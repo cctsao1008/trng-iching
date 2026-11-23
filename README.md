@@ -11,6 +11,7 @@ The system keeps random sampling, astronomical facts, traditional rules, and con
 - **Python computes; ChatGPT interprets.** Python performs deterministic calculations, conversions, rule selection, and output formatting. ChatGPT uses the completed result to interpret classical texts and the question's context, rather than recalculating underlying data.
 - **Sources complement and verify each other.** Assign clear roles to primary computation, independent cross-checks, and published calendar references. Do not average incompatible astronomical values or choose results to suit a preferred reading.
 - **Conventions and provenance are explicit.** Identify time scales, coordinate systems, calendar boundaries, source versions, and the traditional I Ching method used. Never silently mix conventions from different schools.
+- **Efficiency is a design requirement.** Reuse versioned official calendar tables for civil lunar dates; calculate precise astronomical events only where needed. Avoid repeated network requests, redundant computations, overlapping dependencies, and per-reading storage.
 - **The output is portable.** Present one structured, versioned JSON document through the terminal; no database or automatic storage of individual readings is required.
 
 ## Sources and references
@@ -18,14 +19,14 @@ The system keeps random sampling, astronomical facts, traditional rules, and con
 | Source | Intended role |
 | --- | --- |
 | [TRNG.info](https://trng.info/) | True-random sample for the six-line cast |
-| [NASA JPL](https://ssd.jpl.nasa.gov/) | Primary candidate for planetary and lunar ephemeris calculations |
+| [NASA JPL](https://ssd.jpl.nasa.gov/) | Pinned primary ephemeris reference for precise astronomical events |
 | [IMCCE](https://www.imcce.fr/) / [INPOP](https://www.imcce.fr/inpop/) | Independent astronomical model and verification reference |
-| [Taiwan Central Weather Administration](https://www.cwa.gov.tw/) and [Hong Kong Observatory](https://www.hko.gov.hk/) | Published Chinese calendar, solar-term, and lunar-event references |
+| [Hong Kong Observatory](https://www.hko.gov.hk/en/gts/time/conversion1_text.htm) and [Taiwan Central Weather Administration](https://www.cwa.gov.tw/) | Official Chinese lunar-calendar date lookup and independent calendrical reference |
 | [US Naval Observatory](https://aa.usno.navy.mil/) | Supplementary reference for lunar phases and seasonal events |
-| [Skyfield](https://rhodesmill.org/skyfield/) | Candidate Python tooling for local ephemeris and astronomical-event calculations |
+| [Skyfield](https://rhodesmill.org/skyfield/) | Python tooling for locally computed solar terms and lunar-phase events |
 | [Chinese calendar standard GB/T 33661-2017](https://openstd.samr.gov.cn/bzgk/std/newGbInfo?hcno=E107EA4DE9725EDF819F33C60A44B296) | Reference for modern Chinese lunisolar calendar definitions and calculation rules |
 
-Source roles do not imply that every service is queried for every cast. Local, versioned ephemeris data can support deterministic calculations; independent references are used when validation is needed.
+Official lunar-calendar reference data can be synchronized explicitly and then queried locally. Routine lunar-date lookups require neither a network request nor an ephemeris calculation. Source roles do not imply that every service is queried for every cast. Local, versioned ephemeris data can support deterministic calculations; independent references are used when validation is needed.
 
 Related open-source work includes [iching-research-skill](https://github.com/ProfesseurHaipeng/iching-research-skill), which emphasizes transparent computation and textual provenance, and [zzkt/i-ching](https://github.com/zzkt/i-ching), which distinguishes randomness sources from casting methods. They are research references, not required runtime dependencies.
 
