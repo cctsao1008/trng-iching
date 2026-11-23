@@ -13,7 +13,7 @@ from datetime import date, datetime, timezone
 from pathlib import Path
 
 from astronomy import calculate_reference
-from calendar import lookup_hko_date, sync_hko_years
+from lunisolar import lookup_hko_date, sync_hko_years
 
 
 def _utc_timestamp(value: str) -> datetime:
