@@ -43,6 +43,69 @@ def _sha256_file(path: Path) -> str:
     return digest.hexdigest()
 
 
+def _verified_ephemeris_digest(path: Path) -> str:
+    """Require the exact pinned kernel before doing celestial calculations."""
+    if not path.is_file():
+        raise FileNotFoundError(
+            f"JPL ephemeris missing: {path}. "
+            f"Expected the committed de440s.bsp from {JPL_DE440S_URL}."
+        )
+    digest = _sha256_file(path)
+    if digest != JPL_DE440S_SHA256:
+        raise ValueError(
+            "JPL DE440s SHA-256 mismatch: "
+            f"expected {JPL_DE440S_SHA256}; actual {digest}"
+        )
+    return digest
+
+
+def find_calendar_events(
+    *, start: datetime, end: datetime, ephemeris_path: Path
+) -> dict:
+    """Compute new moons and solar terms for calendar review; no lunar labels."""
+    if start.tzinfo is None or end.tzinfo is None or not start < end:
+        raise ValueError("Expected ordered timezone-aware start/end timestamps")
+
+    import skyfield
+    from skyfield import almanac, almanac_east_asia
+    from skyfield.api import load, load_file
+
+    digest = _verified_ephemeris_digest(ephemeris_path)
+    ts = load.timescale(builtin=True)
+    kernel = load_file(str(ephemeris_path))
+    try:
+        t0 = ts.from_datetime(start.astimezone(timezone.utc))
+        t1 = ts.from_datetime(end.astimezone(timezone.utc))
+        term_times, term_codes = almanac.find_discrete(
+            t0, t1, almanac_east_asia.solar_terms(kernel)
+        )
+        phase_times, phase_codes = almanac.find_discrete(
+            t0, t1, almanac.moon_phases(kernel)
+        )
+        terms = [
+            {
+                "index": int(code),
+                "name_zh_tw": almanac_east_asia.SOLAR_TERMS_ZHT[int(code)],
+                "time": moment.utc_datetime(),
+            }
+            for moment, code in zip(term_times, term_codes)
+        ]
+        new_moons = [
+            moment.utc_datetime()
+            for moment, code in zip(phase_times, phase_codes)
+            if int(code) == 0
+        ]
+    finally:
+        kernel.close()
+
+    return {
+        "ephemeris_sha256": digest,
+        "skyfield_version": skyfield.__version__,
+        "solar_terms": terms,
+        "new_moons": new_moons,
+    }
+
+
 def calculate_reference(
     *, cast_time_utc: datetime, start_date: date, days: int, ephemeris_path: Path
 ) -> dict:
@@ -56,24 +119,13 @@ def calculate_reference(
         raise ValueError("cast_time_utc must be timezone-aware")
     if not 1 <= days <= 400:
         raise ValueError("days must be in [1, 400]")
-    if not ephemeris_path.is_file():
-        raise FileNotFoundError(
-            f"JPL ephemeris missing: {ephemeris_path}. "
-            f"Download de440s.bsp from {JPL_DE440S_URL} and pass --ephemeris."
-        )
+    kernel_hash = _verified_ephemeris_digest(ephemeris_path)
 
     import skyfield
     from skyfield import almanac, almanac_east_asia
     from skyfield.api import load, load_file
     from skyfield.framelib import ecliptic_frame
 
-    kernel_hash = _sha256_file(ephemeris_path)
-    if kernel_hash != JPL_DE440S_SHA256:
-        raise ValueError(
-            "JPL DE440s SHA-256 mismatch: "
-            f"expected {JPL_DE440S_SHA256}; actual {kernel_hash}; "
-            "the file is not the validated reference ephemeris"
-        )
     ts = load.timescale(builtin=True)
     eph = load_file(str(ephemeris_path))
     try:

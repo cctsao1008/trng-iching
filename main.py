@@ -13,6 +13,7 @@ from datetime import date, datetime, timezone
 from pathlib import Path
 
 from astronomy import calculate_reference
+from calendar import audit_solstice_cycles
 
 
 def _utc_timestamp(value: str) -> datetime:
@@ -43,6 +44,19 @@ def main(argv: list[str] | None = None) -> int:
         help="Path to an existing local JPL SPK file; never downloaded automatically",
     )
 
+    audit = commands.add_parser(
+        "calendar-audit",
+        help="Audit lunisolar months in two consecutive winter-solstice cycles",
+    )
+    audit.add_argument(
+        "--year", type=int, required=True,
+        help="Middle winter-solstice year, e.g. 2033 (supported: 1901-2098)",
+    )
+    audit.add_argument(
+        "--ephemeris", default="de440s.bsp",
+        help="Path to the pinned, tracked JPL kernel (default: de440s.bsp)",
+    )
+
     args = parser.parse_args(argv)
     try:
         if args.command == "astronomy":
@@ -52,6 +66,11 @@ def main(argv: list[str] | None = None) -> int:
                 cast_time_utc=_utc_timestamp(args.at),
                 start_date=date.fromisoformat(args.start),
                 days=args.days,
+                ephemeris_path=Path(args.ephemeris),
+            )
+        elif args.command == "calendar-audit":
+            result = audit_solstice_cycles(
+                target_year=args.year,
                 ephemeris_path=Path(args.ephemeris),
             )
         else:
