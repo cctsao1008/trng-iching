@@ -1,0 +1,406 @@
+{
+  "schema_version": "hko-month-starts-v1",
+  "years": {
+    "2025": {
+      "source": "https://www.hko.gov.hk/tc/gts/time/calendar/text/files/T2025c.txt",
+      "source_sha256": "7a2803584dcd12a38a13e3710e643369996f59e690d684b9e3705fc5e988ebc2",
+      "days_checked": 365,
+      "month_starts": [
+        {
+          "start_date": "2025-01-29",
+          "month": 1,
+          "is_leap_month": false,
+          "lunar_year": 2025
+        },
+        {
+          "start_date": "2025-02-28",
+          "month": 2,
+          "is_leap_month": false,
+          "lunar_year": 2025
+        },
+        {
+          "start_date": "2025-03-29",
+          "month": 3,
+          "is_leap_month": false,
+          "lunar_year": 2025
+        },
+        {
+          "start_date": "2025-04-28",
+          "month": 4,
+          "is_leap_month": false,
+          "lunar_year": 2025
+        },
+        {
+          "start_date": "2025-05-27",
+          "month": 5,
+          "is_leap_month": false,
+          "lunar_year": 2025
+        },
+        {
+          "start_date": "2025-06-25",
+          "month": 6,
+          "is_leap_month": false,
+          "lunar_year": 2025
+        },
+        {
+          "start_date": "2025-07-25",
+          "month": 6,
+          "is_leap_month": true,
+          "lunar_year": 2025
+        },
+        {
+          "start_date": "2025-08-23",
+          "month": 7,
+          "is_leap_month": false,
+          "lunar_year": 2025
+        },
+        {
+          "start_date": "2025-09-22",
+          "month": 8,
+          "is_leap_month": false,
+          "lunar_year": 2025
+        },
+        {
+          "start_date": "2025-10-21",
+          "month": 9,
+          "is_leap_month": false,
+          "lunar_year": 2025
+        },
+        {
+          "start_date": "2025-11-20",
+          "month": 10,
+          "is_leap_month": false,
+          "lunar_year": 2025
+        },
+        {
+          "start_date": "2025-12-20",
+          "month": 11,
+          "is_leap_month": false,
+          "lunar_year": 2025
+        }
+      ]
+    },
+    "2026": {
+      "source": "https://www.hko.gov.hk/tc/gts/time/calendar/text/files/T2026c.txt",
+      "source_sha256": "7b0831acb16a5a72a1ab553205e938b2f658c3837e06440f22c084e1a39832dd",
+      "days_checked": 365,
+      "month_starts": [
+        {
+          "start_date": "2026-01-19",
+          "month": 12,
+          "is_leap_month": false,
+          "lunar_year": 2025
+        },
+        {
+          "start_date": "2026-02-17",
+          "month": 1,
+          "is_leap_month": false,
+          "lunar_year": 2026
+        },
+        {
+          "start_date": "2026-03-19",
+          "month": 2,
+          "is_leap_month": false,
+          "lunar_year": 2026
+        },
+        {
+          "start_date": "2026-04-17",
+          "month": 3,
+          "is_leap_month": false,
+          "lunar_year": 2026
+        },
+        {
+          "start_date": "2026-05-17",
+          "month": 4,
+          "is_leap_month": false,
+          "lunar_year": 2026
+        },
+        {
+          "start_date": "2026-06-15",
+          "month": 5,
+          "is_leap_month": false,
+          "lunar_year": 2026
+        },
+        {
+          "start_date": "2026-07-14",
+          "month": 6,
+          "is_leap_month": false,
+          "lunar_year": 2026
+        },
+        {
+          "start_date": "2026-08-13",
+          "month": 7,
+          "is_leap_month": false,
+          "lunar_year": 2026
+        },
+        {
+          "start_date": "2026-09-11",
+          "month": 8,
+          "is_leap_month": false,
+          "lunar_year": 2026
+        },
+        {
+          "start_date": "2026-10-10",
+          "month": 9,
+          "is_leap_month": false,
+          "lunar_year": 2026
+        },
+        {
+          "start_date": "2026-11-09",
+          "month": 10,
+          "is_leap_month": false,
+          "lunar_year": 2026
+        },
+        {
+          "start_date": "2026-12-09",
+          "month": 11,
+          "is_leap_month": false,
+          "lunar_year": 2026
+        }
+      ]
+    },
+    "2032": {
+      "source": "https://www.hko.gov.hk/tc/gts/time/calendar/text/files/T2032c.txt",
+      "source_sha256": "4ccf673be92a44b0471a5aca12c48de3b95a967e07776e346a8ce0e63a5dcb42",
+      "days_checked": 366,
+      "month_starts": [
+        {
+          "start_date": "2032-01-13",
+          "month": 12,
+          "is_leap_month": false,
+          "lunar_year": 2031
+        },
+        {
+          "start_date": "2032-02-11",
+          "month": 1,
+          "is_leap_month": false,
+          "lunar_year": 2032
+        },
+        {
+          "start_date": "2032-03-12",
+          "month": 2,
+          "is_leap_month": false,
+          "lunar_year": 2032
+        },
+        {
+          "start_date": "2032-04-10",
+          "month": 3,
+          "is_leap_month": false,
+          "lunar_year": 2032
+        },
+        {
+          "start_date": "2032-05-09",
+          "month": 4,
+          "is_leap_month": false,
+          "lunar_year": 2032
+        },
+        {
+          "start_date": "2032-06-08",
+          "month": 5,
+          "is_leap_month": false,
+          "lunar_year": 2032
+        },
+        {
+          "start_date": "2032-07-07",
+          "month": 6,
+          "is_leap_month": false,
+          "lunar_year": 2032
+        },
+        {
+          "start_date": "2032-08-06",
+          "month": 7,
+          "is_leap_month": false,
+          "lunar_year": 2032
+        },
+        {
+          "start_date": "2032-09-05",
+          "month": 8,
+          "is_leap_month": false,
+          "lunar_year": 2032
+        },
+        {
+          "start_date": "2032-10-04",
+          "month": 9,
+          "is_leap_month": false,
+          "lunar_year": 2032
+        },
+        {
+          "start_date": "2032-11-03",
+          "month": 10,
+          "is_leap_month": false,
+          "lunar_year": 2032
+        },
+        {
+          "start_date": "2032-12-03",
+          "month": 11,
+          "is_leap_month": false,
+          "lunar_year": 2032
+        }
+      ]
+    },
+    "2033": {
+      "source": "https://www.hko.gov.hk/tc/gts/time/calendar/text/files/T2033c.txt",
+      "source_sha256": "d2ec5d438f5838512c38879a8d32b38a6e0cb5dcdd8993ed8b78741fc9f1e899",
+      "days_checked": 365,
+      "month_starts": [
+        {
+          "start_date": "2033-01-01",
+          "month": 12,
+          "is_leap_month": false,
+          "lunar_year": 2032
+        },
+        {
+          "start_date": "2033-01-31",
+          "month": 1,
+          "is_leap_month": false,
+          "lunar_year": 2033
+        },
+        {
+          "start_date": "2033-03-01",
+          "month": 2,
+          "is_leap_month": false,
+          "lunar_year": 2033
+        },
+        {
+          "start_date": "2033-03-31",
+          "month": 3,
+          "is_leap_month": false,
+          "lunar_year": 2033
+        },
+        {
+          "start_date": "2033-04-29",
+          "month": 4,
+          "is_leap_month": false,
+          "lunar_year": 2033
+        },
+        {
+          "start_date": "2033-05-28",
+          "month": 5,
+          "is_leap_month": false,
+          "lunar_year": 2033
+        },
+        {
+          "start_date": "2033-06-27",
+          "month": 6,
+          "is_leap_month": false,
+          "lunar_year": 2033
+        },
+        {
+          "start_date": "2033-07-26",
+          "month": 7,
+          "is_leap_month": false,
+          "lunar_year": 2033
+        },
+        {
+          "start_date": "2033-08-25",
+          "month": 8,
+          "is_leap_month": false,
+          "lunar_year": 2033
+        },
+        {
+          "start_date": "2033-09-23",
+          "month": 9,
+          "is_leap_month": false,
+          "lunar_year": 2033
+        },
+        {
+          "start_date": "2033-10-23",
+          "month": 10,
+          "is_leap_month": false,
+          "lunar_year": 2033
+        },
+        {
+          "start_date": "2033-11-22",
+          "month": 11,
+          "is_leap_month": false,
+          "lunar_year": 2033
+        },
+        {
+          "start_date": "2033-12-22",
+          "month": 11,
+          "is_leap_month": true,
+          "lunar_year": 2033
+        }
+      ]
+    },
+    "2034": {
+      "source": "https://www.hko.gov.hk/tc/gts/time/calendar/text/files/T2034c.txt",
+      "source_sha256": "0b9cdf0733d7069d55851aeed05421365978c58ddc314e524328537a5a011ca2",
+      "days_checked": 365,
+      "month_starts": [
+        {
+          "start_date": "2034-01-20",
+          "month": 12,
+          "is_leap_month": false,
+          "lunar_year": 2033
+        },
+        {
+          "start_date": "2034-02-19",
+          "month": 1,
+          "is_leap_month": false,
+          "lunar_year": 2034
+        },
+        {
+          "start_date": "2034-03-20",
+          "month": 2,
+          "is_leap_month": false,
+          "lunar_year": 2034
+        },
+        {
+          "start_date": "2034-04-19",
+          "month": 3,
+          "is_leap_month": false,
+          "lunar_year": 2034
+        },
+        {
+          "start_date": "2034-05-18",
+          "month": 4,
+          "is_leap_month": false,
+          "lunar_year": 2034
+        },
+        {
+          "start_date": "2034-06-16",
+          "month": 5,
+          "is_leap_month": false,
+          "lunar_year": 2034
+        },
+        {
+          "start_date": "2034-07-16",
+          "month": 6,
+          "is_leap_month": false,
+          "lunar_year": 2034
+        },
+        {
+          "start_date": "2034-08-14",
+          "month": 7,
+          "is_leap_month": false,
+          "lunar_year": 2034
+        },
+        {
+          "start_date": "2034-09-13",
+          "month": 8,
+          "is_leap_month": false,
+          "lunar_year": 2034
+        },
+        {
+          "start_date": "2034-10-12",
+          "month": 9,
+          "is_leap_month": false,
+          "lunar_year": 2034
+        },
+        {
+          "start_date": "2034-11-11",
+          "month": 10,
+          "is_leap_month": false,
+          "lunar_year": 2034
+        },
+        {
+          "start_date": "2034-12-11",
+          "month": 11,
+          "is_leap_month": false,
+          "lunar_year": 2034
+        }
+      ]
+    }
+  }
+}
