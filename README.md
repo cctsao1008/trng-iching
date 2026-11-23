@@ -1,47 +1,52 @@
 # TRNG I Ching
 
-**TRNG I Ching** is a research-oriented workflow that combines true random number generation, astronomical ephemerides, Chinese calendrical calculations, and documented I Ching methods. Its goal is to provide a **consistent, transparent, and reproducible computational basis** for interpretation.
+**TRNG I Ching** is a research-oriented workflow combining true random number generation, astronomical ephemerides, Chinese calendrical calculations, and documented I Ching methods. Its purpose is to establish a **consistent, transparent, and reproducible computational basis** for interpreting a cast.
 
-The workflow separates objective data and deterministic calculations from symbolic and contextual interpretation.
+The system keeps random sampling, astronomical facts, traditional rules, and contextual interpretation distinct.
 
-## Principles
+## Core principles
 
-- **Randomness determines the cast.** Obtain an independent sample from a true random number generator (TRNG). Do not select, alter, or redraw a valid sample to obtain a preferred outcome.
-- **Time and astronomy provide context.** Timestamp each sample and describe the astronomical conditions at that instant. Astronomical data must not silently change the TRNG-derived cast.
-- **Python computes, ChatGPT interprets.** Python handles all specified calculations and conversions, including six-line casting, hexagram identification, calendrical information, and the selection of applicable textual rules. ChatGPT interprets the normalized result rather than recalculating it.
-- **Sources are complementary, not interchangeable.** Distinguish primary sources, independent verification, calendrical reference data, and I Ching reference material. Do not average incompatible astronomical outputs or arbitrarily choose the result that fits an interpretation.
-- **Methods are explicit and versioned.** Record source provenance, coordinate/time conventions, calendar boundaries, casting methods, and interpretation traditions. Do not silently combine incompatible schools.
-- **Output is portable.** Produce one structured JSON result suitable for sharing across conversations. No database or per-reading file storage is required.
+- **Randomness determines the cast.** Use a single valid sample from a true random number generator (TRNG). Never redraw, filter, or replace a sample to obtain a preferred hexagram.
+- **Astronomy provides temporal context.** Record the sampling time and derive astronomical events from clearly identified ephemerides. Astronomical conditions do not alter the TRNG-generated cast.
+- **Python computes; ChatGPT interprets.** Python performs deterministic calculations, conversions, rule selection, and output formatting. ChatGPT uses the completed result to interpret classical texts and the question's context, rather than recalculating underlying data.
+- **Sources complement and verify each other.** Assign clear roles to primary computation, independent cross-checks, and published calendar references. Do not average incompatible astronomical values or choose results to suit a preferred reading.
+- **Conventions and provenance are explicit.** Identify time scales, coordinate systems, calendar boundaries, source versions, and the traditional I Ching method used. Never silently mix conventions from different schools.
+- **The output is portable.** Present one structured, versioned JSON document through the terminal; no database or automatic storage of individual readings is required.
 
-## Source roles
+## Sources and references
 
 | Source | Intended role |
 | --- | --- |
-| [TRNG.info](https://trng.info/) | Independent random input for casting |
-| [NASA JPL](https://ssd.jpl.nasa.gov/) ephemerides | Candidate primary astronomical reference for Sun, Moon, and relevant celestial positions |
-| [IMCCE](https://www.imcce.fr/) | Independent astronomical cross-checks where needed |
-| [Taiwan CWA](https://www.cwa.gov.tw/) / [Hong Kong Observatory](https://www.hko.gov.hk/) | Reference data for Chinese calendar dates, solar terms, and lunar events |
-| [USNO](https://aa.usno.navy.mil/) | Existing prototype source and an optional reference for lunar/seasonal events |
-| I Ching textual and software references | Documented casting, hexagram, textual, and traditional calendrical mapping conventions |
+| [TRNG.info](https://trng.info/) | True-random sample for the six-line cast |
+| [NASA JPL](https://ssd.jpl.nasa.gov/) | Primary candidate for planetary and lunar ephemeris calculations |
+| [IMCCE](https://www.imcce.fr/) / [INPOP](https://www.imcce.fr/inpop/) | Independent astronomical model and verification reference |
+| [Taiwan Central Weather Administration](https://www.cwa.gov.tw/) and [Hong Kong Observatory](https://www.hko.gov.hk/) | Published Chinese calendar, solar-term, and lunar-event references |
+| [US Naval Observatory](https://aa.usno.navy.mil/) | Supplementary reference for lunar phases and seasonal events |
+| [Skyfield](https://rhodesmill.org/skyfield/) | Candidate Python tooling for local ephemeris and astronomical-event calculations |
+| [Chinese calendar standard GB/T 33661-2017](https://openstd.samr.gov.cn/bzgk/std/newGbInfo?hcno=E107EA4DE9725EDF819F33C60A44B296) | Reference for modern Chinese lunisolar calendar definitions and calculation rules |
 
-These are **roles under evaluation**, not a requirement to query every provider on every run. Astronomical calculations may use locally available, versioned ephemeris resources; independent checks are separate from normal casting.
+Source roles do not imply that every service is queried for every cast. Local, versioned ephemeris data can support deterministic calculations; independent references are used when validation is needed.
+
+Related open-source work includes [iching-research-skill](https://github.com/ProfesseurHaipeng/iching-research-skill), which emphasizes transparent computation and textual provenance, and [zzkt/i-ching](https://github.com/zzkt/i-ching), which distinguishes randomness sources from casting methods. They are research references, not required runtime dependencies.
 
 ## Workflow
 
-1. **Define the question in ChatGPT before sampling**, including its relevant time horizon.
-2. **Collect a single TRNG sample and timestamp it.**
-3. **Calculate and normalize in Python:** the six lines, moving lines, primary and relating hexagrams, astronomical context, Chinese calendar information, and applicable I Ching mapping rules.
-4. **Print structured JSON to the terminal.** Include the raw input, normalized results, provenance, versions, and explicit statuses for unavailable fields.
-5. **Paste the JSON into ChatGPT** for a source-aware interpretation that distinguishes classical text, traditional symbolism, astronomical facts, and real-world evidence.
+1. **Formulate the question** and its relevant time horizon in ChatGPT before sampling.
+2. **Acquire one TRNG sample** and record client-side request/response timestamps, with explicit UTC and local-time representations.
+3. **Process the data in Python:** derive six lines, moving lines, primary and relating hexagrams, astronomical events, Chinese calendar values, and any explicitly selected traditional mappings.
+4. **Emit normalized JSON to standard output**, including source provenance, algorithm versions, conventions, and validity statuses. Missing or unsupported values must be identified rather than inferred.
+5. **Provide the JSON to ChatGPT** for interpretation informed by classical sources, calendar context, and the question itself.
 
-The question remains in the conversation; it is not submitted to TRNG or astronomical providers. The tool does not automatically store readings.
+The question stays in the conversation and is not transmitted to randomness or astronomy providers. The tool does not automatically save readings.
 
-## Interpretation boundaries
+## Astronomical and calendrical consistency
 
-Traditional methods such as the twelve monthly hexagrams (十二消息卦), hexagram qi (卦氣), and Najia six-line divination (六爻納甲) have different historical assumptions. When included, their calculations and texts must be labeled with the chosen method and source. They are not interchangeable with the TRNG-generated primary hexagram.
+Astronomical events and traditional calendrical labels involve different kinds of rules. In particular, solar terms depend on a defined solar-longitude convention, while lunisolar dates depend on new-moon instants, civil-day assignment, and leap-month rules. Sexagenary year, month, day, and hour calculations require explicitly selected boundary conventions.
 
-Accurate random samples, ephemerides, and calendar conversions **do not establish the predictive validity of divination**. Interpretations are a framework for cultural inquiry and reflection, not a substitute for independent evidence in financial, medical, legal, or other consequential decisions.
+Results close to midnight, a solar-term transition, or another calendrical boundary require particular care. Independent sources should be compared using compatible time scales, reference frames, and stated precision before discrepancies are assessed.
 
-## Development and decisions
+## I Ching interpretation boundaries
 
-Architecture, implementation details, algorithm conventions, and the JSON contract are tracked in [GitHub Issues](https://github.com/cctsao1008/trng-iching/issues), starting with [Issue #1](https://github.com/cctsao1008/trng-iching/issues/1).
+The TRNG-derived hexagram remains separate from time-related traditional mappings. The twelve monthly hexagrams (十二消息卦), hexagram qi (卦氣), and Najia six-line divination (六爻納甲) are distinct traditions. When used, their source, school, and mapping rules must be identified; one must not silently override another.
+
+The distinction between **astronomical facts**, **calendrical calculation**, **historical interpretation**, and **contemporary reflection** is fundamental. Reproducible computations do not establish that divination can reliably predict future events. This workflow supports cultural study and structured reflection, not a substitute for independent evidence in consequential decisions.
