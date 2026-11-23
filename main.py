@@ -1,7 +1,7 @@
-"""Minimal CLI entry point for TRNG I Ching research computations.
+"""CLI for deterministic TRNG I Ching research.
 
-The astronomy command is a repeatable numerical probe, not a completed
-divination or an independently validated Chinese calendar.
+Only explicit calendar-sync uses HTTP or writes a reference file.
+Normal calendar lookups use the offline official HKO index.
 """
 
 from __future__ import annotations
@@ -13,7 +13,7 @@ from datetime import date, datetime, timezone
 from pathlib import Path
 
 from astronomy import calculate_reference
-from calendar import audit_solstice_cycles
+from calendar import lookup_hko_date, sync_hko_years
 
 
 def _utc_timestamp(value: str) -> datetime:
@@ -26,6 +26,7 @@ def _utc_timestamp(value: str) -> datetime:
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="TRNG I Ching deterministic research CLI")
     commands = parser.add_subparsers(dest="command", required=True)
+
     astronomy = commands.add_parser(
         "astronomy", help="Compute astronomical reference data without acquiring TRNG"
     )
@@ -41,21 +42,21 @@ def main(argv: list[str] | None = None) -> int:
     )
     astronomy.add_argument(
         "--ephemeris", default="de440s.bsp",
-        help="Path to an existing local JPL SPK file; never downloaded automatically",
+        help="Path to the pinned local JPL SPK file",
     )
 
-    audit = commands.add_parser(
-        "calendar-audit",
-        help="Audit lunisolar months in two consecutive winter-solstice cycles",
+    sync = commands.add_parser(
+        "calendar-sync",
+        help="Explicitly fetch official HKO year tables into a compact offline reference",
     )
-    audit.add_argument(
-        "--year", type=int, required=True,
-        help="Middle winter-solstice year, e.g. 2033 (supported: 1901-2098)",
+    sync.add_argument("--years", type=int, nargs="+", required=True)
+    sync.add_argument("--reference", type=Path, default=Path("calendar_reference.json"))
+
+    lookup = commands.add_parser(
+        "calendar", help="Lookup a Chinese lunar date in the offline official reference"
     )
-    audit.add_argument(
-        "--ephemeris", default="de440s.bsp",
-        help="Path to the pinned, tracked JPL kernel (default: de440s.bsp)",
-    )
+    lookup.add_argument("--date", required=True, help="Gregorian date YYYY-MM-DD")
+    lookup.add_argument("--reference", type=Path, default=Path("calendar_reference.json"))
 
     args = parser.parse_args(argv)
     try:
@@ -68,11 +69,11 @@ def main(argv: list[str] | None = None) -> int:
                 days=args.days,
                 ephemeris_path=Path(args.ephemeris),
             )
-        elif args.command == "calendar-audit":
-            result = audit_solstice_cycles(
-                target_year=args.year,
-                ephemeris_path=Path(args.ephemeris),
-            )
+        elif args.command == "calendar-sync":
+            result = sync_hko_years(years=args.years, path=args.reference)
+        elif args.command == "calendar":
+            result = lookup_hko_date(day=date.fromisoformat(args.date),
+                                     path=args.reference)
         else:
             raise ValueError(f"Unsupported command: {args.command}")
     except Exception as exc:
