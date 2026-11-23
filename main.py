@@ -74,6 +74,14 @@ def _cast_context(
 
     try:
         result["iching"] = cast_from_hex(random_source["raw_hex"])
+        result["interpretation"] = {
+            "status": "reading_targets_selected_text_not_bundled",
+            "classical_text_edition": None,
+            "moving_line_ruleset": (
+                result["iching"]["text_selection"]["ruleset"]
+            ),
+            "text_target_location": "iching.text_selection.targets",
+        }
     except Exception as exc:
         result["iching"] = {"status": "error"}
         errors.append({"component": "iching", "error": f"{type(exc).__name__}: {exc}"})
@@ -132,7 +140,6 @@ def _cast_context(
 
 def _manual_reference_cast(args: argparse.Namespace) -> dict:
     """Manual input is never labeled live TRNG or assigned an invented time."""
-    cast_data = cast_from_hex(args.reference_hex)
     sample = {
         "source": "user_provided_reference",
         "raw_hex": args.reference_hex.lower(),
@@ -141,6 +148,7 @@ def _manual_reference_cast(args: argparse.Namespace) -> dict:
         "is_live_trng": False,
     }
     if args.at is None:
+        cast_data = cast_from_hex(args.reference_hex)
         return {
             "schema_version": "0.1.0-preflight",
             "mode": "manual_reference_cast",
