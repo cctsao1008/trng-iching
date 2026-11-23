@@ -14,6 +14,9 @@ from pathlib import Path
 JPL_DE440S_URL = (
     "https://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/planets/de440s.bsp"
 )
+# Independently corroborated against the user's local Get-FileHash and
+# published third-party DE440s inventory; original file remains unmodified.
+JPL_DE440S_SHA256 = "c1c7feeab882263fc493a9d5a5b2ddd71b54826cdf65d8d17a76126b260a49f2"
 UTC_PLUS_8 = timezone(timedelta(hours=8))
 
 
@@ -65,6 +68,12 @@ def calculate_reference(
     from skyfield.framelib import ecliptic_frame
 
     kernel_hash = _sha256_file(ephemeris_path)
+    if kernel_hash != JPL_DE440S_SHA256:
+        raise ValueError(
+            "JPL DE440s SHA-256 mismatch: "
+            f"expected {JPL_DE440S_SHA256}; actual {kernel_hash}; "
+            "the file is not the validated reference ephemeris"
+        )
     ts = load.timescale(builtin=True)
     eph = load_file(str(ephemeris_path))
     try:
@@ -120,6 +129,8 @@ def calculate_reference(
         "provenance": {
             "ephemeris_filename": ephemeris_path.name,
             "ephemeris_sha256": kernel_hash,
+            "ephemeris_sha256_expected": JPL_DE440S_SHA256,
+            "ephemeris_integrity": "verified_sha256_match",
             "ephemeris_size_bytes": ephemeris_path.stat().st_size,
             "suggested_source_url": JPL_DE440S_URL,
             "skyfield_version": skyfield.__version__,

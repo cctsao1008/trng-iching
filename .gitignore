@@ -5,6 +5,8 @@ __pycache__/
 *.py[cod]
 .env
 
-# Downloaded JPL ephemerides are local immutable reference assets, not Git history
+# Commit only the single, verified DE440s reference kernel.
+# Keep all other SPICE kernels and partial downloads untracked.
 *.bsp
+!de440s.bsp
 *.bsp.part
