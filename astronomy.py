@@ -59,6 +59,81 @@ def _verified_ephemeris_digest(path: Path) -> str:
     return digest
 
 
+class PinnedEphemeris:
+    """Single verified JPL kernel session for a minimal at-cast-time snapshot.
+
+    Only one disk hash and one kernel load per cast. No almanac event-search,
+    calendar conversion, or network request in the normal operation.
+    """
+
+    def __init__(self, path: Path):
+        self.path = path
+        self.digest = None
+        self.kernel = None
+        self.ts = None
+        self.skyfield_version = None
+
+    def __enter__(self):
+        import skyfield
+        from skyfield.api import load, load_file
+
+        self.digest = _verified_ephemeris_digest(self.path)
+        self.ts = load.timescale(builtin=True)
+        self.kernel = load_file(str(self.path))
+        self.skyfield_version = skyfield.__version__
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        if self.kernel is not None:
+            self.kernel.close()
+        self.kernel = None
+        return False
+
+    def snapshot(self, cast_time_utc: datetime) -> dict:
+        """Geocentric apparent ecliptic longitudes at exactly one UTC instant."""
+        if self.kernel is None or self.ts is None:
+            raise RuntimeError("PinnedEphemeris must be opened first")
+        if cast_time_utc.tzinfo is None or cast_time_utc.utcoffset() is None:
+            raise ValueError("cast_time_utc must have a timezone")
+
+        from skyfield import almanac_east_asia
+        from skyfield.framelib import ecliptic_frame
+
+        t = self.ts.from_datetime(cast_time_utc.astimezone(timezone.utc))
+        earth = self.kernel["earth"].at(t)
+        _, sun_angle, _ = earth.observe(
+            self.kernel["sun"]
+        ).apparent().frame_latlon(ecliptic_frame)
+        _, moon_angle, _ = earth.observe(
+            self.kernel["moon"]
+        ).apparent().frame_latlon(ecliptic_frame)
+        sun = float(sun_angle.degrees) % 360.0
+        moon = float(moon_angle.degrees) % 360.0
+        phase = (moon - sun) % 360.0
+        current_index = int(sun // 15.0) % 24
+
+        return {
+            "status": "calculated",
+            "reference_instant_utc": _iso_utc(cast_time_utc),
+            "reference_frame": "geocentric apparent ecliptic of date",
+            "sun_apparent_ecliptic_longitude_degrees": round(sun, 9),
+            "moon_apparent_ecliptic_longitude_degrees": round(moon, 9),
+            "moon_sun_ecliptic_difference_degrees": round(phase, 9),
+            "current_solar_term": {
+                "index": current_index,
+                "name_zh_tw": almanac_east_asia.SOLAR_TERMS_ZHT[current_index],
+                "derivation": "floor(sun_apparent_longitude_degrees / 15)",
+                "event_time_calculated": False,
+            },
+            "provenance": {
+                "ephemeris_filename": self.path.name,
+                "ephemeris_sha256": self.digest,
+                "skyfield_version": self.skyfield_version,
+                "timescale": "Skyfield builtin=True",
+            },
+        }
+
+
 def find_calendar_events(
     *, start: datetime, end: datetime, ephemeris_path: Path
 ) -> dict:
