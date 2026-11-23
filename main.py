@@ -14,6 +14,8 @@ from pathlib import Path
 
 from astronomy import calculate_reference
 from lunisolar import lookup_hko_date, sync_hko_years
+from sources import acquire_trng_bytes
+from iching import cast_from_hex
 
 
 def _utc_timestamp(value: str) -> datetime:
@@ -58,6 +60,14 @@ def main(argv: list[str] | None = None) -> int:
     lookup.add_argument("--date", required=True, help="Gregorian date YYYY-MM-DD")
     lookup.add_argument("--reference", type=Path, default=Path("calendar_reference.json"))
 
+    cast_parser = commands.add_parser(
+        "cast", help="Cast once using TRNG.info, or verify a fixed sample"
+    )
+    cast_parser.add_argument(
+        "--hex", dest="reference_hex",
+        help="Manual verification sample (exactly 6 hex digits); NO TRNG request",
+    )
+
     args = parser.parse_args(argv)
     try:
         if args.command == "astronomy":
@@ -71,6 +81,34 @@ def main(argv: list[str] | None = None) -> int:
             )
         elif args.command == "calendar-sync":
             result = sync_hko_years(years=args.years, path=args.reference)
+        elif args.command == "cast":
+            if args.reference_hex is None:
+                sample = acquire_trng_bytes()
+                result = {
+                    "schema_version": "0.1.0-preflight",
+                    "mode": "live_trng_cast",
+                    "status": "cast_only",
+                    "randomness": sample,
+                    "iching": cast_from_hex(sample["raw_hex"]),
+                    "astronomy": {"status": "not_evaluated"},
+                    "calendar": {"status": "not_evaluated"},
+                }
+            else:
+                result = {
+                    "schema_version": "0.1.0-preflight",
+                    "mode": "manual_reference_cast",
+                    "status": "cast_only",
+                    "randomness": {
+                        "source": "user_provided_reference",
+                        "raw_hex": args.reference_hex.lower(),
+                        "request_time_utc": None,
+                        "receive_time_utc": None,
+                        "is_live_trng": False,
+                    },
+                    "iching": cast_from_hex(args.reference_hex),
+                    "astronomy": {"status": "not_evaluated"},
+                    "calendar": {"status": "not_evaluated"},
+                }
         elif args.command == "calendar":
             result = lookup_hko_date(day=date.fromisoformat(args.date),
                                      path=args.reference)
