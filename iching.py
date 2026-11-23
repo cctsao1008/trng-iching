@@ -56,13 +56,16 @@ def _hexagram(bits_bottom_to_top: str) -> dict:
     upper = _TRIGRAM_INDEX[bits_bottom_to_top[3:]]
     number = _KING_WEN_MATRIX[lower][upper]
     lower_name, upper_name = _TRIGRAMS[lower][0], _TRIGRAMS[upper][0]
+    trigram_images = ("天", "澤", "火", "雷", "風", "水", "山", "地")
+    display = (
+        f"{upper_name}為{trigram_images[upper]}"
+        if lower == upper
+        else f"{trigram_images[upper]}{trigram_images[lower]}{_NAMES[number - 1]}"
+    )
     return {
         "number": number,
         "name": _NAMES[number - 1],
-        "display_name": (
-            f"{upper_name}{lower_name}{_NAMES[number - 1]}"
-            if lower != upper else f"{upper_name}為{upper_name}"
-        ),
+        "display_name": display,
         "unicode": chr(0x4DC0 + number - 1),
         "bits_bottom_to_top": bits_bottom_to_top,
         "lower_trigram": lower_name,
