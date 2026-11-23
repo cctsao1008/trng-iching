@@ -11,7 +11,7 @@ import hashlib
 import json
 import re
 from bisect import bisect_right
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 from urllib.request import Request, urlopen
 
@@ -176,4 +176,98 @@ def lookup_hko_date(*, day: date, path: Path = REFERENCE_FILE) -> dict:
             "method": DATA_VERSION,
             "cache_file": str(path),
         },
+    }
+
+
+# Solar-term-based four pillars (NOT the HKO lunar-year Ganzhi convention).
+# Deterministic local civil time: UTC+08, midnight day boundary, no true-solar-time
+# or split Zi-hour adjustment. The year and month boundaries are computed from
+# the same JPL apparent solar longitude already used for the astronomy snapshot.
+_STEMS = "甲乙丙丁戊己庚辛壬癸"
+_BRANCHES = "子丑寅卯辰巳午未申酉戌亥"
+_DAY_ANCHOR = date(2000, 1, 1)  # 戊午 day, #55 in the 60-day cycle (zero-index 54)
+_DAY_ANCHOR_INDEX = 54
+_UTC_PLUS_8 = timezone(timedelta(hours=8))
+
+
+def _sexagenary(index: int) -> str:
+    return _STEMS[index % 10] + _BRANCHES[index % 12]
+
+
+def calculate_four_pillars(
+    *, cast_time_utc: datetime, sun_longitude_degrees: float | None
+) -> dict:
+    """Return four pillars using 立春/節月 and UTC+08 midnight day rollover.
+
+    If solar longitude is unavailable, report year/month as unavailable while
+    still computing independently valid continuous day/hour pillars.
+    """
+    import math
+
+    if cast_time_utc.tzinfo is None or cast_time_utc.utcoffset() is None:
+        raise ValueError("Ganzhi requires an offset-aware cast timestamp")
+    local = cast_time_utc.astimezone(_UTC_PLUS_8)
+    day_index = (
+        _DAY_ANCHOR_INDEX + (local.date() - _DAY_ANCHOR).days
+    ) % 60
+    hour_branch_index = ((local.hour + 1) // 2) % 12
+    # Five-rat starting stem: 甲己日起甲子, 乙庚丙子, 丙辛戊子, etc.
+    hour_stem_index = (2 * (day_index % 10 % 5) + hour_branch_index) % 10
+
+    day_pillar = _sexagenary(day_index)
+    hour_pillar = _STEMS[hour_stem_index] + _BRANCHES[hour_branch_index]
+    year_pillar = None
+    month_pillar = None
+    solar_year = None
+    solar_month_branch = None
+
+    if sun_longitude_degrees is not None:
+        if not math.isfinite(sun_longitude_degrees) or not (
+            0.0 <= sun_longitude_degrees < 360.0
+        ):
+            raise ValueError("Sun longitude must be finite and within [0,360)")
+
+        # For Jan/early Feb, the most recent 立春 belongs to the previous
+        # Gregorian year. From later February through December, it is current.
+        before_lichun = (
+            local.month == 1
+            or (local.month == 2 and sun_longitude_degrees < 315.0)
+        )
+        solar_year = local.year - int(before_lichun)
+        year_index = (solar_year - 1984) % 60  # 1984: 甲子 at 立春
+        year_pillar = _sexagenary(year_index)
+
+        # 寅 starts at 315°, 卯 345°, 辰 15°, ... 丑 285°.
+        jie_offset = int(((sun_longitude_degrees - 315.0) % 360.0) // 30.0)
+        month_branch_index = (2 + jie_offset) % 12
+        month_stem_index = (2 * (year_index % 10 % 5) + 2 + jie_offset) % 10
+        solar_month_branch = _BRANCHES[month_branch_index]
+        month_pillar = (
+            _STEMS[month_stem_index] + _BRANCHES[month_branch_index]
+        )
+
+    return {
+        "status": "calculated" if solar_year is not None else "partial",
+        "convention": "four_pillars_solar_jie_midnight_utc_plus_8_v1",
+        "year": year_pillar,
+        "month": month_pillar,
+        "day": day_pillar,
+        "hour": hour_pillar,
+        "solar_year": solar_year,
+        "solar_month_branch": solar_month_branch,
+        "hour_branch": _BRANCHES[hour_branch_index],
+        "boundaries": {
+            "civil_offset": "UTC+08:00",
+            "year": "Li Chun: solar longitude 315 degrees",
+            "month": "12 solar Jie, every 30 degrees beginning at 315",
+            "day": "00:00 UTC+08 (not 23:00)",
+            "hour": "two-hour civil-clock bins; Zi=23:00-00:59",
+            "true_solar_time_correction": False,
+        },
+        "day_cycle_anchor": "2000-01-01=戊午",
+        "solar_longitude_used_degrees": sun_longitude_degrees,
+        "note": (
+            "Year pillar uses Li Chun; the lunar year in calendar.lunar uses "
+            "official HKO lunar new year. These conventions can differ."
+        ),
     }

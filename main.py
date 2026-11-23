@@ -15,7 +15,7 @@ from pathlib import Path
 
 from astronomy import PinnedEphemeris, UTC_PLUS_8, calculate_reference
 from iching import cast_from_hex
-from lunisolar import lookup_hko_date, sync_hko_years
+from lunisolar import calculate_four_pillars, lookup_hko_date, sync_hko_years
 from sources import acquire_trng_bytes
 
 
@@ -63,6 +63,7 @@ def _cast_context(
         "iching": None,
         "calendar": None,
         "astronomy": None,
+        "ganzhi": None,
         "interpretation": {
             "status": "not_implemented",
             "classical_text_edition": None,
@@ -103,6 +104,25 @@ def _cast_context(
     else:
         result["astronomy"] = {"status": "unavailable"}
         errors.append({"component": "astronomy", "error": "Ephemeris was not loaded"})
+
+    # Reuse the existing Sun longitude; do not search solar-term events again.
+    # The calendar's lunar year and four-pillars solar year remain separate.
+    try:
+        sun_longitude = (
+            result["astronomy"]["sun_apparent_ecliptic_longitude_degrees"]
+            if result["astronomy"].get("status") == "calculated"
+            else None
+        )
+        result["ganzhi"] = calculate_four_pillars(
+            cast_time_utc=cast_time,
+            sun_longitude_degrees=sun_longitude,
+        )
+    except Exception as exc:
+        result["ganzhi"] = {"status": "unavailable"}
+        errors.append({
+            "component": "ganzhi",
+            "error": f"{type(exc).__name__}: {exc}",
+        })
 
     result["status"] = "context_complete" if not errors else "partial"
     if errors:
