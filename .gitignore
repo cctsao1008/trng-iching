@@ -1,0 +1,10 @@
+# Local environments and Python-generated files
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.env
+
+# Downloaded JPL ephemerides are local immutable reference assets, not Git history
+*.bsp
+*.bsp.part
