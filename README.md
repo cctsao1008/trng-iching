@@ -1,42 +1,47 @@
 # TRNG I Ching
 
-以**真實亂數（True Random Number Generator, TRNG）**與**天文時序資料**為基礎，建立一套規則明確、計算一致、結果可追溯的數位易經起卦流程。
+**TRNG I Ching** is a research-oriented workflow that combines true random number generation, astronomical ephemerides, Chinese calendrical calculations, and documented I Ching methods. Its goal is to provide a **consistent, transparent, and reproducible computational basis** for interpretation.
 
-本專案結合 TRNG.info、美國海軍天文台（USNO）提供的資料，以及中國傳統曆法與易學規則。目標是將可確定計算的部分交由程式處理，再交給 ChatGPT 進行卦義與問事情境的解讀。
+The workflow separates objective data and deterministic calculations from symbolic and contextual interpretation.
 
-## 設計理念
+## Principles
 
-- **亂數決定卦象**：以外部 TRNG 取得起卦亂數，不因卦象偏好而重新抽取。
-- **程式負責確定性計算**：由 Python 處理時間、六爻、本卦、之卦、曆法及已定義的規則映射，不依賴語言模型臨時計算。
-- **天象提供時序背景**：以 USNO 的客觀天文資料輔助理解起卦時刻；天象不修改 TRNG 結果。
-- **統一資料介面**：將來源、時間戳記、原始值、計算結果與規則版本整理成結構化 JSON，讓不同對話使用一致的輸入。
-- **解讀與資料分離**：ChatGPT 負責解釋卦辭、爻辭、象徵意義與實際問題；客觀資料、傳統詮釋和現實推論須清楚區別。
+- **Randomness determines the cast.** Obtain an independent sample from a true random number generator (TRNG). Do not select, alter, or redraw a valid sample to obtain a preferred outcome.
+- **Time and astronomy provide context.** Timestamp each sample and describe the astronomical conditions at that instant. Astronomical data must not silently change the TRNG-derived cast.
+- **Python computes, ChatGPT interprets.** Python handles all specified calculations and conversions, including six-line casting, hexagram identification, calendrical information, and the selection of applicable textual rules. ChatGPT interprets the normalized result rather than recalculating it.
+- **Sources are complementary, not interchangeable.** Distinguish primary sources, independent verification, calendrical reference data, and I Ching reference material. Do not average incompatible astronomical outputs or arbitrarily choose the result that fits an interpretation.
+- **Methods are explicit and versioned.** Record source provenance, coordinate/time conventions, calendar boundaries, casting methods, and interpretation traditions. Do not silently combine incompatible schools.
+- **Output is portable.** Produce one structured JSON result suitable for sharing across conversations. No database or per-reading file storage is required.
 
-## 使用流程
+## Source roles
 
-1. 在 ChatGPT 中先確定占問事項及需要觀察的時間範圍。
-2. 執行本機資料處理工具，取得 TRNG、時間戳記與 USNO 天文資訊。
-3. 由 Python 完成確定性轉換、檢查資料有效性，並在終端機輸出標準化 JSON。
-4. 將 JSON 貼到 ChatGPT，依既定易經規則進行解卦與情境討論。
-
-工具原則上**只輸出資料，不自動保存起卦紀錄**；不要求資料庫，也不將問事內容傳送給亂數或天文資料服務。
-
-## 資料與方法的邊界
-
-| 層次 | 職責 |
+| Source | Intended role |
 | --- | --- |
-| TRNG | 提供隨機取樣資料 |
-| Timestamp | 記錄取樣請求與接收時刻，明確標示時區 |
-| USNO | 提供月相、季節性天文事件等可查證資料 |
-| Python | 進行六爻、卦象、曆法及其他**已確定規則**的標準化計算 |
-| ChatGPT | 依輸出資料、傳統文獻與占問背景進行解讀 |
+| [TRNG.info](https://trng.info/) | Independent random input for casting |
+| [NASA JPL](https://ssd.jpl.nasa.gov/) ephemerides | Candidate primary astronomical reference for Sun, Moon, and relevant celestial positions |
+| [IMCCE](https://www.imcce.fr/) | Independent astronomical cross-checks where needed |
+| [Taiwan CWA](https://www.cwa.gov.tw/) / [Hong Kong Observatory](https://www.hko.gov.hk/) | Reference data for Chinese calendar dates, solar terms, and lunar events |
+| [USNO](https://aa.usno.navy.mil/) | Existing prototype source and an optional reference for lunar/seasonal events |
+| I Ching textual and software references | Documented casting, hexagram, textual, and traditional calendrical mapping conventions |
 
-對尚無可靠資料或尚未定案的轉換，應明確標示缺失或未支援，而不是推測補值。使用的曆法慣例、易學體系與資料來源需能被辨識，不應把不同流派的規則無標示地混用。
+These are **roles under evaluation**, not a requirement to query every provider on every run. Astronomical calculations may use locally available, versioned ephemeris resources; independent checks are separate from normal casting.
 
-## 使用限制
+## Workflow
 
-本專案以傳統文化、工程方法及可重現的規則為研究與實作方向。**真實亂數、天文事件與曆法換算的正確性，不代表卦象已被科學證實能預測現實事件。** 投資、健康或其他重大決策仍應依據獨立且可靠的事實與專業判斷。
+1. **Define the question in ChatGPT before sampling**, including its relevant time horizon.
+2. **Collect a single TRNG sample and timestamp it.**
+3. **Calculate and normalize in Python:** the six lines, moving lines, primary and relating hexagrams, astronomical context, Chinese calendar information, and applicable I Ching mapping rules.
+4. **Print structured JSON to the terminal.** Include the raw input, normalized results, provenance, versions, and explicit statuses for unavailable fields.
+5. **Paste the JSON into ChatGPT** for a source-aware interpretation that distinguishes classical text, traditional symbolism, astronomical facts, and real-world evidence.
 
-## 專案討論
+The question remains in the conversation; it is not submitted to TRNG or astronomical providers. The tool does not automatically store readings.
 
-架構、演算法、曆法慣例及輸出契約的討論與決策請參考 [GitHub Issues](https://github.com/cctsao1008/trng-iching/issues)。
+## Interpretation boundaries
+
+Traditional methods such as the twelve monthly hexagrams (十二消息卦), hexagram qi (卦氣), and Najia six-line divination (六爻納甲) have different historical assumptions. When included, their calculations and texts must be labeled with the chosen method and source. They are not interchangeable with the TRNG-generated primary hexagram.
+
+Accurate random samples, ephemerides, and calendar conversions **do not establish the predictive validity of divination**. Interpretations are a framework for cultural inquiry and reflection, not a substitute for independent evidence in financial, medical, legal, or other consequential decisions.
+
+## Development and decisions
+
+Architecture, implementation details, algorithm conventions, and the JSON contract are tracked in [GitHub Issues](https://github.com/cctsao1008/trng-iching/issues), starting with [Issue #1](https://github.com/cctsao1008/trng-iching/issues/1).
