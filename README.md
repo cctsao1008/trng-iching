@@ -75,6 +75,27 @@ provenance, and calendrical conventions. Both modes encode the same cast.
 Input-validation errors exit nonzero rather than emitting a false cast.
 The script does not call GPT, store readings, or include an interpretation
 engine. This version intentionally supersedes legacy 0.1/0.2 preflight JSON.
+
+## Acceptance policy: live-only, fail-fast
+
+**Only online end-to-end acceptance tests are authorized.** Execute a real
+`py .\main.py cast --audit` once, obtaining a new sample from TRNG.info and
+running the full capture/conversion/HKO/JPL/Ganzhi pipeline. Do not use
+`--hex`, simulated samples or offline tests to claim acceptance.
+
+Acceptance requires one successful TRNG response, correct six-line
+derivation from that exact response, schema `0.3.0`, no Python
+`interpretation`/`text_selection`, a valid timestamp, and `status=complete`
+with all three context components available. Any failed condition is a
+**hard STOP**: record the failing output and diagnose before proceeding.
+Do not run another cast as an automatic retry, and do not use another sample
+to substitute for the failed acceptance. A partial live result preserves
+the valid cast but **fails strict end-to-end acceptance**.
+
+One live acceptance call is one real casting event. Its JSON can be handed
+to GPT for interpretation only **after** the complete online validation
+passes. The legacy manual `--hex` mode remains available for explicit
+replay/reference input but is not part of this project's acceptance policy.
 ## Astronomical and calendrical consistency
 
 Solar/lunar positions and traditional calendrical labels involve different kinds of rules. In particular, solar terms depend on a defined solar-longitude convention, while lunisolar dates depend on new-moon instants, civil-day assignment, and leap-month rules. Sexagenary year, month, day, and hour calculations require explicitly selected boundary conventions.
