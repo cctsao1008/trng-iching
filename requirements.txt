@@ -1,2 +1,1 @@
-# Pinned primary astronomy dependency for the S-1 numerical probe.
 skyfield==1.55
