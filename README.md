@@ -1,29 +1,17 @@
-# TRNG I Ching · 真隨機易經
+# TRNG Hexagram Casting
 
-> **Let physical randomness choose the hexagram. Let astronomy record the moment. Let interpretation remain open.**
->
-> **讓真實物理世界的隨機性決定卦象，讓可驗證的天文曆法記錄當下，讓人與 AI 自由探索卦象和問題之間的意義。**
+**A transparent, reproducible hexagram casting tool for use with the I Ching.**
 
-## Why this exists · 專案的靈魂
+This repository implements **hexagram casting**, not the *I Ching* itself. The *I Ching* includes classical texts and interpretive traditions; this tool calculates the six lines, moving lines, primary hexagram, and relating hexagram. It does **not** provide scripture, readings, or predictions.
 
-The *I Ching* is an ancient way of asking questions through change and symbols. This project brings that practice into conversation with **physical randomness, modern astronomy, reproducible computation, and AI**—without pretending that these are the same thing.
+Each cast starts with one true-random sample from TRNG.info. Python converts the sample into a hexagram and records astronomical and calendrical context for the time of the cast. The output is a traceable JSON record that can be used for I Ching study or interpretation.
 
-A hexagram is not selected by a language model, a hidden prediction rule, or the answer someone hopes to receive. It comes from **one real, external TRNG sample**. At the moment that sample is received, **JPL astronomy, an official lunar calendar, and the sexagenary cycle describe the surrounding time**. Only after these facts are fixed does a person bring their question to ChatGPT.
-
-**The boundaries are the point:**
-
-- **Chance is not steered.** Neither Python nor GPT gets to pick or reroll a more desirable hexagram.
-- **Time is context, not a cause of the cast.** Astronomical and calendrical facts describe the moment; they never modify the random bits or the six lines.
-- **Meaning is not preprogrammed.** Python calculates and records; interpretation belongs to the dialogue between the questioner and AI. There is no mandatory school, reading plan, counter-reading, or action checklist.
-
-The purpose is not to build a fortune-telling machine with predetermined answers. It is to build a **traceable meeting point between an unpredictable event, a precisely described moment, a human question, and open-ended thought**.
-
-這個工具最重要的不是「替人決定未來」，而是**不預設結果、不竄改卦象、不把解釋寫死**：以真亂數起卦，以天文曆法記時，最後保留探索與思考的自由。
+**Randomness determines the hexagram; astronomy and calendars describe the time; interpretation is left to the user.** None of these steps silently changes the others.
 
 ## How a cast works
 
 ```text
-             A question
+        Run a live cast
                  |
                  v
      TRNG.info: one 3-byte sample
@@ -46,8 +34,8 @@ The purpose is not to build a fortune-telling machine with predetermined answers
                        Versioned JSON
                                |
                                v
-                  Human question + ChatGPT
-                     (free interpretation)
+             Optional I Ching reading
+                 (human or AI)
 ```
 
 ### 1. A live random sample determines the hexagram
@@ -75,11 +63,9 @@ The cast timestamp is the **client's TRNG response receive time**, not the unkno
 
 These are **descriptive time facts**, not inputs to the random casting algorithm.
 
-### 3. Interpretation stays open
+### 3. Interpretation is separate
 
-Python does **not** select scripture, decide whether a cast is favorable, or impose a reading method. You can give the JSON and your question to ChatGPT and explore the result freely. The only essential integrity boundary is that the original random input, hexagrams, moving lines, timestamps, and computed facts **must not be silently rewritten**.
-
-No mandatory interpretation protocol or predetermined conclusion is built into the project.
+The program ends with a structured casting record. You can use that record in an *I Ching* reading—on your own or with an AI—but Python does not select classical passages, evaluate whether a cast is favorable, or prescribe a reading method. The recorded random input, hexagrams, moving lines, timestamp, and computed context should remain unchanged.
 
 ## Getting started
 
@@ -91,7 +77,7 @@ cd trng-iching
 py -m pip install -r .\requirements.txt
 ```
 
-1. Decide what you want to ask.
+1. Decide on a question if you intend to use the result for an *I Ching* reading.
 2. Make **one** live cast:
 
    ```powershell
@@ -99,7 +85,7 @@ py -m pip install -r .\requirements.txt
    ```
 
 3. Confirm `mode == "live_trng_cast"` and `status == "complete"`.
-4. Share the JSON with ChatGPT alongside your question.
+4. Use the JSON for your own study or share it with ChatGPT alongside your question for optional interpretation.
 
 The **alternative**, when you need technical traceability, is:
 
@@ -147,7 +133,7 @@ The following is a real recorded sample presented using the compact v0.4.0 schem
 }
 ```
 
-The JSON gives GPT the question's **fixed inputs and time context** without flooding its interpretation with request transport, bit-level derivation, and dependency metadata.
+The compact JSON preserves the casting result and time context without including transport details, bit-level derivations, or dependency metadata.
 
 ## JSON schema and audit mode
 
@@ -185,7 +171,7 @@ Windows terminals may show Unicode escapes (`\uXXXX`) for Chinese text; JSON par
 
 ## Design and compatibility
 
-- **Deterministic data, open-ended interpretation.** Preserve the separation between generation, time context and meaning.
+- **Casting, not interpretation.** Python records a verifiable hexagram; any *I Ching* reading happens separately.
 - **No hidden redraw.** A failed call never silently triggers another TRNG request.
 - **Pinned provenance.** The local JPL kernel is SHA-256 checked; the HKO reference stores source hashes.
 - **Concise default, complete audit.** Use `cast` for interpretation and `cast --audit` for engineering investigation.
@@ -211,6 +197,4 @@ On Windows, network acquisition uses PowerShell with the system proxy; elsewhere
 
 The data pipeline uses [TRNG.info](https://trng.info/), [NASA JPL ephemerides](https://ssd.jpl.nasa.gov/), [Skyfield](https://rhodesmill.org/skyfield/), and the [Hong Kong Observatory](https://www.hko.gov.hk/en/gts/time/conversion1_text.htm).
 
-Independent research references include [Taiyin Ephemeris](https://github.com/RedSC1/taiyin-ephemeris), [stem-branch](https://github.com/h4x0r/stem-branch), and [Chinese Calendar Dataset](https://github.com/Kuangchujia/chinese-calendar-dataset). They do not silently replace the pinned computational sources. [I Ching Research Skill](https://github.com/ProfesseurHaipeng/iching-research-skill) and [I Ching Today](https://iching.today/method) provide optional cultural/methodological background, **not compulsory interpretation rules**.
-
-**This is an experiment in transparent casting and reflective interpretation, not a scientifically validated method of forecasting events.** A symbol may invite insight; it does not replace evidence in consequential real-world decisions.
+**This tool produces a traceable casting record, not an *I Ching* interpretation or a scientifically validated forecast of future events.**
