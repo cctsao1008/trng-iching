@@ -130,39 +130,39 @@ Both sources require no API key. A failed request stops the cast; the other prov
 
 ### An example
 
-The following is an actual earlier cast, showing 泰 changing to 節:
+The following illustrative reference cast shows 火風鼎, whose judgment begins with 元吉. The fixed input and reference time are chosen for documentation, not obtained by a live quantum request.
+
+```powershell
+py .\main.py cast --hex 649640 --at 2026-11-24T20:07:13.986461+08:00 --view human --text
+```
 
 ```text
 Hexagram Casting
 Time: 2026-11-24T20:07:13.986461+08:00
-Source: trng.info / 93e182
-Mode: live_trng_cast | Status: complete
+Source: user_provided_reference / 649640
+Mode: manual_reference_cast | Status: complete
 
-Primary 11: 地天泰
-Relating 60: 水澤節
+Primary 50: 火風鼎
+Relating 50: 火風鼎
 
    PRIMARY            RELATING
-6  ---- ----          ---- ----
-5  ---- ----  *       ---------
-4  ---- ----          ---- ----
-3  ---------  *       ---- ----
+6  ---------          ---------
+5  ---- ----          ---- ----
+4  ---------          ---------
+3  ---------          ---------
 2  ---------          ---------
-1  ---------          ---------
+1  ---- ----          ---- ----
 
-* Line 3: Old Yang -> Yin
-* Line 5: Old Yin -> Yang
+Moving lines: none
 Solar term: 小雪
 Lunar: 2026-10-16
 Four pillars: 丙午 己亥 壬寅 庚戌
 
 Classical Text / 周易
-本卦 11 泰：小往大來，吉亨。
-九三：无平不陂，无往不復，艱貞无咎。勿恤其孚，于食有福。
-六五：帝乙歸妹，以祉，元吉。
-之卦 60 節：亨。苦節不可貞。
+本卦 50 鼎：元吉，亨。
 ```
 
-The terminal also displays the source links for the classical passages. The asterisks identify moving lines.
+The terminal also displays the classical source link. This fixed example illustrates the output format; live casts are never selected or redrawn for a favorable result.
 
 No interpretation is attached to this example. Its meaning depends on the question and the reader's approach.
 
