@@ -25,7 +25,7 @@
 </p>
 
 <p align="center">
-  ✨ Quantum &nbsp;·&nbsp; ☯️ Change &nbsp;·&nbsp; 🌙 Cosmos &nbsp;·&nbsp; 📜 Wisdom
+  ⚛️ Quantum &nbsp;·&nbsp; ☯️ Change &nbsp;·&nbsp; 🌙 Cosmos &nbsp;·&nbsp; 📜 Wisdom
 </p>
 
 <p align="center">
