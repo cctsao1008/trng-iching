@@ -73,107 +73,33 @@ def _hexagram(bits_bottom_to_top: str) -> dict:
     }
 
 
-def cast_from_hex(raw_hex: str) -> dict:
-    """Map three bytes to six traditional three-coin lines (first = bottom)."""
+def cast_from_hex(raw_hex: str, *, audit: bool = False) -> dict:
+    """Convert 3 bytes to six ordered lines and two hexagrams; no interpretation."""
     if not isinstance(raw_hex, str) or _HEX.fullmatch(raw_hex) is None:
         raise ValueError("Cast requires exactly 6 hexadecimal digits (3 bytes)")
     bits = f"{int(raw_hex, 16):024b}"
     groups = [bits[i:i + 3] for i in range(0, 18, 3)]
     lines = [6 + group.count("1") for group in groups]
-    moving = [index for index, value in enumerate(lines, 1) if value in (6, 9)]
+    moving = [i for i, value in enumerate(lines, 1) if value in (6, 9)]
     original_bits = "".join("1" if line in (7, 9) else "0" for line in lines)
-    changed_bits = "".join(
-        "1" if line in (6, 7) else "0" for line in lines
-    )
-    return {
+    changed_bits = "".join("1" if line in (6, 7) else "0" for line in lines)
+    primary = _hexagram(original_bits)
+    relating = _hexagram(changed_bits)
+    if not audit:
+        primary.pop("bits_bottom_to_top")
+        relating.pop("bits_bottom_to_top")
+    cast = {
         "method": "three_coins_18bit_msb_first",
-        "raw_hex": raw_hex.lower(),
-        "bits_used": bits[:18],
-        "bits_discarded": bits[18:],
-        "triples_bottom_to_top": groups,
+        "line_order": "bottom_to_top",
         "lines_bottom_to_top": lines,
         "moving_lines": moving,
-        "primary": _hexagram(original_bits),
-        "relating": _hexagram(changed_bits),
-        "text_selection_status": "targets_selected_text_not_bundled",
-        "text_selection": select_text_targets(
-            primary=_hexagram(original_bits),
-            relating=_hexagram(changed_bits),
-            moving_lines=moving,
-        ),
+        "primary": primary,
+        "relating": relating,
     }
-
-
-
-def select_text_targets(
-    *, primary: dict, relating: dict, moving_lines: list[int]
-) -> dict:
-    """Select references, not text, under Zhu Xi's 考變占 seven cases.
-
-    Rule reference: 易學啟蒙 考變占第四, as transmitted in
-    易學啟蒙通釋 (四庫全書本)/卷下. No copyrighted translation or
-    classical text corpus is bundled; 3-moving-line case returns both
-    judgments without imposing an unverified primary/secondary priority.
-    """
-    changed = sorted(set(moving_lines))
-    if len(changed) != len(moving_lines) or any(
-        not isinstance(number, int) or not 1 <= number <= 6
-        for number in changed
-    ):
-        raise ValueError("Moving-line positions must be unique integers 1..6")
-    still = [number for number in range(1, 7) if number not in changed]
-    count = len(changed)
-
-    def ref(hexagram: dict, text_type: str, *, line: int | None = None,
-            priority: str = "selected") -> dict:
-        target = {
-            "hexagram_number": hexagram["number"],
-            "hexagram_name": hexagram["display_name"],
-            "text_type": text_type,
-            "role": priority,
-        }
-        if line is not None:
-            target["line_number"] = line
-        return target
-
-    if count == 0:
-        targets = [ref(primary, "hexagram_judgment")]
-    elif count == 1:
-        targets = [ref(primary, "line_statement", line=changed[0])]
-    elif count == 2:
-        targets = [
-            ref(primary, "line_statement", line=number,
-                priority="primary" if number == changed[-1] else "secondary")
-            for number in changed
-        ]
-    elif count == 3:
-        targets = [
-            ref(primary, "hexagram_judgment", priority="zhen_original"),
-            ref(relating, "hexagram_judgment", priority="hui_relating"),
-        ]
-    elif count == 4:
-        targets = [
-            ref(relating, "line_statement", line=number,
-                priority="primary" if number == still[0] else "secondary")
-            for number in still
-        ]
-    elif count == 5:
-        targets = [ref(relating, "line_statement", line=still[0])]
-    elif primary["number"] == 1:
-        targets = [ref(primary, "use_nine")]
-    elif primary["number"] == 2:
-        targets = [ref(primary, "use_six")]
-    else:
-        targets = [ref(relating, "hexagram_judgment")]
-    return {
-        "ruleset": "zhu_xi_yixue_qimeng_kaobian_zhan_v1",
-        "number_of_moving_lines": count,
-        "source_title": "易學啟蒙・考變占第四",
-        "source_reference": (
-            "https://zh.wikisource.org/zh-hant/"
-            "%E6%98%93%E5%AD%B8%E5%95%9F%E8%92%99%E9%80%9A%E9%87%8B_"
-            "%28%E5%9B%9B%E5%BA%AB%E5%85%A8%E6%9B%B8%E6%9C%AC%29/%E5%8D%B7%E4%B8%8B"
-        ),
-        "targets": targets,
-        "status": "references_only_classical_text_not_bundled",
-    }
+    if audit:
+        cast.update({
+            "bits_used": bits[:18],
+            "bits_discarded": bits[18:],
+            "triples_bottom_to_top": groups,
+        })
+    return cast

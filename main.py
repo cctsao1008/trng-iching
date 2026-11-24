@@ -1,8 +1,6 @@
-"""Deterministic TRNG I Ching CLI: one live cast, one consistent UTC instant.
+"""Single-sample deterministic TRNG data pipeline; GPT handles all interpretation.
 
-Only the explicit calendar-sync command writes local reference data.
-A live cast performs one network request after local prerequisites are checked;
-normal calendar and ephemeris operations require no network access.
+Optional astronomy/calendar failures never trigger a redraw or erase a valid cast.
 """
 
 from __future__ import annotations
@@ -10,13 +8,15 @@ from __future__ import annotations
 import argparse
 import json
 import sys
-from datetime import date, datetime, timedelta, timezone
+from datetime import date, datetime, timezone
 from pathlib import Path
 
 from astronomy import PinnedEphemeris, UTC_PLUS_8, calculate_reference
 from iching import cast_from_hex
 from lunisolar import calculate_four_pillars, lookup_hko_date, sync_hko_years
 from sources import acquire_trng_bytes
+
+ROOT = Path(__file__).resolve().parent
 
 
 def _utc_timestamp(value: str) -> datetime:
@@ -33,113 +33,112 @@ def _iso_utc(value: datetime) -> str:
 
 
 def _cast_context(
-    *,
-    random_source: dict,
-    cast_time: datetime,
-    ephemeris: PinnedEphemeris | None,
-    reference_file: Path,
-    ephemeris_error: Exception | None = None,
+    *, sample: dict, cast: dict, cast_time: datetime | None,
+    ephemeris_path: Path, reference_file: Path, audit: bool,
 ) -> dict:
-    """Build a single JSON result; preserve the sample after valid acquisition."""
-    local_time = cast_time.astimezone(UTC_PLUS_8)
-    is_live = random_source.get("source") == "trng.info"
+    """One immutable cast, plus independent optional reference components."""
+    is_live = sample.get("source") == "trng.info"
     result = {
-        "schema_version": "0.2.0-preflight",
+        "schema_version": "0.3.0",
         "mode": "live_trng_cast" if is_live else "manual_reference_cast",
-        "status": "pending",
-        "scope": "computational_context_only",
+        "status": "cast_only" if cast_time is None else "pending",
         "capture": {
-            "cast_time_utc": _iso_utc(cast_time),
-            "cast_time_utc_plus_8": local_time.isoformat(timespec="microseconds"),
-            "cast_time_source": (
-                "trng_client_receive_time" if is_live else "manual_reference_time"
+            "cast_time_utc": _iso_utc(cast_time) if cast_time else None,
+            "cast_time_utc_plus_8": (
+                cast_time.astimezone(UTC_PLUS_8).isoformat(timespec="microseconds")
+                if cast_time else None
             ),
-            "note": (
-                "The client receive time is not the hardware RNG generation time"
-                if is_live else "A user-supplied timestamp; not a live capture"
+            "cast_time_source": (
+                "trng_client_receive_time" if is_live else
+                "manual_reference_time" if cast_time else "not_provided"
             ),
         },
-        "randomness": random_source,
-        "iching": None,
-        "calendar": None,
-        "astronomy": None,
-        "ganzhi": None,
-        "interpretation": {
-            "status": "not_implemented",
-            "classical_text_edition": None,
-            "moving_line_ruleset": None,
+        "randomness": sample if audit else {
+            "source": sample["source"],
+            "raw_hex": sample["raw_hex"],
+            "request_time_utc": sample.get("request_time_utc"),
+            "receive_time_utc": sample.get("receive_time_utc"),
+            "is_live_trng": is_live,
+        },
+        "cast": cast,
+        "context": {
+            "calendar": {"status": "not_requested"},
+            "astronomy": {"status": "not_requested"},
+            "ganzhi": {"status": "not_requested"},
         },
     }
-    errors = []
+    if cast_time is None:
+        return result
 
+    context = result["context"]
+    errors = []
     try:
-        result["iching"] = cast_from_hex(random_source["raw_hex"])
-        result["interpretation"] = {
-            "status": "reading_targets_selected_text_not_bundled",
-            "classical_text_edition": None,
-            "moving_line_ruleset": (
-                result["iching"]["text_selection"]["ruleset"]
-            ),
-            "text_target_location": "iching.text_selection.targets",
+        raw_calendar = lookup_hko_date(
+            day=cast_time.astimezone(UTC_PLUS_8).date(),
+            path=reference_file,
+        )
+        context["calendar"] = raw_calendar if audit else {
+            "status": raw_calendar["status"],
+            "gregorian_date": raw_calendar["gregorian_date"],
+            "lunar": raw_calendar["lunar"],
+            "source": "Hong Kong Observatory",
         }
     except Exception as exc:
-        result["iching"] = {"status": "error"}
-        errors.append({"component": "iching", "error": f"{type(exc).__name__}: {exc}"})
-
-    try:
-        result["calendar"] = lookup_hko_date(
-            day=local_time.date(), path=reference_file
-        )
-    except Exception as exc:
-        result["calendar"] = {"status": "unavailable"}
+        context["calendar"] = {"status": "unavailable"}
         errors.append({"component": "calendar", "error": f"{type(exc).__name__}: {exc}"})
 
-    if ephemeris_error is not None:
-        result["astronomy"] = {"status": "unavailable"}
-        errors.append({
-            "component": "astronomy",
-            "error": f"{type(ephemeris_error).__name__}: {ephemeris_error}",
-        })
-    elif ephemeris is not None:
-        try:
-            result["astronomy"] = ephemeris.snapshot(cast_time)
-        except Exception as exc:
-            result["astronomy"] = {"status": "unavailable"}
-            errors.append({
-                "component": "astronomy",
-                "error": f"{type(exc).__name__}: {exc}",
-            })
-    else:
-        result["astronomy"] = {"status": "unavailable"}
-        errors.append({"component": "astronomy", "error": "Ephemeris was not loaded"})
-
-    # Reuse the existing Sun longitude; do not search solar-term events again.
-    # The calendar's lunar year and four-pillars solar year remain separate.
+    solar_longitude = None
     try:
-        sun_longitude = (
-            result["astronomy"]["sun_apparent_ecliptic_longitude_degrees"]
-            if result["astronomy"].get("status") == "calculated"
-            else None
-        )
-        result["ganzhi"] = calculate_four_pillars(
-            cast_time_utc=cast_time,
-            sun_longitude_degrees=sun_longitude,
-        )
+        with PinnedEphemeris(ephemeris_path) as ephemeris:
+            raw_astronomy = ephemeris.snapshot(cast_time)
+        solar_longitude = raw_astronomy["sun_apparent_ecliptic_longitude_degrees"]
+        context["astronomy"] = raw_astronomy if audit else {
+            "status": raw_astronomy["status"],
+            "reference_instant_utc": raw_astronomy["reference_instant_utc"],
+            "sun_apparent_ecliptic_longitude_degrees":
+                raw_astronomy["sun_apparent_ecliptic_longitude_degrees"],
+            "moon_apparent_ecliptic_longitude_degrees":
+                raw_astronomy["moon_apparent_ecliptic_longitude_degrees"],
+            "moon_sun_ecliptic_difference_degrees":
+                raw_astronomy["moon_sun_ecliptic_difference_degrees"],
+            "current_solar_term": {
+                "index": raw_astronomy["current_solar_term"]["index"],
+                "name_zh_tw": raw_astronomy["current_solar_term"]["name_zh_tw"],
+            },
+            "source": "JPL DE440s / Skyfield",
+        }
     except Exception as exc:
-        result["ganzhi"] = {"status": "unavailable"}
-        errors.append({
-            "component": "ganzhi",
-            "error": f"{type(exc).__name__}: {exc}",
-        })
+        context["astronomy"] = {"status": "unavailable"}
+        errors.append({"component": "astronomy", "error": f"{type(exc).__name__}: {exc}"})
 
-    result["status"] = "context_complete" if not errors else "partial"
+    try:
+        pillars = calculate_four_pillars(
+            cast_time_utc=cast_time,
+            sun_longitude_degrees=solar_longitude,
+        )
+        context["ganzhi"] = pillars if audit else {
+            key: pillars[key]
+            for key in ("status", "convention", "year", "month", "day", "hour")
+        }
+    except Exception as exc:
+        context["ganzhi"] = {"status": "unavailable"}
+        errors.append({"component": "ganzhi", "error": f"{type(exc).__name__}: {exc}"})
+
+    result["status"] = (
+        "complete" if not errors and all(
+            entry.get("status") not in ("partial", "unavailable")
+            for entry in context.values()
+        ) else "partial"
+    )
     if errors:
         result["errors"] = errors
     return result
 
 
 def _manual_reference_cast(args: argparse.Namespace) -> dict:
-    """Manual input is never labeled live TRNG or assigned an invented time."""
+    """Validate hex and supplied timestamp before optional context."""
+    cast = cast_from_hex(args.reference_hex, audit=args.audit)
+    cast_time = _utc_timestamp(args.at) if args.at is not None else None
     sample = {
         "source": "user_provided_reference",
         "raw_hex": args.reference_hex.lower(),
@@ -147,56 +146,23 @@ def _manual_reference_cast(args: argparse.Namespace) -> dict:
         "receive_time_utc": None,
         "is_live_trng": False,
     }
-    if args.at is None:
-        cast_data = cast_from_hex(args.reference_hex)
-        return {
-            "schema_version": "0.1.0-preflight",
-            "mode": "manual_reference_cast",
-            "status": "cast_only",
-            "randomness": sample,
-            "iching": cast_data,
-            "astronomy": {"status": "not_evaluated"},
-            "calendar": {"status": "not_evaluated"},
-        }
-    cast_time = _utc_timestamp(args.at)
-    try:
-        with PinnedEphemeris(args.ephemeris) as session:
-            return _cast_context(
-                random_source=sample,
-                cast_time=cast_time,
-                ephemeris=session,
-                reference_file=args.reference,
-            )
-    except Exception as exc:
-        return _cast_context(
-            random_source=sample,
-            cast_time=cast_time,
-            ephemeris=None,
-            ephemeris_error=exc,
-            reference_file=args.reference,
-        )
+    return _cast_context(
+        sample=sample, cast=cast, cast_time=cast_time,
+        ephemeris_path=args.ephemeris, reference_file=args.reference,
+        audit=args.audit,
+    )
 
 
 def _live_cast(args: argparse.Namespace) -> dict:
-    """Preflight BEFORE taking a single, non-repeatable TRNG sample.
-
-    Keep a single opened JPL session to avoid hashing/loading the same kernel
-    twice. Check today and tomorrow so an imminent UTC+8 date rollover
-    cannot unexpectedly require an uncached calendar year after sampling.
-    """
-    now_local = datetime.now(timezone.utc).astimezone(UTC_PLUS_8).date()
-    lookup_hko_date(day=now_local, path=args.reference)
-    lookup_hko_date(day=now_local + timedelta(days=1), path=args.reference)
-
-    with PinnedEphemeris(args.ephemeris) as session:
-        sample = acquire_trng_bytes()  # exactly one request; NO retry
-        cast_time = _utc_timestamp(sample["receive_time_utc"])
-        return _cast_context(
-            random_source=sample,
-            cast_time=cast_time,
-            ephemeris=session,
-            reference_file=args.reference,
-        )
+    """Exactly one TRNG request, regardless of optional JPL/HKO availability."""
+    sample = acquire_trng_bytes()
+    cast = cast_from_hex(sample["raw_hex"], audit=args.audit)
+    cast_time = _utc_timestamp(sample["receive_time_utc"])
+    return _cast_context(
+        sample=sample, cast=cast, cast_time=cast_time,
+        ephemeris_path=args.ephemeris, reference_file=args.reference,
+        audit=args.audit,
+    )
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -217,7 +183,7 @@ def main(argv: list[str] | None = None) -> int:
         "--days", type=int, default=45, help="Search days (1 to 400)"
     )
     astronomy.add_argument(
-        "--ephemeris", type=Path, default=Path("de440s.bsp"),
+        "--ephemeris", type=Path, default=ROOT / "de440s.bsp",
         help="Pinned local JPL kernel",
     )
 
@@ -225,13 +191,13 @@ def main(argv: list[str] | None = None) -> int:
         "calendar-sync", help="Explicitly sync HKO year tables to a compact local reference"
     )
     sync.add_argument("--years", type=int, nargs="+", required=True)
-    sync.add_argument("--reference", type=Path, default=Path("calendar_reference.json"))
+    sync.add_argument("--reference", type=Path, default=ROOT / "calendar_reference.json")
 
     lookup = commands.add_parser(
         "calendar", help="Lookup an official Chinese lunar date without HTTP or astronomy"
     )
     lookup.add_argument("--date", required=True, help="Gregorian date YYYY-MM-DD")
-    lookup.add_argument("--reference", type=Path, default=Path("calendar_reference.json"))
+    lookup.add_argument("--reference", type=Path, default=ROOT / "calendar_reference.json")
 
     cast_parser = commands.add_parser(
         "cast", help="One TRNG.info sample with local calendar/JPL context"
@@ -245,12 +211,17 @@ def main(argv: list[str] | None = None) -> int:
         help="Reference time for --hex only; enables integrated offline context",
     )
     cast_parser.add_argument(
-        "--ephemeris", type=Path, default=Path("de440s.bsp"),
+        "--ephemeris", type=Path, default=ROOT / "de440s.bsp",
         help="Pinned local JPL kernel",
     )
     cast_parser.add_argument(
-        "--reference", type=Path, default=Path("calendar_reference.json"),
+        "--reference", type=Path, default=ROOT / "calendar_reference.json",
         help="Offline official HKO month-start index",
+    )
+
+    cast_parser.add_argument(
+        "--audit", action="store_true",
+        help="Include full provenance, bit groups and conversion conventions",
     )
 
     args = parser.parse_args(argv)
