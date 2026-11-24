@@ -170,13 +170,13 @@ No interpretation is attached to this example. Its meaning depends on the questi
 
 Choose one of the following live commands:
 
-| Command (after `py .\main.py`) | Display |
-| --- | --- |
-| `cast` | JSON for AI or other software |
-| `cast --audit` | Full JSON with source and calculation details |
-| `cast --view human` | Hexagrams |
-| `cast --view human --text` | Hexagrams and classical passages |
-| `cast --audit --view human --text` | Full JSON followed by hexagrams and classical passages |
+| Command (after `py .\main.py`) | Display | Recommended use |
+| --- | --- | --- |
+| `cast` | JSON for AI or other software | Asking through the hexagram with ChatGPT or another AI assistant |
+| `cast --audit` | Full JSON with source and calculation details | Reviewing randomness provenance and casting calculations |
+| `cast --view human` | Hexagrams | Quickly viewing the primary and relating hexagrams |
+| `cast --view human --text` | Hexagrams and classical passages | Personal reflection and traditional interpretation |
+| `cast --audit --view human --text` | Full JSON followed by hexagrams and classical passages | In-depth AI-assisted interpretation with classical references and full provenance |
 
 Add `--source trng.info` or `--source lfdr.de` to any of these live commands to choose the randomness source explicitly. If omitted, TRNG.info is used.
 
