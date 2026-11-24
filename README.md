@@ -47,8 +47,11 @@ It is a tool for **casting a hexagram (起卦)**, not a system that dictates how
 ## Yin, Yang and Change
 
 <pre>
-Yang  陽    ━━━━━━━
-Yin   陰    ━━━ ━━━
+Yang  陽    █████████
+            █████████
+
+Yin   陰    ████ ████
+            ████ ████
 </pre>
 
 Six lines, read from the bottom upward, form a hexagram. The lower and upper trigrams together express one of the sixty-four configurations of yin and yang.
