@@ -2,7 +2,7 @@
   <img src="assets/emblem.png" width="112" alt="Six-line hexagram emblem">
 </p>
 
-<h1 align="center">TRNG Hexagram Casting · 問天</h1>
+<h1 align="center">TRNG Hexagram Casting</h1>
 
 <p align="center">
   <strong>問天，觀象，思己。</strong>
