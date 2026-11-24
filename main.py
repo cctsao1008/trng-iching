@@ -165,6 +165,73 @@ def _live_cast(args: argparse.Namespace) -> dict:
     )
 
 
+
+def _present_cast_result(result: dict, *, audit: bool) -> dict:
+    """Project existing cast data into a concise v0.4.0 JSON interface.
+
+    Internal cast calculations and provenance stay unchanged. Presentation only
+    runs after all calculations; an incomplete context never triggers a redraw.
+    """
+    cast = result["cast"]
+    context = result["context"]
+    calendar = context["calendar"]
+    astronomy = context["astronomy"]
+    ganzhi = context["ganzhi"]
+
+    compact = {
+        "schema_version": "0.4.0",
+        "mode": result["mode"],
+        "status": result["status"],
+        "timestamp": result["capture"]["cast_time_utc_plus_8"],
+        "randomness": {
+            "source": result["randomness"]["source"],
+            "raw_hex": result["randomness"]["raw_hex"],
+        },
+        "hexagram": {
+            "lines_bottom_to_top": cast["lines_bottom_to_top"],
+            "moving_lines": cast["moving_lines"],
+            "primary": {
+                "number": cast["primary"]["number"],
+                "name": cast["primary"]["display_name"],
+            },
+            "relating": {
+                "number": cast["relating"]["number"],
+                "name": cast["relating"]["display_name"],
+            },
+        },
+        "calendar": (
+            {
+                "lunar": {
+                    key: calendar["lunar"][key]
+                    for key in ("year", "month", "day", "is_leap_month")
+                }
+            }
+            if calendar.get("status") == "official_reference_lookup"
+            else None
+        ),
+        "solar_term": (
+            astronomy["current_solar_term"]["name_zh_tw"]
+            if astronomy.get("status") == "calculated"
+            else None
+        ),
+        "ganzhi": (
+            {key: ganzhi.get(key) for key in ("year", "month", "day", "hour")}
+            if ganzhi.get("status") in ("calculated", "partial")
+            else None
+        ),
+    }
+    if result.get("errors"):
+        compact["errors"] = result["errors"]
+    if audit:
+        compact["audit"] = {
+            "capture": result["capture"],
+            "randomness": result["randomness"],
+            "cast": result["cast"],
+            "context": result["context"],
+        }
+    return compact
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="TRNG I Ching deterministic research CLI")
     commands = parser.add_subparsers(dest="command", required=True)
@@ -255,6 +322,9 @@ def main(argv: list[str] | None = None) -> int:
     except Exception as exc:
         print(f"ERROR [{type(exc).__name__}]: {exc}", file=sys.stderr)
         return 1
+
+    if args.command == "cast":
+        result = _present_cast_result(result, audit=args.audit)
 
     # Render ASCII-safe JSON before writing to stdout.
     # Windows PowerShell may use cp950, which cannot encode I Ching glyphs.
