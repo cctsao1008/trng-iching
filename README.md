@@ -69,7 +69,7 @@ The program ends with a structured casting record. You can use that record in an
 
 ## Getting started
 
-Requires Python and the dependencies in `requirements.txt`. The repository contains the pinned JPL kernel (`de440s.bsp`) and a local HKO reference file (`calendar_reference.json`).
+Requires Python and the dependencies in `requirements.txt`. The repository contains the pinned JPL kernel (`data/de440s.bsp`) and a local HKO reference file (`data/calendar_reference.json`).
 
 ```powershell
 git clone https://github.com/cctsao1008/trng-iching.git

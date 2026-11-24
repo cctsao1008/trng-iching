@@ -8,5 +8,11 @@ __pycache__/
 # Commit only the single, verified DE440s reference kernel.
 # Keep all other SPICE kernels and partial downloads untracked.
 *.bsp
-!de440s.bsp
+!/data/de440s.bsp
 *.bsp.part
+
+# Local acquisition staging and cast records (never publish by default).
+/zhouyi_stage*/
+/zhouyi_audit*.json
+/cast*.json
+/reference.json

@@ -17,7 +17,7 @@ from urllib.request import Request, urlopen
 
 
 SOURCE_URL = "https://www.hko.gov.hk/tc/gts/time/calendar/text/files/T{year}c.txt"
-REFERENCE_FILE = Path("calendar_reference.json")
+REFERENCE_FILE = Path(__file__).resolve().parent / "data" / "calendar_reference.json"
 DATA_VERSION = "hko-month-starts-v1"
 _ROW = re.compile(r"^\s*(\d{4})年(\d{1,2})月(\d{1,2})日\s+(\S+)")
 _MONTHS = {

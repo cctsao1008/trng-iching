@@ -264,7 +264,7 @@ def main(argv: list[str] | None = None) -> int:
         "--days", type=int, default=45, help="Search days (1 to 400)"
     )
     astronomy.add_argument(
-        "--ephemeris", type=Path, default=ROOT / "de440s.bsp",
+        "--ephemeris", type=Path, default=ROOT / "data" / "de440s.bsp",
         help="Pinned local JPL kernel",
     )
 
@@ -272,13 +272,13 @@ def main(argv: list[str] | None = None) -> int:
         "calendar-sync", help="Explicitly sync HKO year tables to a compact local reference"
     )
     sync.add_argument("--years", type=int, nargs="+", required=True)
-    sync.add_argument("--reference", type=Path, default=ROOT / "calendar_reference.json")
+    sync.add_argument("--reference", type=Path, default=ROOT / "data" / "calendar_reference.json")
 
     lookup = commands.add_parser(
         "calendar", help="Lookup an official Chinese lunar date without HTTP or astronomy"
     )
     lookup.add_argument("--date", required=True, help="Gregorian date YYYY-MM-DD")
-    lookup.add_argument("--reference", type=Path, default=ROOT / "calendar_reference.json")
+    lookup.add_argument("--reference", type=Path, default=ROOT / "data" / "calendar_reference.json")
 
     cast_parser = commands.add_parser(
         "cast", help="One TRNG.info sample with local calendar/JPL context"
@@ -292,11 +292,11 @@ def main(argv: list[str] | None = None) -> int:
         help="Reference time for --hex only; enables integrated offline context",
     )
     cast_parser.add_argument(
-        "--ephemeris", type=Path, default=ROOT / "de440s.bsp",
+        "--ephemeris", type=Path, default=ROOT / "data" / "de440s.bsp",
         help="Pinned local JPL kernel",
     )
     cast_parser.add_argument(
-        "--reference", type=Path, default=ROOT / "calendar_reference.json",
+        "--reference", type=Path, default=ROOT / "data" / "calendar_reference.json",
         help="Offline official HKO month-start index",
     )
 
