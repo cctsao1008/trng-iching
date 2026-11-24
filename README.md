@@ -1,13 +1,38 @@
-# TRNG Hexagram Casting
+<p align="center">
+  <img src="assets/emblem.png" width="112" alt="Six-line hexagram emblem">
+</p>
 
-> **問天**
->
-> 量子無心生卦象，  
-> 乾坤有序紀辰光。  
-> 周經一卷明玄理，  
-> 萬象由君自度量。
+<h1 align="center">TRNG Hexagram Casting · 問天</h1>
 
-**An ancient way of asking, with modern tools for casting.**
+<p align="center">
+  <strong>問天，觀象，思己。</strong>
+</p>
+
+<p align="center">
+  Ask the universe. Observe the changes. Reflect within.
+</p>
+
+<p align="center">
+  不為預知未來，而為洞察當下。
+</p>
+
+<p align="center">
+  <em>Not to predict the future, but to understand the present.</em>
+</p>
+
+<p align="center">
+  <strong>An ancient way of asking, with modern tools for casting.</strong>
+</p>
+
+<p align="center">
+  <strong>問天</strong><br>
+  量子無心生卦象，<br>
+  乾坤有序紀辰光。<br>
+  周經一卷明玄理，<br>
+  萬象由君自度量。
+</p>
+
+---
 
 The *I Ching* (易經) explores change through the language of yin and yang, the eight trigrams, and the sixty-four hexagrams. Casting a hexagram offers a symbolic starting point for reflecting on a question, a situation, or a moment of uncertainty.
 
