@@ -168,4 +168,43 @@ Modern tools support the traditional practice without claiming to explain or val
 
 The scientific tools describe randomness and time; they do not establish the predictive validity of divination.
 
+## Software Architecture
+
+The application keeps casting, time context, presentation, and interpretation separate.
+
+```mermaid
+flowchart TD
+    U[Choose a source] --> S["sources.py · TRNG.info or LfD QRNG"]
+    S --> M["main.py · Casting coordinator"]
+    M --> I["iching.py · Six lines and hexagrams"]
+    M --> A["astronomy.py · Celestial context"]
+    A --> L["lunisolar.py · Calendar and four pillars"]
+    M --> L
+    I --> R["Cast result"]
+    A --> R
+    L --> R
+    R --> J["JSON"]
+    R --> H["human_view.py · Hexagrams and optional classical text"]
+    D["data/zhouyi.json"] --> H
+    J -. Manually share .-> Q["Human or AI interpretation"]
+    H -. Reference .-> Q
+    P["Question"] --> Q
+```
+
+| Module | Responsibility |
+| --- | --- |
+| `main.py` | CLI, casting coordination and JSON output |
+| `sources.py` | Acquire one three-byte quantum random sample from the selected provider |
+| `iching.py` | Derive the six lines, moving lines and hexagrams |
+| `astronomy.py` | Calculate celestial positions and solar terms using local JPL data |
+| `lunisolar.py` | Look up lunar dates and calculate the four pillars |
+| `human_view.py` | Render hexagrams and optionally retrieve classical passages |
+| `data/` | Local ephemeris, lunar calendar and Zhouyi references |
+
+### Asking through the hexagram (依卦問事)
+
+Cast once, then share the resulting JSON with an AI assistant such as ChatGPT and ask your question. The assistant can interpret the hexagram in the context of the question, the classical text and present circumstances. The optional human view provides the relevant classical passages for reference.
+
+Interpretation takes place outside the application. No AI connection, fixed mapping between hexagrams and modern events, or automatic judgment is built into the casting tool.
+
 For additional technical options, use `py .\main.py --help` or `py .\main.py cast --help`.
