@@ -1,5 +1,12 @@
 # TRNG Hexagram Casting
 
+> **問天**
+>
+> 量子無心生卦象，  
+> 乾坤有序紀辰光。  
+> 周經一卷明玄理，  
+> 萬象由君自度量。
+
 **An ancient way of asking, with modern tools for casting.**
 
 The *I Ching* (易經) explores change through the language of yin and yang, the eight trigrams, and the sixty-four hexagrams. Casting a hexagram offers a symbolic starting point for reflecting on a question, a situation, or a moment of uncertainty.
