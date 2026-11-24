@@ -184,7 +184,7 @@ Each live command casts a new hexagram. Confirm that the result is complete befo
 
 File output is optional: add `--json-out <new-file>` if desired. Existing files are not overwritten. An explicitly saved record can be displayed with `py .\main.py view --input cast.json --text` without casting again.
 
-## 🌌 Modern Foundations
+## 🔬 Modern Foundations
 
 Modern tools support the traditional practice without claiming to explain or validate its metaphysical meaning.
 
