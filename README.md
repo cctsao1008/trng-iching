@@ -2,41 +2,104 @@
 
 **A transparent, reproducible hexagram casting tool for use with the I Ching.**
 
-This repository implements **hexagram casting**, not the *I Ching* itself. The *I Ching* includes classical texts and interpretive traditions; this tool calculates the six lines, moving lines, primary hexagram, and relating hexagram. It optionally displays fixed classical passages as reference text; it does **not** provide interpretations or predictions.
+One physical random sample determines the hexagram. Independently calculated astronomical and calendrical information describes the moment of casting. A fixed local collection of classical reference text provides context for human or AI interpretation.
 
-Each cast starts with one true-random sample from TRNG.info. Python converts the sample into a hexagram and records astronomical and calendrical context for the time of the cast. The output is a traceable JSON record that can be used for I Ching study or interpretation.
+This is a **casting tool**, not an interpretation or prediction engine.
 
-**Randomness determines the hexagram; astronomy and calendars describe the time; interpretation is left to the user.** None of these steps silently changes the others.
-
-## How a cast works
+**Randomness determines the hexagram; astronomy and calendars describe the time; classical text provides a reference; interpretation is left to the reader.**
 
 ```text
-        Run a live cast
-                 |
-                 v
-     TRNG.info: one 3-byte sample
-                 |
-                 v
-  Python: six lines → primary hexagram
-           + moving lines → relating hexagram
-                 |
-                 +---------------------------+
-                 |                           |
-                 |                     Client receive time
-                 |                           |
-                 |                      JPL astronomy
-                 |                    HKO lunar calendar
-                 |                    four pillars (干支)
-                 |                           |
-                 +-------------+-------------+
-                               |
-                               v
-                       Versioned JSON
-                               |
-                               v
-             Optional I Ching reading
-                 (human or AI)
+TRNG.info ──> Six lines ──> Primary / relating hexagrams
+                                  |
+Client receive time ──> JPL / HKO / Ganzhi
+                                  |
+                          Casting record
+                           /           \
+                      JSON          Human View <── Zhouyi text
+                           \           /
+                         Human or AI reading
 ```
+
+## Quick start
+
+```powershell
+git clone https://github.com/cctsao1008/trng-iching.git
+cd trng-iching
+py -m pip install -r .\requirements.txt
+```
+
+Make one live cast and display the hexagrams and classical text while saving the complete audit JSON:
+
+```powershell
+py .\main.py cast --audit --view human --text --json-out cast_audit.json
+```
+
+Confirm `Mode: live_trng_cast | Status: complete`. Share the saved JSON with an AI alongside your question, or study the result yourself.
+
+The output filename must be new; existing cast records are not overwritten.
+
+### Example: Human View
+
+Actual recorded sample, displayed offline using the same saved cast:
+
+```text
+Hexagram Casting
+Time: 2026-11-24T20:07:13.986461+08:00
+Source: trng.info / 93e182
+Mode: live_trng_cast | Status: complete
+
+Primary 11: 地天泰
+Relating 60: 水澤節
+
+   PRIMARY            RELATING
+6  ---- ----          ---- ----
+5  ---- ----  *       ---------
+4  ---- ----          ---- ----
+3  ---------  *       ---- ----
+2  ---------          ---------
+1  ---------          ---------
+
+* Line 3: Old Yang -> Yin
+* Line 5: Old Yin -> Yang
+Solar term: 小雪
+Lunar: 2026-10-16
+Four pillars: 丙午 己亥 壬寅 庚戌
+
+Classical Text / 周易
+本卦 11 泰：小往大來，吉亨。
+九三：无平不陂，无往不復，艱貞无咎。勿恤其孚，于食有福。
+六五：帝乙歸妹，以祉，元吉。
+之卦 60 節：亨。苦節不可貞。
+```
+
+The terminal also prints the pinned source URLs for the displayed passages. Lines are drawn from top to bottom; line 1 is the bottom line. An asterisk marks a moving line.
+
+### Reopen the same cast
+
+```powershell
+py .\main.py view --input cast_audit.json --text
+```
+
+This reads the existing JSON and local text without contacting TRNG.info or recalculating the time context.
+
+## Commands
+
+Choose **one** live casting command for each cast.
+
+| Command (after `py .\main.py`) | Output |
+| --- | --- |
+| `cast` | Compact JSON |
+| `cast --audit` | JSON with full technical provenance |
+| `cast --view human --json-out cast.json` | ASCII hexagrams + saved compact JSON |
+| `cast --view human --text --json-out cast.json` | ASCII hexagrams and classical text + saved compact JSON |
+| `view --input cast.json` | Offline ASCII hexagrams |
+| `view --input cast.json --text` | Offline ASCII hexagrams and classical text |
+
+Add `--audit` to a live Human View command to save full audit JSON instead. The `--text` option is for Human View only and never changes JSON.
+
+**Every invocation of live `cast` obtains a new sample.** Use `view` to revisit an existing cast, not another live command. If saving fails after acquisition, JSON is emitted to stdout and the command returns an error; do not redraw to bypass a failure.
+
+## How casting works
 
 ### 1. A live random sample determines the hexagram
 
@@ -63,120 +126,15 @@ The cast timestamp is the **client's TRNG response receive time**, not the unkno
 
 These are **descriptive time facts**, not inputs to the random casting algorithm.
 
-### 3. Interpretation is separate
+### 3. Classical text is a reference, not a reading method
 
-The program ends with a structured casting record. You can use that record in an *I Ching* reading—on your own or with an AI—but Python does not prescribe a reading method, evaluate whether a cast is favorable, or interpret classical passages. The recorded random input, hexagrams, moving lines, timestamp, and computed context should remain unchanged.
+The bundled corpus contains 64 hexagram judgments, 384 line statements, 用九 and 用六, 彖傳, 大象傳, 小象傳, the two special-line images and 文言傳 (966 text units). The optional text display shows the primary judgment, all moving-line statements, the applicable special passage for all-moving Qian or Kun, and the relating judgment when different.
 
-## Getting started
-
-Requires Python and the dependencies in `requirements.txt`. The repository contains the pinned JPL kernel (`data/de440s.bsp`) and a local HKO reference file (`data/calendar_reference.json`).
-
-```powershell
-git clone https://github.com/cctsao1008/trng-iching.git
-cd trng-iching
-py -m pip install -r .\requirements.txt
-```
-
-1. Decide on a question if you intend to use the result for an *I Ching* reading.
-2. Make **one** live cast:
-
-   ```powershell
-   py .\main.py cast
-   ```
-
-3. Confirm `mode == "live_trng_cast"` and `status == "complete"`.
-4. Use the JSON for your own study or share it with ChatGPT alongside your question for optional interpretation.
-
-The **alternative**, when you need technical traceability, is:
-
-```powershell
-py .\main.py cast --audit
-```
-
-**Do not run both commands for the same cast:** each invocation performs a *new* live TRNG request, not a different view of the previous sample. `--audit` prints the same compact fields **plus detailed evidence** for that single new cast.
-
-### Example: compact JSON (v0.4.0)
-
-The following is a real recorded sample presented using the compact v0.4.0 schema:
-
-```json
-{
-  "schema_version": "0.4.0",
-  "mode": "live_trng_cast",
-  "status": "complete",
-  "timestamp": "2026-11-24T19:26:29.939927+08:00",
-  "randomness": {
-    "source": "trng.info",
-    "raw_hex": "a44916"
-  },
-  "hexagram": {
-    "lines_bottom_to_top": [8, 7, 6, 7, 7, 7],
-    "moving_lines": [3],
-    "primary": {"number": 6, "name": "天水訟"},
-    "relating": {"number": 44, "name": "天風姤"}
-  },
-  "calendar": {
-    "lunar": {
-      "year": 2026,
-      "month": 10,
-      "day": 16,
-      "is_leap_month": false
-    }
-  },
-  "solar_term": "小雪",
-  "ganzhi": {
-    "year": "丙午",
-    "month": "己亥",
-    "day": "壬寅",
-    "hour": "庚戌"
-  }
-}
-```
-
-The compact JSON preserves the casting result and time context without including transport details, bit-level derivations, or dependency metadata.
-
-## Human-readable view
-
-The default commands still emit only JSON. For a single live cast with a
-side-by-side ASCII diagram and a saved canonical record:
-
-```powershell
-py .\main.py cast --view human --json-out cast.json
-```
-
-Add `--audit` to save the full audit record. The destination must not already
-exist. To redraw the same record offline, with no TRNG or time-context request:
-
-```powershell
-py .\main.py view --input cast.json
-```
-
-Lines are displayed top to bottom, numbered 6 to 1. An asterisk identifies
-a moving line in the primary hexagram. Chinese names remain text; the strokes
-use ASCII. For legacy Windows redirected streams, UTF-8 decoding may be needed.
-If saving fails after acquisition, the command emits the JSON to stdout and
-returns an error; do not redraw to bypass the failure. Add `--text` to the Human View command to display local classical reference
-text (primary judgment, every moving line, and the relating judgment if
-different; the special 用九/用六 passage is also displayed when applicable).
-This is a display convention, not a rule for interpretation.
-
-```powershell
-py .\main.py view --input cast.json --text
-```
-
-For a new cast, add `--text` to `cast --view human --json-out <new-file>`.
-No extra TRNG request or online text lookup is made. The JSON remains unchanged.
-
-The local `data/zhouyi.json` contains the 64 hexagrams, 384 line statements,
-special lines, Tuan, Images and Wenyan. Text is sourced from Chinese Wikisource;
-`data/sources.json` identifies pinned revisions and source snapshot hashes.
-See [data attribution and license](data/LICENSE.md). Structural and
-captured-source consistency were audited; independent cross-edition collation
-was not performed.
+These are display conventions, not prescribed interpretation rules. The corpus is a pinned Chinese Wikisource received-text transcription; original source characters are retained. See [data provenance and licensing](data/LICENSE.md) and [source revisions](data/sources.json). Structural and captured-source consistency were audited; independent cross-edition collation was not performed.
 
 ## JSON schema and audit mode
 
-**v0.4.0 changes the public `cast` JSON layout**, not the randomness, hexagram, astronomical, lunar or Ganzhi computations.
+The public casting record uses schema `0.4.0`. Human View is a separate presentation of the same record.
 
 | Default field | Meaning |
 | --- | --- |
@@ -208,15 +166,68 @@ A manually supplied `--hex` value is **not a live TRNG result**; without `--at`,
 
 Windows terminals may show Unicode escapes (`\uXXXX`) for Chinese text; JSON parsers decode these normally.
 
-## Design and compatibility
+### Compact JSON example
 
-- **Casting, not interpretation.** Python records a verifiable hexagram; any *I Ching* reading happens separately.
-- **No hidden redraw.** A failed call never silently triggers another TRNG request.
-- **Pinned provenance.** The local JPL kernel is SHA-256 checked; the HKO reference stores source hashes.
-- **Concise default, complete audit.** Use `cast` for interpretation and `cast --audit` for engineering investigation.
-- **Versioned public output.** Existing v0.3.0 consumers must adapt to the new v0.4.0 `cast` fields; `astronomy` and `calendar` reference commands retain their own outputs.
+The compact projection of the same recorded cast:
 
-Other reference commands:
+```json
+{
+  "schema_version": "0.4.0",
+  "mode": "live_trng_cast",
+  "status": "complete",
+  "timestamp": "2026-11-24T20:07:13.986461+08:00",
+  "randomness": {
+    "source": "trng.info",
+    "raw_hex": "93e182"
+  },
+  "hexagram": {
+    "lines_bottom_to_top": [7, 7, 9, 8, 6, 8],
+    "moving_lines": [3, 5],
+    "primary": {"number": 11, "name": "地天泰"},
+    "relating": {"number": 60, "name": "水澤節"}
+  },
+  "calendar": {
+    "lunar": {
+      "year": 2026,
+      "month": 10,
+      "day": 16,
+      "is_leap_month": false
+    }
+  },
+  "solar_term": "小雪",
+  "ganzhi": {
+    "year": "丙午",
+    "month": "己亥",
+    "day": "壬寅",
+    "hour": "庚戌"
+  }
+}
+```
+
+## Repository layout
+
+```text
+trng-iching/
+├── main.py                  CLI
+├── sources.py               TRNG acquisition
+├── iching.py                Hexagram conversion
+├── astronomy.py             JPL astronomy
+├── lunisolar.py             Lunar calendar and Ganzhi
+├── human_view.py            ASCII and classical text
+├── requirements.txt
+├── README.md
+├── .gitignore
+└── data/
+    ├── de440s.bsp            Pinned JPL ephemeris
+    ├── calendar_reference.json
+    ├── zhouyi.json
+    ├── sources.json
+    └── LICENSE.md
+```
+
+## Reference commands
+
+These commands do not acquire TRNG randomness:
 
 ```powershell
 py .\main.py calendar --date 2026-11-24
@@ -224,10 +235,10 @@ py .\main.py astronomy --at 2026-11-24T11:26:29Z --start 2026-11-01 --days 40
 py .\main.py cast --hex a44916
 ```
 
-On Windows, network acquisition uses PowerShell with the system proxy; elsewhere it uses Python `urllib`. The script never sends your question to the randomness provider. ChatGPT does not invoke the local script automatically.
+On Windows, live acquisition uses PowerShell with the system proxy; elsewhere it uses Python `urllib`. The question is never sent to the randomness provider. Classical text, astronomy and calendar lookups for a normal cast use local reference files.
 
-## References and scope
+## References
 
-The data pipeline uses [TRNG.info](https://trng.info/), [NASA JPL ephemerides](https://ssd.jpl.nasa.gov/), [Skyfield](https://rhodesmill.org/skyfield/), and the [Hong Kong Observatory](https://www.hko.gov.hk/en/gts/time/conversion1_text.htm).
+[TRNG.info](https://trng.info/) · [NASA JPL ephemerides](https://ssd.jpl.nasa.gov/) · [Skyfield](https://rhodesmill.org/skyfield/) · [Hong Kong Observatory](https://www.hko.gov.hk/en/gts/time/conversion1_text.htm) · [Chinese Wikisource — Zhouyi](https://zh.wikisource.org/wiki/周易)
 
-**This tool produces a traceable casting record, not an *I Ching* interpretation or a scientifically validated forecast of future events.**
+This tool does not establish the scientific validity of divination or forecast future events.
