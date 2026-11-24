@@ -78,7 +78,13 @@ engine. This version intentionally supersedes legacy 0.1/0.2 preflight JSON.
 
 ## Acceptance policy: live-only, fail-fast
 
-**Only online end-to-end acceptance tests are authorized.** Execute a real
+**Only online end-to-end acceptance tests are authorized.**
+
+On Windows, live sampling uses the built-in Windows PowerShell HTTP client with
+the system web proxy and integrated proxy credentials. This follows the
+corporate-PC connectivity behavior; it is selected **before** the request,
+not as a retry after a failed urllib attempt. Other platforms retain urllib.
+The transport change must pass a live end-to-end cast before acceptance. Execute a real
 `py .\main.py cast --audit` once, obtaining a new sample from TRNG.info and
 running the full capture/conversion/HKO/JPL/Ganzhi pipeline. Do not use
 `--hex`, simulated samples or offline tests to claim acceptance.
