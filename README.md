@@ -71,7 +71,11 @@ With all requested references, the result is `complete`.
 
 The default JSON omits verbose bit and reference metadata; `--audit`
 includes the used/discarded bits, six three-bit groups, pinned-source
-provenance, and calendrical conventions. Both modes encode the same cast.
+provenance, and calendrical conventions.
+The CLI writes ASCII-safe JSON using standard `\\uXXXX` Unicode escapes for
+Chinese names and hexagram glyphs, preventing Windows cp950 pipe/console
+encoding failures. JSON parsers recover the original Unicode characters;
+this changes only transport encoding, never the decoded six-line cast. Both modes encode the same cast.
 Input-validation errors exit nonzero rather than emitting a false cast.
 The script does not call GPT, store readings, or include an interpretation
 engine. This version intentionally supersedes legacy 0.1/0.2 preflight JSON.

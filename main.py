@@ -256,8 +256,10 @@ def main(argv: list[str] | None = None) -> int:
         print(f"ERROR [{type(exc).__name__}]: {exc}", file=sys.stderr)
         return 1
 
-    json.dump(result, sys.stdout, ensure_ascii=False, indent=2)
-    sys.stdout.write("\n")
+    # Render ASCII-safe JSON before writing to stdout.
+    # Windows PowerShell may use cp950, which cannot encode I Ching glyphs.
+    # Unicode escapes retain the original characters for JSON consumers.
+    sys.stdout.write(json.dumps(result, ensure_ascii=True, indent=2) + "\n")
     return 0
 
 
