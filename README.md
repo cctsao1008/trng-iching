@@ -1,119 +1,111 @@
 # TRNG I Ching
 
-**TRNG I Ching** is a research-oriented workflow combining true random number generation, astronomical ephemerides, Chinese calendrical calculations, and documented I Ching methods. Its purpose is to establish a **consistent, transparent, and reproducible computational basis** for interpreting a cast.
+**TRNG I Ching v0.3.0** is a small, auditable Python data pipeline for I Ching casting. It obtains one true-random sample from TRNG.info, deterministically computes six lines and the King Wen hexagram(s), and attaches documented astronomical, lunar-calendar and four-pillars context. **Python does not interpret the cast; ChatGPT does.**
 
-The system keeps random sampling, astronomical facts, traditional rules, and contextual interpretation distinct.
+**Current status:** Live end-to-end integration **PASS** on Windows (2026-11-24, commit `8f85d7a`). See [Issue #1](https://github.com/cctsao1008/trng-iching/issues/1) for the acceptance record. No further draw is required to confirm this milestone.
 
-## Core principles
+## Quick start (Windows)
 
-- **Randomness determines the cast.** Use a single valid sample from a true random number generator (TRNG). Never redraw, filter, or replace a sample to obtain a preferred hexagram.
-- **Astronomy provides temporal context.** Record the sampling time and derive astronomical events from clearly identified ephemerides. Astronomical conditions do not alter the TRNG-generated cast.
-- **Python collects and normalizes; ChatGPT interprets.** Python handles one TRNG acquisition and deterministic data conversions only. It does not select classical passages, lock the interpretation to a school, or produce judgments. ChatGPT uses the fixed cast as input for context-sensitive reading.
-- **Sources complement and verify each other.** Assign clear roles to primary computation, independent cross-checks, and published calendar references. Do not average incompatible astronomical values or choose results to suit a preferred reading.
-- **Conventions and provenance are explicit.** Identify time scales, coordinate systems, calendar boundaries, source versions, and the traditional I Ching method used. Never silently mix conventions from different schools.
-- **Efficiency is a design requirement.** Reuse versioned official calendar tables for civil lunar dates; calculate precise astronomical events only where needed. Avoid repeated network requests, redundant computations, overlapping dependencies, and per-reading storage.
-- **The output is portable.** Present one structured, versioned JSON document through the terminal; no database or automatic storage of individual readings is required.
+Install the pinned Python dependency once in the interpreter used by `py`:
 
-## Sources and references
+```powershell
+cd E:\trng-iching
+py -m pip install -r .\requirements.txt
+```
 
-| Source | Intended role |
-| --- | --- |
-| [TRNG.info](https://trng.info/) | True-random sample for the six-line cast |
-| [NASA JPL](https://ssd.jpl.nasa.gov/) | Pinned primary ephemeris reference for precise astronomical events |
-| [IMCCE](https://www.imcce.fr/) / [INPOP](https://www.imcce.fr/inpop/) | Independent astronomical model and verification reference |
-| [Hong Kong Observatory](https://www.hko.gov.hk/en/gts/time/conversion1_text.htm) and [Taiwan Central Weather Administration](https://www.cwa.gov.tw/) | Official Chinese lunar-calendar date lookup and independent calendrical reference |
-| [US Naval Observatory](https://aa.usno.navy.mil/) | Supplementary reference for lunar phases and seasonal events |
-| [Skyfield](https://rhodesmill.org/skyfield/) | Python tooling for locally computed solar terms and lunar-phase events |
-| [Chinese calendar standard GB/T 33661-2017](https://openstd.samr.gov.cn/bzgk/std/newGbInfo?hcno=E107EA4DE9725EDF819F33C60A44B296) | Reference for modern Chinese lunisolar calendar definitions and calculation rules |
+The repository already contains `de440s.bsp` (JPL DE440s) and `calendar_reference.json` (HKO reference). Their default paths resolve relative to `main.py`, so a separate checkout also works at `D:\my-github\trng-iching`.
 
-Official lunar-calendar reference data can be synchronized explicitly and then queried locally. Routine lunar-date lookups require neither a network request nor an ephemeris calculation. Source roles do not imply that every service is queried for every cast. Local, versioned ephemeris data can support deterministic calculations; independent references are used when validation is needed.
+**For each new question, formulate the question and time horizon *before* drawing. Then execute exactly one of the following commands (not both):**
 
-Related open-source work includes [iching-research-skill](https://github.com/ProfesseurHaipeng/iching-research-skill), which emphasizes transparent computation and textual provenance, and [zzkt/i-ching](https://github.com/zzkt/i-ching), which distinguishes randomness sources from casting methods. They are research references, not required runtime dependencies.
+```powershell
+# Recommended: complete data and provenance
+py .\main.py cast --audit
+```
 
-## Workflow
-
-1. **Formulate the question** and its relevant time horizon in ChatGPT before sampling.
-2. **Acquire one TRNG sample** and record client-side request/response timestamps, with explicit UTC and local-time representations.
-3. **Process the data in Python:** derive the six lines, moving positions, original/relating hexagrams, and optional astronomy, calendar and four-pillars context. Missing local reference files do not invalidate the core cast.
-4. **Emit versioned JSON to standard output** (schema 0.3.0) containing the deterministic cast plus independent optional contexts. Use `--audit` to expand raw bit groups, source fingerprints and detailed conventions; never fabricate missing values.
-5. **Provide the JSON to ChatGPT** for classical-text reference, school/method choice, and context-sensitive interpretation. GPT may interpret the same cast differently for different questions but must not change the Python-generated lines or hexagrams.
-
-The question stays in the conversation and is not transmitted to randomness or astronomy providers. The tool does not automatically save readings.
-
-## CLI usage and versioned data contract
-
-Run the script from the repository root, or call it by absolute path.
-Default JPL and HKO reference paths resolve relative to the Python script,
-not the shell's current directory. This supports separate work/home PCs.
+Or, if less detailed JSON is preferred:
 
 ```powershell
 py .\main.py cast
-py .\main.py cast --hex 02c60a
-py .\main.py cast --hex 02c60a --at 2026-11-23T05:01:47.094054Z
-py .\main.py cast --hex 02c60a --at 2026-11-23T05:01:47.094054Z --audit
 ```
 
-Live `cast` makes **exactly one TRNG.info request**, never redraws or uses
-a PRNG fallback, and attempts independently available local time context.
-The `--hex` commands use fixed offline input and never contact TRNG.info.
-Manual input must be exactly six hex digits; `--at` requires a timezone.
+Every execution of `cast` without `--hex` requests a **new** three-byte sample from TRNG.info. `--audit` only changes output detail, not the number of draws. Never redraw because a hexagram looks unfavorable, or to bypass an error.
 
-All `cast` invocations use schema **0.3.0**, with `schema_version`, `mode`,
-`status`, `capture`, `randomness`, `cast` and `context` sections.
-The `cast` section has six numeric lines ordered bottom to top, moving-line
-positions and King Wen original/relating hexagram identifiers. It contains
-**no** Zhu Xi passage-selection, classical texts, or `interpretation` block.
-The `context` section has independent `calendar`, `astronomy` and `ganzhi`
-statuses. Missing optional sources produce `partial` output with errors,
-but do not invalidate a successful core cast or cause resampling.
-Without `--at`, manual mode returns `cast_only` and `not_requested` contexts.
-With all requested references, the result is `complete`.
+After the command, check that the JSON has `schema_version: "0.3.0"`, `mode: "live_trng_cast"` and **`status: "complete"`**. Then copy the **entire JSON** into the same ChatGPT conversation as the previously stated question. Example request:
 
-The default JSON omits verbose bit and reference metadata; `--audit`
-includes the used/discarded bits, six three-bit groups, pinned-source
-provenance, and calendrical conventions.
-The CLI writes ASCII-safe JSON using standard `\\uXXXX` Unicode escapes for
-Chinese names and hexagram glyphs, preventing Windows cp950 pipe/console
-encoding failures. JSON parsers recover the original Unicode characters;
-this changes only transport encoding, never the decoded six-line cast. Both modes encode the same cast.
-Input-validation errors exit nonzero rather than emitting a false cast.
-The script does not call GPT, store readings, or include an interpretation
-engine. This version intentionally supersedes legacy 0.1/0.2 preflight JSON.
+> 請根據以下 trng-iching v0.3.0 JSON 解讀我剛才提出的問題。先確認本卦、之卦與動爻，再選擇適合的《周易》經文與解卦方法，清楚區分傳統象徵解讀、天文曆法事實與實際決策證據。不得自行更動 Python 的卦象。（貼上完整 JSON）
 
-## Acceptance policy: live-only, fail-fast
+ChatGPT does not execute this CLI automatically. The user runs Python on their PC and supplies the result for interpretation. The question itself is not sent to TRNG.info.
 
-**Only online end-to-end acceptance tests are authorized.**
+## Live-only, fail-fast operating policy
 
-On Windows, live sampling uses the built-in Windows PowerShell HTTP client with
-the system web proxy and integrated proxy credentials. This follows the
-corporate-PC connectivity behavior; it is selected **before** the request,
-not as a retry after a failed urllib attempt. Other platforms retain urllib.
-The transport change must pass a live end-to-end cast before acceptance. Execute a real
-`py .\main.py cast --audit` once, obtaining a new sample from TRNG.info and
-running the full capture/conversion/HKO/JPL/Ganzhi pipeline. Do not use
-`--hex`, simulated samples or offline tests to claim acceptance.
+- **Only real online end-to-end runs count for acceptance.** Do not use simulated/fixed-hex/offline tests to claim a PASS.
+- **Exactly one TRNG request per cast.** There is no automatic retry, resampling or pseudorandom fallback.
+- **STOP on any failure.** An HTTP error, nonzero process exit, unparseable JSON, bad six-line conversion, missing context, or top-level `partial` is not an accepted full reading. Diagnose the same failure before any new cast; do not use a new sample to hide it.
+- **A zero exit code alone is insufficient.** The application can correctly serialize a valid cast with `status=partial` and exit zero. For strict acceptance, require `complete` and all three context components: `calendar.status=official_reference_lookup`, `astronomy.status=calculated` and `ganzhi.status=calculated`.
 
-Acceptance requires one successful TRNG response, correct six-line
-derivation from that exact response, schema `0.3.0`, no Python
-`interpretation`/`text_selection`, a valid timestamp, and `status=complete`
-with all three context components available. Any failed condition is a
-**hard STOP**: record the failing output and diagnose before proceeding.
-Do not run another cast as an automatic retry, and do not use another sample
-to substitute for the failed acceptance. A partial live result preserves
-the valid cast but **fails strict end-to-end acceptance**.
+The following **alternative** PowerShell snippet performs one live acquisition and checks the strict context gate in the same block. Use it **instead of**, not after, the quick-start `cast` command:
 
-One live acceptance call is one real casting event. Its JSON can be handed
-to GPT for interpretation only **after** the complete online validation
-passes. The legacy manual `--hex` mode remains available for explicit
-replay/reference input but is not part of this project's acceptance policy.
-## Astronomical and calendrical consistency
+```powershell
+& {
+    Set-Location E:\trng-iching
+    $json = (& py .\main.py cast --audit) -join "`n"
+    if ($LASTEXITCODE -ne 0) { throw 'STOP: Online cast failed' }
+    $r = $json | ConvertFrom-Json -ErrorAction Stop
+    Write-Output $json
+    if ($r.schema_version -ne '0.3.0' -or
+        $r.mode -ne 'live_trng_cast' -or
+        $r.randomness.source -ne 'trng.info' -or
+        $r.status -ne 'complete' -or
+        $r.context.calendar.status -ne 'official_reference_lookup' -or
+        $r.context.astronomy.status -ne 'calculated' -or
+        $r.context.ganzhi.status -ne 'calculated') {
+        throw 'STOP: Incomplete online integration result'
+    }
+    Write-Host '[PASS] LIVE CONTEXT GATE'
+}
+```
 
-Solar/lunar positions and traditional calendrical labels involve different kinds of rules. In particular, solar terms depend on a defined solar-longitude convention, while lunisolar dates depend on new-moon instants, civil-day assignment, and leap-month rules. Sexagenary year, month, day, and hour calculations require explicitly selected boundary conventions.
+This snippet checks schema, source and context availability; the formal acceptance also verified the actual sample's six-line derivation. A standalone `Write-Host '[PASS]'` outside this block is **not** proof that an earlier command passed.
 
-Results close to midnight, a solar-term transition, or another calendrical boundary require particular care. Independent sources should be compared using compatible time scales, reference frames, and stated precision before discrepancies are assessed.
+## What the pipeline returns
 
-## I Ching interpretation boundaries
+| JSON field | Meaning |
+| --- | --- |
+| `capture` | UTC receive time and UTC+08:00 local time; client receive time is **not** claimed to be TRNG hardware generation time |
+| `randomness` | TRNG provider, raw six-digit hexadecimal sample and request/receive timestamps; `--audit` adds transport details |
+| `cast` | Six lines **bottom-to-top**, moving positions, primary and relating King Wen hexagrams; `--audit` adds bit groups and provenance |
+| `context.calendar` | HKO-based official lunar-date lookup from the local reference file |
+| `context.astronomy` | Sun/moon apparent ecliptic longitudes and current solar term from locally pinned JPL DE440s with Skyfield |
+| `context.ganzhi` | Year/month/day/hour pillars under stated boundaries: Li Chun solar year, solar-Jie month, UTC+08:00 midnight day and civil two-hour bins |
+| `status` | `complete` when requested context is available; `partial` when some context is missing; manual no-time references may be `cast_only` |
+| `errors` | Component-specific failures, if any |
 
-The TRNG-derived hexagram remains separate from time-related traditional mappings. The twelve monthly hexagrams (十二消息卦), hexagram qi (卦氣), and Najia six-line divination (六爻納甲) are distinct traditions. When used, their source, school, and mapping rules must be identified; one must not silently override another.
+### Fixed casting algorithm
 
-The distinction between **astronomical facts**, **calendrical calculation**, **historical interpretation**, and **contemporary reflection** is fundamental. Reproducible computations do not establish that divination can reliably predict future events. This workflow supports cultural study and structured reflection, not a substitute for independent evidence in consequential decisions.
+1. Request **three random bytes** and preserve the six-digit hex string.
+2. Read the first **18 bits MSB-first** in six groups of three, **bottom-to-top**. Each line is `6 + popcount(three_bits)`, yielding 6/7/8/9. Ignore the remaining six bits.
+3. Lines with values **6 or 9** move. Flip only those lines for the relating hexagram. With no moving lines, primary and relating hexagrams are identical.
+4. Map primary and relating six-line patterns to the King Wen numbering and trigrams. Astronomical/calendar data add context only; they **do not alter the drawn hexagram**.
+
+The Python program does **not** implement Zhu Xi passage selection, store an I Ching text corpus, decide an interpretive school, provide advice, call a GPT API or automatically store readings. Classical quotation, interpretation method and situation-specific reasoning belong to GPT.
+
+### Windows console and network behavior
+
+- Windows uses built-in PowerShell's HTTP client with the system web proxy and integrated Windows credentials to acquire the one TRNG sample; other platforms use Python `urllib`. This is a **platform choice before the request**, not a retry after a failed connection.
+- JSON output is ASCII-safe (`ensure_ascii=True`). Chinese names and hexagram glyphs may appear as standard `\uXXXX` escapes in the terminal; parsing JSON restores them. This avoids Windows `cp950` encoding failures.
+- Local JPL and HKO references are not fetched over HTTP for every cast. The pinned ephemeris and calendar index provide reproducible local computations and lookups.
+
+## Sources and background
+
+| Source | Role |
+| --- | --- |
+| [TRNG.info](https://trng.info/) | Online source for one true-random sample |
+| [NASA JPL](https://ssd.jpl.nasa.gov/) | Pinned `de440s.bsp` astronomical ephemeris |
+| [Skyfield](https://rhodesmill.org/skyfield/) | Astronomical calculations; pinned in `requirements.txt` (`skyfield==1.55`) |
+| [Hong Kong Observatory](https://www.hko.gov.hk/en/gts/time/conversion1_text.htm) | Official lunar-calendar dates compiled into `calendar_reference.json` |
+| [Taiwan Central Weather Administration](https://www.cwa.gov.tw/), [US Naval Observatory](https://aa.usno.navy.mil/), [IMCCE/INPOP](https://www.imcce.fr/inpop/) | Optional independent research references, not required live API calls |
+| [GB/T 33661-2017](https://openstd.samr.gov.cn/bzgk/std/newGbInfo?hcno=E107EA4DE9725EDF819F33C60A44B296) | Reference standard for Chinese lunisolar calendar definitions |
+
+Other CLI subcommands (`calendar`, `calendar-sync`, `astronomy`) serve explicit reference lookup/synchronization or research; they are **not** substitutes for the required live TRNG cast or its online acceptance. The legacy `--hex` option remains available for explicit manual reference/replay, but **is not used for acceptance testing**.
+
+Solar longitude, lunar calendar date and sexagenary pillars use different boundaries and conventions, which must not be silently mixed. Near solar terms or civil-date boundaries, interpret the timestamp and conventions carefully. Divination is a cultural and reflective practice and is not validated evidence for forecasting stock prices or making other consequential decisions.
