@@ -2,7 +2,7 @@
 
 **A transparent, reproducible hexagram casting tool for use with the I Ching.**
 
-This repository implements **hexagram casting**, not the *I Ching* itself. The *I Ching* includes classical texts and interpretive traditions; this tool calculates the six lines, moving lines, primary hexagram, and relating hexagram. It does **not** provide scripture, readings, or predictions.
+This repository implements **hexagram casting**, not the *I Ching* itself. The *I Ching* includes classical texts and interpretive traditions; this tool calculates the six lines, moving lines, primary hexagram, and relating hexagram. It optionally displays fixed classical passages as reference text; it does **not** provide interpretations or predictions.
 
 Each cast starts with one true-random sample from TRNG.info. Python converts the sample into a hexagram and records astronomical and calendrical context for the time of the cast. The output is a traceable JSON record that can be used for I Ching study or interpretation.
 
@@ -65,7 +65,7 @@ These are **descriptive time facts**, not inputs to the random casting algorithm
 
 ### 3. Interpretation is separate
 
-The program ends with a structured casting record. You can use that record in an *I Ching* reading—on your own or with an AI—but Python does not select classical passages, evaluate whether a cast is favorable, or prescribe a reading method. The recorded random input, hexagrams, moving lines, timestamp, and computed context should remain unchanged.
+The program ends with a structured casting record. You can use that record in an *I Ching* reading—on your own or with an AI—but Python does not prescribe a reading method, evaluate whether a cast is favorable, or interpret classical passages. The recorded random input, hexagrams, moving lines, timestamp, and computed context should remain unchanged.
 
 ## Getting started
 
@@ -155,8 +155,24 @@ Lines are displayed top to bottom, numbered 6 to 1. An asterisk identifies
 a moving line in the primary hexagram. Chinese names remain text; the strokes
 use ASCII. For legacy Windows redirected streams, UTF-8 decoding may be needed.
 If saving fails after acquisition, the command emits the JSON to stdout and
-returns an error; do not redraw to bypass the failure. Classical text and
-interpretation remain outside this release.
+returns an error; do not redraw to bypass the failure. Add `--text` to the Human View command to display local classical reference
+text (primary judgment, every moving line, and the relating judgment if
+different; the special 用九/用六 passage is also displayed when applicable).
+This is a display convention, not a rule for interpretation.
+
+```powershell
+py .\main.py view --input cast.json --text
+```
+
+For a new cast, add `--text` to `cast --view human --json-out <new-file>`.
+No extra TRNG request or online text lookup is made. The JSON remains unchanged.
+
+The local `data/zhouyi.json` contains the 64 hexagrams, 384 line statements,
+special lines, Tuan, Images and Wenyan. Text is sourced from Chinese Wikisource;
+`data/sources.json` identifies pinned revisions and source snapshot hashes.
+See [data attribution and license](data/LICENSE.md). Structural and
+captured-source consistency were audited; independent cross-edition collation
+was not performed.
 
 ## JSON schema and audit mode
 
@@ -206,12 +222,6 @@ Other reference commands:
 py .\main.py calendar --date 2026-11-24
 py .\main.py astronomy --at 2026-11-24T11:26:29Z --start 2026-11-01 --days 40
 py .\main.py cast --hex a44916
-```
-
-Offline projection regression tests, with **no TRNG request**:
-
-```powershell
-py -m unittest discover -s tests -v
 ```
 
 On Windows, network acquisition uses PowerShell with the system proxy; elsewhere it uses Python `urllib`. The script never sends your question to the randomness provider. ChatGPT does not invoke the local script automatically.

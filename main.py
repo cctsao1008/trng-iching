@@ -310,9 +310,13 @@ def main(argv: list[str] | None = None) -> int:
                              help="Save the same cast JSON to a new file")
     view = commands.add_parser("view", help="Render a saved cast without TRNG")
     view.add_argument("--input", type=Path, required=True)
+    for command in (cast_parser, view):
+        command.add_argument("--text", action="store_true", help="Show local classical text in Human View")
 
     args = parser.parse_args(argv)
     if args.command == "cast":
+        if args.text and args.view != "human":
+            parser.error("--text requires --view human")
         if args.view == "human" and args.json_out is None:
             parser.error("--view human requires --json-out to preserve the cast")
         if args.json_out is not None and args.json_out.exists():
@@ -320,7 +324,7 @@ def main(argv: list[str] | None = None) -> int:
     try:
         if args.command == "view":
             result = json.loads(args.input.read_text(encoding="utf-8-sig"))
-            _write_human(render_human(result))
+            _write_human(render_human(result, classical=args.text))
             return 0
         if args.command == "astronomy":
             if not 1 <= args.days <= 400:
@@ -367,7 +371,7 @@ def main(argv: list[str] | None = None) -> int:
                 sys.stdout.write(payload)
                 raise
         if args.command == "cast" and args.view == "human":
-            _write_human(render_human(result))
+            _write_human(render_human(result, classical=args.text))
         else:
             sys.stdout.write(payload)
     except Exception as exc:
