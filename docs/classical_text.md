@@ -38,3 +38,15 @@ fetches missing pages only, retaining the original revisions of cached pages.
 Explicit exceptions cover source page aliases, inline judgments, 習坎 and the
 comma-delimited 否 line labels. Original judgment text is preserved when no
 separate heading exists. Other structural checks remain unchanged.
+
+## P2C offline audit
+
+```powershell
+py .\tools\validate_zhouyi.py --stage .\zhouyi_stage_v2 --report .\zhouyi_audit.json
+```
+The gate checks the 64 pinned source entries, raw snapshot hashes, all
+1,026 text units (including the two special-line images and two Wenyan
+sections), independent field/line-label checks, and exact reproduction
+using the original extraction parser. It does not independently verify
+the parser's transcription or collate another edition. A PASS is not
+a claim of cross-edition textual correctness. Keep staging files intact.
