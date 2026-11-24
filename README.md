@@ -4,7 +4,7 @@
 
 The *I Ching* (易經) explores change through the language of yin and yang, the eight trigrams, and the sixty-four hexagrams. Casting a hexagram offers a symbolic starting point for reflecting on a question, a situation, or a moment of uncertainty.
 
-This project brings together traditional hexagram casting, physical randomness, astronomical time, and the classical text of the *Zhouyi* (周易).
+This project brings together traditional hexagram casting, quantum randomness, astronomical and calendrical context, and the classical text of the *Zhouyi* (周易).
 
 It is a tool for **casting a hexagram (起卦)**, not a system that dictates how the hexagram should be interpreted.
 
@@ -45,6 +45,8 @@ A past casting record may preserve the lines and the time, but it cannot preserv
 
 **Cast once, attend to the result, and leave the interpretation open.**
 
+Choose the source before casting. Once the hexagram is formed, accept it as it is.
+
 No casting record is stored unless the user explicitly requests it. There is no automatic archive, redraw, or selection of a preferred hexagram.
 
 ## The Classical Text
@@ -75,19 +77,21 @@ cd trng-iching
 py -m pip install -r .\requirements.txt
 ```
 
-When ready, cast once:
+When ready, choose one of the following sources and cast once.
+
+**[TRNG.info](https://trng.info/) — default**
 
 ```powershell
 py .\main.py cast --view human --text
 ```
 
-To choose [LfD QRNG](https://lfdr.de/QRNG/) instead of the default TRNG.info, use the following **alternative** command before casting:
+**[LfD QRNG](https://lfdr.de/QRNG/) — alternative**
 
 ```powershell
 py .\main.py cast --source lfdr.de --view human --text
 ```
 
-Choose the source before the cast. Neither provider requires an API key. A failed request stops the cast; the other provider is never selected automatically.
+Both sources require no API key. A failed request stops the cast; the other provider is never selected automatically.
 
 ### An example
 
@@ -138,6 +142,8 @@ Choose one of the following live commands:
 | `cast --view human` | Hexagrams |
 | `cast --view human --text` | Hexagrams and classical passages |
 | `cast --audit --view human --text` | Full JSON followed by hexagrams and classical passages |
+
+Add `--source trng.info` or `--source lfdr.de` to any of these live commands to choose the randomness source explicitly. If omitted, TRNG.info is used.
 
 Each live command casts a new hexagram. Confirm that the result is complete before using it; do not redraw to bypass a failure.
 
