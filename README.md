@@ -25,7 +25,7 @@
 </p>
 
 <p align="center">
-  ⚛️ Quantum &nbsp;·&nbsp; ☯️ Change &nbsp;·&nbsp; 🌙 Cosmos &nbsp;·&nbsp; 📜 Wisdom
+  ⚛️ Quantum &nbsp;·&nbsp; 🔄 Change &nbsp;·&nbsp; 🌏 Cosmos &nbsp;·&nbsp; 🪷 Wisdom
 </p>
 
 <p align="center">
@@ -70,7 +70,7 @@ The **primary hexagram (本卦)** presents the original configuration. Moving li
 
 The relationship between the two hexagrams opens a space for contemplating change. It does not, by itself, prescribe a particular future.
 
-## 🌙 The Moment of Casting
+## 🕰️ The Moment of Casting
 
 A hexagram is encountered at a particular moment, in the presence of a particular question.
 
@@ -84,7 +84,7 @@ Choose the source before casting. Once the hexagram is formed, accept it as it i
 
 No casting record is stored unless the user explicitly requests it. There is no automatic archive, redraw, or selection of a preferred hexagram.
 
-## 📜 The Classical Text
+## 📖 The Classical Text
 
 The *Zhouyi* offers the words through which generations have contemplated the hexagrams and their changes.
 
@@ -229,7 +229,7 @@ flowchart TD
 | `human_view.py` | Render hexagrams and optionally retrieve classical passages |
 | `data/` | Local ephemeris, lunar calendar and Zhouyi references |
 
-### 🌱 Asking through the hexagram (依卦問事)
+### 💭 Asking through the hexagram (依卦問事)
 
 Cast once, then share the resulting JSON with an AI assistant such as ChatGPT and ask your question. The assistant can interpret the hexagram in the context of the question, the classical text and present circumstances. The optional human view provides the relevant classical passages for reference.
 
