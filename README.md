@@ -135,6 +135,29 @@ The following is a real recorded sample presented using the compact v0.4.0 schem
 
 The compact JSON preserves the casting result and time context without including transport details, bit-level derivations, or dependency metadata.
 
+## Human-readable view
+
+The default commands still emit only JSON. For a single live cast with a
+side-by-side ASCII diagram and a saved canonical record:
+
+```powershell
+py .\main.py cast --view human --json-out cast.json
+```
+
+Add `--audit` to save the full audit record. The destination must not already
+exist. To redraw the same record offline, with no TRNG or time-context request:
+
+```powershell
+py .\main.py view --input cast.json
+```
+
+Lines are displayed top to bottom, numbered 6 to 1. An asterisk identifies
+a moving line in the primary hexagram. Chinese names remain text; the strokes
+use ASCII. For legacy Windows redirected streams, UTF-8 decoding may be needed.
+If saving fails after acquisition, the command emits the JSON to stdout and
+returns an error; do not redraw to bypass the failure. Classical text and
+interpretation remain outside this release.
+
 ## JSON schema and audit mode
 
 **v0.4.0 changes the public `cast` JSON layout**, not the randomness, hexagram, astronomical, lunar or Ganzhi computations.

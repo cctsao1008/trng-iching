@@ -13,6 +13,7 @@ from pathlib import Path
 
 from astronomy import PinnedEphemeris, UTC_PLUS_8, calculate_reference
 from iching import cast_from_hex
+from human_view import render_human
 from lunisolar import calculate_four_pillars, lookup_hko_date, sync_hko_years
 from sources import acquire_trng_bytes
 
@@ -232,6 +233,19 @@ def _present_cast_result(result: dict, *, audit: bool) -> dict:
     return compact
 
 
+def _write_human(value: str) -> None:
+    # Windows console uses Python's Unicode console writer; redirected streams
+    # may have a legacy encoding. Emit UTF-8 when necessary.
+    try:
+        sys.stdout.write(value)
+    except UnicodeEncodeError:
+        if not hasattr(sys.stdout, "buffer"):
+            raise
+        sys.stdout.flush()
+        sys.stdout.buffer.write(value.encode("utf-8"))
+        sys.stdout.buffer.flush()
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="TRNG I Ching deterministic research CLI")
     commands = parser.add_subparsers(dest="command", required=True)
@@ -291,8 +305,23 @@ def main(argv: list[str] | None = None) -> int:
         help="Include full provenance, bit groups and conversion conventions",
     )
 
+    cast_parser.add_argument("--view", choices=("json", "human"), default="json")
+    cast_parser.add_argument("--json-out", type=Path,
+                             help="Save the same cast JSON to a new file")
+    view = commands.add_parser("view", help="Render a saved cast without TRNG")
+    view.add_argument("--input", type=Path, required=True)
+
     args = parser.parse_args(argv)
+    if args.command == "cast":
+        if args.view == "human" and args.json_out is None:
+            parser.error("--view human requires --json-out to preserve the cast")
+        if args.json_out is not None and args.json_out.exists():
+            parser.error("--json-out must be a new file; existing records are not overwritten")
     try:
+        if args.command == "view":
+            result = json.loads(args.input.read_text(encoding="utf-8-sig"))
+            _write_human(render_human(result))
+            return 0
         if args.command == "astronomy":
             if not 1 <= args.days <= 400:
                 raise ValueError("--days must be between 1 and 400")
@@ -326,10 +355,24 @@ def main(argv: list[str] | None = None) -> int:
     if args.command == "cast":
         result = _present_cast_result(result, audit=args.audit)
 
-    # Render ASCII-safe JSON before writing to stdout.
-    # Windows PowerShell may use cp950, which cannot encode I Ching glyphs.
-    # Unicode escapes retain the original characters for JSON consumers.
-    sys.stdout.write(json.dumps(result, ensure_ascii=True, indent=2) + "\n")
+    # Keep the canonical JSON ASCII-safe for existing consumers.
+    payload = json.dumps(result, ensure_ascii=True, indent=2) + "\n"
+    try:
+        if args.command == "cast" and args.json_out is not None:
+            try:
+                with args.json_out.open("x", encoding="utf-8", newline="\n") as output:
+                    output.write(payload)
+            except OSError:
+                # Preserve the already acquired record even if file saving fails.
+                sys.stdout.write(payload)
+                raise
+        if args.command == "cast" and args.view == "human":
+            _write_human(render_human(result))
+        else:
+            sys.stdout.write(payload)
+    except Exception as exc:
+        print(f"ERROR [{type(exc).__name__}]: {exc}", file=sys.stderr)
+        return 1
     return 0
 
 
