@@ -26,3 +26,15 @@ No third-party NC-SA dataset is imported.
 
 Do not commit the staging directory as a canonical corpus until P2C checks
 and source collation are complete.
+
+## Resume a partial acquisition
+
+```powershell
+py .\tools\build_zhouyi.py --resume .\zhouyi_stage --out .\zhouyi_stage_v2
+```
+
+Cached HTML snapshots are reused only after SHA-256 verification. The builder
+fetches missing pages only, retaining the original revisions of cached pages.
+Explicit exceptions cover source page aliases, inline judgments, 習坎 and the
+comma-delimited 否 line labels. Original judgment text is preserved when no
+separate heading exists. Other structural checks remain unchanged.

@@ -20,6 +20,9 @@ from iching import _NAMES, _KING_WEN_MATRIX, _TRIGRAMS
 
 API = "https://zh.wikisource.org/w/api.php"
 PIN = "https://zh.wikisource.org/w/index.php?"
+PAGE_ALIASES = {"無妄": "无妄", "恆": "恒"}
+INLINE_JUDGMENTS = {10: "履虎尾", 12: "否之", 13: "同人于"}
+JUDGMENT_ALIASES = {25: ("無妄", "无妄"), 29: ("習坎", "坎"), 32: ("恆", "恒")}
 SECTIONS = {"易經：": "classic", "彖曰：": "tuan", "象曰：": "image",
             "文言曰：": "wenyan"}
 BITS = {number: _TRIGRAMS[lower][1] + _TRIGRAMS[upper][1]
@@ -87,14 +90,23 @@ def extract(html, number, name):
     if len(classic) != count or len(images) != count:
         raise ValueError(f"unexpected entry counts: {len(classic)}, {len(images)}")
     judgment = classic[0]
-    if not re.match(re.escape(name) + r"[:：]", judgment):
-        raise ValueError("judgment name mismatch")
+    aliases = JUDGMENT_ALIASES.get(number, (name,))
+    heading = re.match(r"(?:" + "|".join(map(re.escape, aliases)) + r")[:：]\s*", judgment)
+    if heading:
+        judgment_text = judgment[heading.end():]
+    elif number in INLINE_JUDGMENTS and judgment.startswith(INLINE_JUDGMENTS[number]):
+        judgment_text = judgment
+    else:
+        raise ValueError(f"judgment name mismatch: {judgment[:40]}")
+    if not judgment_text.strip():
+        raise ValueError("empty judgment")
     lines = []
     for i, value in enumerate(classic[1:7], 1):
         polarity = "九" if BITS[number][i-1] == "1" else "六"
         label = ("初" + polarity if i == 1 else "上" + polarity if i == 6
                  else polarity + "二三四五"[i-2])
-        m = re.fullmatch(re.escape(label) + r"[:：]\s*(.+)", value, re.S)
+        separator = r"[:：，,]" if number == 12 else r"[:：]"
+        m = re.fullmatch(re.escape(label) + separator + r"\s*(.+)", value, re.S)
         if not m:
             raise ValueError(f"line {i} label mismatch: {value[:30]}")
         lines.append({"position": i, "label": label, "text": m.group(1)})
@@ -113,15 +125,16 @@ def extract(html, number, name):
     wenyan = "\n".join(flatten(x) for x in sections.get("wenyan", [])) or None
     if not all([tuan, *images, *(x["text"] for x in lines)]):
         raise ValueError("empty text")
-    return {"number": number, "name": name, "judgment": re.split("[:：]", judgment, maxsplit=1)[1].strip(),
+    return {"number": number, "name": name, "judgment": judgment_text.strip(),
             "lines": lines, "tuan": tuan, "image": images[0],
             "line_images": images[1:7], "special_line": special, "wenyan": wenyan}
 
 
 def fetch(name, revision=None):
     params = {"action": "parse", "prop": "text|revid", "format": "json", "formatversion": 2}
+    title = "周易/" + PAGE_ALIASES.get(name, name)
     if revision is None:
-        params["page"] = "周易/" + name
+        params["page"] = title
     else:
         params["oldid"] = revision
     req = Request(API + "?" + urlencode(params),
@@ -130,8 +143,12 @@ def fetch(name, revision=None):
         raw = response.read(4 * 1024 * 1024 + 1)
     if len(raw) > 4 * 1024 * 1024:
         raise ValueError("oversized response")
-    page = json.loads(raw)["parse"]
-    if page["title"] != "周易/" + name or (revision is not None and page["revid"] != revision):
+    document = json.loads(raw)
+    if "parse" not in document:
+        error = document.get("error", {})
+        raise ValueError(f"MediaWiki API: {error.get('code', 'unknown')}: {error.get('info', 'missing parse response')}")
+    page = document["parse"]
+    if page["title"] != title or (revision is not None and page["revid"] != revision):
         raise ValueError("source identity mismatch")
     html = page["text"]
     return html, page["revid"]
@@ -141,7 +158,11 @@ def main():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--out", type=Path, required=True, help="New output directory")
     p.add_argument("--pins", type=Path, help="Prior sources.json for pinned revision replay")
+    p.add_argument("--resume", type=Path, help="Reuse verified HTML snapshots and revisions from an earlier stage")
     args = p.parse_args()
+    cached = {}
+    if args.resume:
+        cached = {x["number"]: x for x in json.loads((args.resume / "sources.json").read_text(encoding="utf-8"))["pages"]}
     pins = {}
     if args.pins:
         pins = {x["number"]: x["revision"] for x in json.loads(args.pins.read_text(encoding="utf-8"))["pages"]}
@@ -153,11 +174,19 @@ def main():
     pages, records, failures = [], [], []
     for number, name in enumerate(_NAMES, 1):
         try:
-            html, revision = fetch(name, pins.get(number))
-            encoded = html.encode("utf-8")
+            if number in cached:
+                entry = cached[number]
+                encoded = (args.resume / "raw" / f"{number:02d}.html").read_bytes()
+                if (entry["name"] != name or hashlib.sha256(encoded).hexdigest() != entry["html_sha256"]
+                        or (number in pins and pins[number] != entry["revision"])):
+                    raise ValueError("cached source identity or checksum mismatch")
+                html, revision = encoded.decode("utf-8"), entry["revision"]
+            else:
+                html, revision = fetch(name, pins.get(number))
+                encoded = html.encode("utf-8")
             (raw_dir / f"{number:02d}.html").write_bytes(encoded)
             pages.append({"number": number, "name": name, "revision": revision,
-                          "url": PIN + urlencode({"title": "周易/" + name, "oldid": revision}),
+                          "url": PIN + urlencode({"title": "周易/" + PAGE_ALIASES.get(name, name), "oldid": revision}),
                           "html_sha256": hashlib.sha256(encoded).hexdigest()})
             records.append(extract(html, number, name))
             print(f"PASS {number:02d} {name}")
