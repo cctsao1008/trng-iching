@@ -1,73 +1,89 @@
-# TRNG I Ching
+# TRNG I Ching · 真隨機易經
 
-**An I Ching casting tool that keeps randomness, calculation, time context, and interpretation separate.**
+> **Let physical randomness choose the hexagram. Let astronomy record the moment. Let interpretation remain open.**
+>
+> **讓真實物理世界的隨機性決定卦象，讓可驗證的天文曆法記錄當下，讓人與 AI 自由探索卦象和問題之間的意義。**
 
-The *I Ching* (Book of Changes) uses six lines to form a hexagram. Some lines may change, producing a second hexagram. Traditionally, people interpret these patterns in relation to a question.
+## Why this exists · 專案的靈魂
 
-TRNG I Ching makes the process clear and traceable: **TRNG.info provides the random input, Python calculates the hexagrams and time context, and ChatGPT interprets the result.** The program does not choose an answer, predict an outcome, or select passages from the classics on its own.
+The *I Ching* is an ancient way of asking questions through change and symbols. This project brings that practice into conversation with **physical randomness, modern astronomy, reproducible computation, and AI**—without pretending that these are the same thing.
 
-## How it works
+A hexagram is not selected by a language model, a hidden prediction rule, or the answer someone hopes to receive. It comes from **one real, external TRNG sample**. At the moment that sample is received, **JPL astronomy, an official lunar calendar, and the sexagenary cycle describe the surrounding time**. Only after these facts are fixed does a person bring their question to ChatGPT.
+
+**The boundaries are the point:**
+
+- **Chance is not steered.** Neither Python nor GPT gets to pick or reroll a more desirable hexagram.
+- **Time is context, not a cause of the cast.** Astronomical and calendrical facts describe the moment; they never modify the random bits or the six lines.
+- **Meaning is not preprogrammed.** Python calculates and records; interpretation belongs to the dialogue between the questioner and AI. There is no mandatory school, reading plan, counter-reading, or action checklist.
+
+The purpose is not to build a fortune-telling machine with predetermined answers. It is to build a **traceable meeting point between an unpredictable event, a precisely described moment, a human question, and open-ended thought**.
+
+這個工具最重要的不是「替人決定未來」，而是**不預設結果、不竄改卦象、不把解釋寫死**：以真亂數起卦，以天文曆法記時，最後保留探索與思考的自由。
+
+## How a cast works
 
 ```text
-Your question
-     |
-     v
-TRNG.info (one 3-byte random sample)
-     |
-     v
-Python (six lines, moving lines, hexagrams)
-     |                          |
-     |                  Time of the cast
-     |                          |
-     |                  JPL astronomy + HKO lunar calendar
-     |                          |
-     +------------+-------------+
-                  |
-                  v
-          One traceable JSON
-                  |
-                  v
-      ChatGPT reads and interprets
+             A question
+                 |
+                 v
+     TRNG.info: one 3-byte sample
+                 |
+                 v
+  Python: six lines → primary hexagram
+           + moving lines → relating hexagram
+                 |
+                 +---------------------------+
+                 |                           |
+                 |                     Client receive time
+                 |                           |
+                 |                      JPL astronomy
+                 |                    HKO lunar calendar
+                 |                    four pillars (干支)
+                 |                           |
+                 +-------------+-------------+
+                               |
+                               v
+                       Versioned JSON
+                               |
+                               v
+                  Human question + ChatGPT
+                     (free interpretation)
 ```
 
-### 1. Randomness determines the hexagram
+### 1. A live random sample determines the hexagram
 
-A live cast takes **three bytes** from [TRNG.info](https://trng.info/). The first 18 bits are divided into six groups of three, read **from the bottom line upward**.
+Each live cast requests exactly **3 bytes (24 bits)** from [TRNG.info](https://trng.info/). The **first 18 bits**, MSB first, are split into six 3-bit groups. The groups form the lines **bottom to top**. Each line value is `6 + number of 1 bits in its group`, reproducing the traditional three-coin probabilities.
 
-Each group represents three coin tosses. Count its `1` bits and add 6:
-
-| Line value | Traditional name | Meaning |
+| Value | Line | Role |
 | --- | --- | --- |
-| `6` | Old yin (老陰) | Broken line that changes |
-| `7` | Young yang (少陽) | Solid line |
-| `8` | Young yin (少陰) | Broken line |
-| `9` | Old yang (老陽) | Solid line that changes |
+| `6` | 老陰 / old yin | Broken, moving |
+| `7` | 少陽 / young yang | Solid, still |
+| `8` | 少陰 / young yin | Broken, still |
+| `9` | 老陽 / old yang | Solid, moving |
 
-The remaining six bits are not used. Lines valued `6` or `9` change to form the *relating hexagram* (之卦). When there are no moving lines, the primary and relating hexagrams are the same.
+The last six bits are discarded. Moving lines (`6` and `9`) produce the relating hexagram (之卦). Hexagram numbers use King Wen order.
 
-**A cast uses one random sample.** There is no automatic retry, replacement with pseudorandom numbers, or redrawing to obtain a preferred result.
+**One command = one live sample.** No automatic retry, pseudorandom fallback, resampling, or silent switching to another provider.
 
 ### 2. Astronomy and calendars describe the moment
 
-Using the time the TRNG response reaches the computer, Python adds:
+The cast timestamp is the **client's TRNG response receive time**, not the unknown hardware generation time. Python adds independent context:
 
-- **Astronomy:** Sun and Moon positions, plus the current solar term, calculated locally with [JPL DE440s](https://ssd.jpl.nasa.gov/) and [Skyfield](https://rhodesmill.org/skyfield/).
-- **Lunar date:** An official Chinese lunar-calendar reference from the [Hong Kong Observatory](https://www.hko.gov.hk/en/gts/time/conversion1_text.htm).
-- **Four pillars (四柱干支):** Year, month, day, and hour under explicitly stated solar-term and UTC+08:00 civil-time conventions.
+- **Astronomy:** JPL **DE440s** + Skyfield calculate the Sun and Moon's geocentric apparent ecliptic longitudes at that instant and identify the **current solar term**. The ordinary cast does **not** calculate the exact solar-term transition time.
+- **Lunar calendar:** official [Hong Kong Observatory](https://www.hko.gov.hk/en/gts/time/conversion1_text.htm) calendar reference, from pinned local month starts.
+- **Four pillars:** year/month based on **Li Chun (315°)** and the twelve solar `Jie`; day changes at **00:00 UTC+08**; hours use civil two-hour periods. No true-solar-time correction. The HKO lunar year and the solar-term-based Ganzhi year can legitimately differ.
 
-These describe **when** the cast took place. They do **not** change the random sample or the hexagram. The recorded timestamp is the **client receive time**, not a claim about when the random bits were generated by the hardware.
+These are **descriptive time facts**, not inputs to the random casting algorithm.
 
-### 3. ChatGPT interprets the result
+### 3. Interpretation stays open
 
-Python produces structured data, not a reading. You give the JSON and your question to ChatGPT, which can then examine the relevant *I Ching* text, explain its chosen interpretive approach, and relate the symbolism to your question.
+Python does **not** select scripture, decide whether a cast is favorable, or impose a reading method. You can give the JSON and your question to ChatGPT and explore the result freely. The only essential integrity boundary is that the original random input, hexagrams, moving lines, timestamps, and computed facts **must not be silently rewritten**.
 
-The hexagram and moving lines must remain exactly as Python produced them. Classical texts, later commentaries, astronomical facts, and GPT's interpretation should be identified as different kinds of information.
+No mandatory interpretation protocol or predetermined conclusion is built into the project.
 
 ## Getting started
 
-Requires Python on your computer. The repository includes the JPL ephemeris (`de440s.bsp`) and the HKO lunar-date reference (`calendar_reference.json`).
-
-Install the pinned Python dependency once:
+Requires Python and the dependencies in `requirements.txt`. The repository contains the pinned JPL kernel (`de440s.bsp`) and a local HKO reference file (`calendar_reference.json`).
 
 ```powershell
 git clone https://github.com/cctsao1008/trng-iching.git
@@ -75,57 +91,126 @@ cd trng-iching
 py -m pip install -r .\requirements.txt
 ```
 
-For each new question:
-
-1. **State the question and relevant time period before casting.**
-2. **Run a single live cast:**
+1. Decide what you want to ask.
+2. Make **one** live cast:
 
    ```powershell
-   py .\main.py cast --audit
+   py .\main.py cast
    ```
 
-3. **Check the output:** `schema_version` should be `0.3.0`, `mode` should be `live_trng_cast`, and `status` should be `complete`.
-4. **Copy the entire JSON into ChatGPT**, together with the question you stated beforehand.
+3. Confirm `mode == "live_trng_cast"` and `status == "complete"`.
+4. Share the JSON with ChatGPT alongside your question.
 
-Example ChatGPT request:
+The **alternative**, when you need technical traceability, is:
 
-> Please interpret this TRNG I Ching JSON in relation to my question. First check the primary hexagram, relating hexagram, and moving lines. Identify the classical passages and interpretive method used. Keep historical interpretations, astronomical/calendrical data, and real-world evidence distinct. Do not change the cast. [Paste the full JSON.]
+```powershell
+py .\main.py cast --audit
+```
 
-For a shorter JSON response, use **`py .\main.py cast` instead of `--audit`**. These are alternative commands, not two steps: **each invocation makes a new live draw**. `--audit` adds the underlying bit groups, source details, and calculation conventions without changing the cast.
+**Do not run both commands for the same cast:** each invocation performs a *new* live TRNG request, not a different view of the previous sample. `--audit` prints the same compact fields **plus detailed evidence** for that single new cast.
 
-ChatGPT does not call this script automatically. Run Python locally and paste the result yourself. Your question is not sent to the randomness provider.
+### Example: compact JSON (v0.4.0)
 
-## Reading the JSON
+The following is a real recorded sample presented using the compact v0.4.0 schema:
 
-| Field | What it tells you |
+```json
+{
+  "schema_version": "0.4.0",
+  "mode": "live_trng_cast",
+  "status": "complete",
+  "timestamp": "2026-11-24T19:26:29.939927+08:00",
+  "randomness": {
+    "source": "trng.info",
+    "raw_hex": "a44916"
+  },
+  "hexagram": {
+    "lines_bottom_to_top": [8, 7, 6, 7, 7, 7],
+    "moving_lines": [3],
+    "primary": {"number": 6, "name": "天水訟"},
+    "relating": {"number": 44, "name": "天風姤"}
+  },
+  "calendar": {
+    "lunar": {
+      "year": 2026,
+      "month": 10,
+      "day": 16,
+      "is_leap_month": false
+    }
+  },
+  "solar_term": "小雪",
+  "ganzhi": {
+    "year": "丙午",
+    "month": "己亥",
+    "day": "壬寅",
+    "hour": "庚戌"
+  }
+}
+```
+
+The JSON gives GPT the question's **fixed inputs and time context** without flooding its interpretation with request transport, bit-level derivation, and dependency metadata.
+
+## JSON schema and audit mode
+
+**v0.4.0 changes the public `cast` JSON layout**, not the randomness, hexagram, astronomical, lunar or Ganzhi computations.
+
+| Default field | Meaning |
 | --- | --- |
-| `capture` | UTC and UTC+08:00 client receive time |
-| `randomness` | Source, raw random hex, and request/receive timestamps |
-| `cast` | Six lines from bottom to top, moving lines, primary and relating hexagrams |
-| `context.calendar` | Official lunar-calendar date |
-| `context.astronomy` | Solar/lunar longitude and current solar term |
-| `context.ganzhi` | Year, month, day, and hour pillars |
-| `status` | `complete` when the requested context is available; `partial` if some context is missing |
-| `errors` | Component-specific error details, when applicable |
+| `schema_version` | Cast output contract, `0.4.0` |
+| `mode` | `live_trng_cast` or `manual_reference_cast` |
+| `status` | `complete`, `partial`, or `cast_only` |
+| `timestamp` | UTC+08 client receive time (or null for untimed manual input) |
+| `randomness` | Provenance source and original 3-byte hex |
+| `hexagram` | Bottom-to-top line values, moving positions (1-based), primary and relating names/numbers |
+| `calendar.lunar` | Lunar year, month, day, leap-month flag |
+| `solar_term` | Current solar-term name (not its exact changeover instant) |
+| `ganzhi` | Year, month, day and hour pillars |
+| `errors` | Present only when optional context lookup/calculation raises an error |
 
-A `partial` result can retain a valid cast, but **it is not a complete reading under this project's operating rule**. Stop, inspect the reported error, and do not redraw simply to bypass a failure. Also, a process exit code of zero does not by itself guarantee `status=complete`.
+If requested, **`--audit` additionally includes `audit`** with the complete original engineering record:
 
-The terminal may display Chinese characters as JSON Unicode escapes (such as `\uXXXX`). This is standard JSON encoding; a JSON parser restores the original characters.
+| Audit section | Contents |
+| --- | --- |
+| `audit.capture` | UTC/local timestamps and their meaning |
+| `audit.randomness` | TRNG endpoint, transport, raw hex, request and receive timestamps |
+| `audit.cast` | Six-line conversion, line order, trigram details, original/relating hexagram bits and discarded bits |
+| `audit.context.calendar` | HKO reference URLs, source SHA-256 and month-start data |
+| `audit.context.astronomy` | JPL DE440s SHA-256, Skyfield version, coordinate conventions, Sun/Moon longitude and lunar phase angle |
+| `audit.context.ganzhi` | Four-pillar derivation conventions and boundaries |
 
-## Design principles
+A `partial` cast **does not mean the random sample or hexagram was discarded**; it means required time context is incomplete. Stop and investigate the reported issue rather than requesting another cast to bypass it. A successful process exit alone is not proof of `status="complete"`.
 
-- **One source of randomness:** one TRNG request per live cast; no silent fallback or resampling.
-- **Deterministic calculation:** the same raw input always gives the same six lines and hexagrams.
-- **Independent time context:** astronomical and calendar information enrich the record without influencing the draw.
-- **Clear division of responsibility:** Python computes and records; GPT interprets and cites sources.
-- **Traceability:** the versioned JSON preserves the information needed to check how a result was obtained.
+A manually supplied `--hex` value is **not a live TRNG result**; without `--at`, it has `mode="manual_reference_cast"`, `status="cast_only"`, and null time context. This is for reference, not live acceptance.
 
-The default data files are resolved relative to `main.py`, so the tool can be used from different working directories. On Windows, the HTTP request uses Windows PowerShell and the system web proxy; on other platforms it uses Python's `urllib`.
+Windows terminals may show Unicode escapes (`\uXXXX`) for Chinese text; JSON parsers decode these normally.
 
-The CLI also has `calendar`, `calendar-sync`, and `astronomy` commands for reference work. `--hex` supports manual reference input, but **fixed-hex and offline modes are not used for live acceptance testing**.
+## Design and compatibility
+
+- **Deterministic data, open-ended interpretation.** Preserve the separation between generation, time context and meaning.
+- **No hidden redraw.** A failed call never silently triggers another TRNG request.
+- **Pinned provenance.** The local JPL kernel is SHA-256 checked; the HKO reference stores source hashes.
+- **Concise default, complete audit.** Use `cast` for interpretation and `cast --audit` for engineering investigation.
+- **Versioned public output.** Existing v0.3.0 consumers must adapt to the new v0.4.0 `cast` fields; `astronomy` and `calendar` reference commands retain their own outputs.
+
+Other reference commands:
+
+```powershell
+py .\main.py calendar --date 2026-11-24
+py .\main.py astronomy --at 2026-11-24T11:26:29Z --start 2026-11-01 --days 40
+py .\main.py cast --hex a44916
+```
+
+Offline projection regression tests, with **no TRNG request**:
+
+```powershell
+py -m unittest discover -s tests -v
+```
+
+On Windows, network acquisition uses PowerShell with the system proxy; elsewhere it uses Python `urllib`. The script never sends your question to the randomness provider. ChatGPT does not invoke the local script automatically.
 
 ## References and scope
 
-The implementation draws on [TRNG.info](https://trng.info/), [NASA JPL ephemerides](https://ssd.jpl.nasa.gov/), [Skyfield](https://rhodesmill.org/skyfield/), and [Hong Kong Observatory calendar data](https://www.hko.gov.hk/en/gts/time/conversion1_text.htm). Other calendar and astronomy references can be consulted independently when needed.
+The data pipeline uses [TRNG.info](https://trng.info/), [NASA JPL ephemerides](https://ssd.jpl.nasa.gov/), [Skyfield](https://rhodesmill.org/skyfield/), and the [Hong Kong Observatory](https://www.hko.gov.hk/en/gts/time/conversion1_text.htm).
 
-**This is a tool for studying and reflecting on the I Ching, not a scientifically validated method of predicting future events.** In financial, health, or other consequential decisions, symbolic interpretation must be kept separate from independently verifiable evidence.
+Independent research references include [Taiyin Ephemeris](https://github.com/RedSC1/taiyin-ephemeris), [stem-branch](https://github.com/h4x0r/stem-branch), and [Chinese Calendar Dataset](https://github.com/Kuangchujia/chinese-calendar-dataset). They do not silently replace the pinned computational sources. [I Ching Research Skill](https://github.com/ProfesseurHaipeng/iching-research-skill) and [I Ching Today](https://iching.today/method) provide optional cultural/methodological background, **not compulsory interpretation rules**.
+
+**This is an experiment in transparent casting and reflective interpretation, not a scientifically validated method of forecasting events.** A symbol may invite insight; it does not replace evidence in consequential real-world decisions.
