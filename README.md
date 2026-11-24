@@ -102,7 +102,7 @@ These passages are references, not compulsory rules for reading a hexagram. Diff
 
 The Chinese text comes from [Wikisource — Zhouyi](https://zh.wikisource.org/wiki/周易), with its source characters preserved. See [source revisions](data/sources.json) and [attribution and licensing](data/LICENSE.md). The transcription has been checked against captured source material; independent comparison of textual editions has not been performed.
 
-<h2><img src="assets/cash-coin.svg" width="24" height="24" alt="Ancient Chinese cash coin"> Casting a Hexagram</h2>
+## <img src="assets/cash-coin.svg" width="24" height="24" align="absmiddle" alt="Ancient Chinese cash coin"> Casting a Hexagram
 
 Install Python dependencies:
 
