@@ -25,7 +25,6 @@
 </p>
 
 <p align="center">
-  <strong>問天觀象思己</strong><br>
   問天量子生爻象，<br>
   觀象乾坤察四方。<br>
   一卷周經參世理，<br>
