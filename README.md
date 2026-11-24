@@ -25,6 +25,10 @@
 </p>
 
 <p align="center">
+  ✨ Quantum &nbsp;·&nbsp; ☯️ Change &nbsp;·&nbsp; 🌙 Cosmos &nbsp;·&nbsp; 📜 Wisdom
+</p>
+
+<p align="center">
   問天量子生爻象，<br>
   觀象乾坤察四方。<br>
   一卷周經參世理，<br>
@@ -44,7 +48,7 @@ It is a tool for **casting a hexagram (起卦)**, not a system that dictates how
 > Classical text offers a language for reflection.  
 > Interpretation belongs to the reader.
 
-## Yin, Yang and Change
+## ☯️ Yin, Yang and Change
 
 | Line | Symbol |
 | :--- | :---: |
@@ -66,7 +70,7 @@ The **primary hexagram (本卦)** presents the original configuration. Moving li
 
 The relationship between the two hexagrams opens a space for contemplating change. It does not, by itself, prescribe a particular future.
 
-## The Moment of Casting
+## 🌙 The Moment of Casting
 
 A hexagram is encountered at a particular moment, in the presence of a particular question.
 
@@ -80,7 +84,7 @@ Choose the source before casting. Once the hexagram is formed, accept it as it i
 
 No casting record is stored unless the user explicitly requests it. There is no automatic archive, redraw, or selection of a preferred hexagram.
 
-## The Classical Text
+## 📜 The Classical Text
 
 The *Zhouyi* offers the words through which generations have contemplated the hexagrams and their changes.
 
@@ -98,7 +102,7 @@ These passages are references, not compulsory rules for reading a hexagram. Diff
 
 The Chinese text comes from [Wikisource — Zhouyi](https://zh.wikisource.org/wiki/周易), with its source characters preserved. See [source revisions](data/sources.json) and [attribution and licensing](data/LICENSE.md). The transcription has been checked against captured source material; independent comparison of textual editions has not been performed.
 
-## Casting a Hexagram
+## 🪙 Casting a Hexagram
 
 Install Python dependencies:
 
@@ -180,7 +184,7 @@ Each live command casts a new hexagram. Confirm that the result is complete befo
 
 File output is optional: add `--json-out <new-file>` if desired. Existing files are not overwritten. An explicitly saved record can be displayed with `py .\main.py view --input cast.json --text` without casting again.
 
-## Modern Foundations
+## 🌌 Modern Foundations
 
 Modern tools support the traditional practice without claiming to explain or validate its metaphysical meaning.
 
@@ -192,7 +196,7 @@ Modern tools support the traditional practice without claiming to explain or val
 
 The scientific tools describe randomness and time; they do not establish the predictive validity of divination.
 
-## Software Architecture
+## ⚙️ Software Architecture
 
 The application keeps casting, time context, presentation, and interpretation separate.
 
@@ -225,7 +229,7 @@ flowchart TD
 | `human_view.py` | Render hexagrams and optionally retrieve classical passages |
 | `data/` | Local ephemeris, lunar calendar and Zhouyi references |
 
-### Asking through the hexagram (依卦問事)
+### 🌱 Asking through the hexagram (依卦問事)
 
 Cast once, then share the resulting JSON with an AI assistant such as ChatGPT and ask your question. The assistant can interpret the hexagram in the context of the question, the classical text and present circumstances. The optional human view provides the relevant classical passages for reference.
 
