@@ -229,7 +229,7 @@ flowchart TD
 | `human_view.py` | Render hexagrams and optionally retrieve classical passages |
 | `data/` | Local ephemeris, lunar calendar and Zhouyi references |
 
-### 💭 Asking through the hexagram (依卦問事)
+### 🧠 Asking through the hexagram (依卦問事)
 
 Cast once, then share the resulting JSON with an AI assistant such as ChatGPT and ask your question. The assistant can interpret the hexagram in the context of the question, the classical text and present circumstances. The optional human view provides the relevant classical passages for reference.
 
