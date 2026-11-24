@@ -1,26 +1,73 @@
 # TRNG Hexagram Casting
 
-**A transparent, reproducible hexagram casting tool for use with the I Ching.**
+**An ancient way of asking, with modern tools for casting.**
 
-One physical random sample determines the hexagram. Independently calculated astronomical and calendrical information describes the moment of casting. A fixed local collection of classical reference text provides context for human or AI interpretation.
+The *I Ching* (易經) explores change through the language of yin and yang, the eight trigrams, and the sixty-four hexagrams. Casting a hexagram offers a symbolic starting point for reflecting on a question, a situation, or a moment of uncertainty.
 
-This is a **casting tool**, not an interpretation or prediction engine.
+This project brings together traditional hexagram casting, physical randomness, astronomical time, and the classical text of the *Zhouyi* (周易).
 
-**Randomness determines the hexagram; astronomy and calendars describe the time; classical text provides a reference; interpretation is left to the reader.**
+It is a tool for **casting a hexagram (起卦)**, not a system that dictates how the hexagram should be interpreted.
 
-```text
-TRNG.info ──> Six lines ──> Primary / relating hexagrams
-                                  |
-Client receive time ──> JPL / HKO / Ganzhi
-                                  |
-                          Casting record
-                           /           \
-                      JSON          Human View <── Zhouyi text
-                           \           /
-                         Human or AI reading
-```
+> Randomness determines the hexagram.  
+> Heaven and the calendar describe the moment.  
+> Classical text offers a language for reflection.  
+> Interpretation belongs to the reader.
 
-## Quick start
+## Yin, Yang and Change
+
+<pre>
+Yang  陽    ━━━━━━━
+Yin   陰    ━━━ ━━━
+</pre>
+
+Six lines, read from the bottom upward, form a hexagram. The lower and upper trigrams together express one of the sixty-four configurations of yin and yang.
+
+The traditional three-coin method distinguishes four kinds of lines:
+
+| Line | Nature | Meaning in casting |
+| --- | --- | --- |
+| 6 — 老陰 | Old yin | Yin changes to yang |
+| 7 — 少陽 | Young yang | Yang remains |
+| 8 — 少陰 | Young yin | Yin remains |
+| 9 — 老陽 | Old yang | Yang changes to yin |
+
+The **primary hexagram (本卦)** presents the original configuration. Moving lines (動爻) mark its changing elements. Their transformation produces the **relating hexagram (之卦)**.
+
+The relationship between the two hexagrams opens a space for contemplating change. It does not, by itself, prescribe a particular future.
+
+## The Moment of Casting
+
+A hexagram is encountered at a particular moment, in the presence of a particular question.
+
+The project records the time of casting alongside the solar term (節氣), lunar date (農曆), and four pillars (干支). These provide calendrical and astronomical context without changing the hexagram drawn.
+
+A past casting record may preserve the lines and the time, but it cannot preserve the circumstances of that moment.
+
+**Cast once, attend to the result, and leave the interpretation open.**
+
+No casting record is stored unless the user explicitly requests it. There is no automatic archive, redraw, or selection of a preferred hexagram.
+
+## The Classical Text
+
+The *Zhouyi* offers the words through which generations have contemplated the hexagrams and their changes.
+
+The local reference includes:
+
+- 卦辭 — hexagram judgments
+- 爻辭 — the statements of the six lines, including 用九 and 用六
+- 彖傳 — commentary on the judgments
+- 象傳 — images of the hexagrams and their lines
+- 文言傳 — commentary on Qian and Kun
+
+The human-readable display presents the primary judgment, the moving-line statements, and the relating judgment when different, with the special passage for Qian or Kun when applicable.
+
+These passages are references, not compulsory rules for reading a hexagram. Different interpretive traditions, personal reflection, and AI-assisted study remain open to the reader.
+
+The Chinese text comes from [Wikisource — Zhouyi](https://zh.wikisource.org/wiki/周易), with its source characters preserved. See [source revisions](data/sources.json) and [attribution and licensing](data/LICENSE.md). The transcription has been checked against captured source material; independent comparison of textual editions has not been performed.
+
+## Casting a Hexagram
+
+Install Python dependencies:
 
 ```powershell
 git clone https://github.com/cctsao1008/trng-iching.git
@@ -28,19 +75,15 @@ cd trng-iching
 py -m pip install -r .\requirements.txt
 ```
 
-Make one live cast and display the hexagrams and classical text without saving any files:
+When ready, cast once:
 
 ```powershell
 py .\main.py cast --view human --text
 ```
 
-Confirm `Mode: live_trng_cast | Status: complete`. Study the result yourself or share the displayed information with an AI alongside your question.
+### An example
 
-No cast records are stored by default. Saving is entirely optional.
-
-### Example: Human View
-
-Actual recorded sample, displayed offline using the same saved cast:
+The following is an actual earlier cast, showing 泰 changing to 節:
 
 ```text
 Hexagram Casting
@@ -72,180 +115,36 @@ Classical Text / 周易
 之卦 60 節：亨。苦節不可貞。
 ```
 
-The terminal also prints the pinned source URLs for the displayed passages. Lines are drawn from top to bottom; line 1 is the bottom line. An asterisk marks a moving line.
+The terminal also displays the source links for the classical passages. The asterisks identify moving lines.
 
-### Optional file output
+No interpretation is attached to this example. Its meaning depends on the question and the reader's approach.
 
-If you explicitly want a JSON file, add `--json-out` with a new filename. Existing files are not overwritten. For example, the following is an alternative live casting command, not a second step after Quick Start:
+### Output options
 
-```powershell
-py .\main.py cast --audit --view human --text --json-out cast_audit.json
-```
+Choose one of the following live commands:
 
-To display an existing record, without a new TRNG request or time-context calculation:
-
-```powershell
-py .\main.py view --input cast_audit.json --text
-```
-
-## Commands
-
-Choose **one** live casting command for each cast.
-
-| Command (after `py .\main.py`) | Output |
+| Command (after `py .\main.py`) | Display |
 | --- | --- |
-| `cast` | Compact JSON |
-| `cast --audit` | JSON with full technical provenance |
-| `cast --view human` | ASCII hexagrams |
-| `cast --view human --text` | ASCII hexagrams and classical text |
-| `cast --audit --view human --text` | Full audit JSON followed by ASCII hexagrams and classical text |
-| `view --input cast.json` | Offline ASCII hexagrams |
-| `view --input cast.json --text` | Offline ASCII hexagrams and classical text |
+| `cast` | JSON for AI or other software |
+| `cast --audit` | Full JSON with source and calculation details |
+| `cast --view human` | Hexagrams |
+| `cast --view human --text` | Hexagrams and classical passages |
+| `cast --audit --view human --text` | Full JSON followed by hexagrams and classical passages |
 
-Add `--json-out <new-file>` to any live casting command only when you explicitly want file output. With Human View and `--audit`, the audit JSON is printed before the human-readable display unless `--json-out` is supplied, in which case the JSON is saved to the requested file instead. The `--text` option is for Human View only and never changes JSON. Commands using the default JSON view continue to emit pure JSON.
+Each live command casts a new hexagram. Confirm that the result is complete before using it; do not redraw to bypass a failure.
 
-**Every invocation of live `cast` obtains a new sample.** Use `view` to revisit an existing cast, not another live command. If saving fails after acquisition, JSON is emitted to stdout and the command returns an error; do not redraw to bypass a failure.
+File output is optional: add `--json-out <new-file>` if desired. Existing files are not overwritten. An explicitly saved record can be displayed with `py .\main.py view --input cast.json --text` without casting again.
 
-## How casting works
+## Modern Foundations
 
-### 1. A live random sample determines the hexagram
+Modern tools support the traditional practice without claiming to explain or validate its metaphysical meaning.
 
-Each live cast requests exactly **3 bytes (24 bits)** from [TRNG.info](https://trng.info/). The **first 18 bits**, MSB first, are split into six 3-bit groups. The groups form the lines **bottom to top**. Each line value is `6 + number of 1 bits in its group`, reproducing the traditional three-coin probabilities.
+**True randomness.** [TRNG.info](https://trng.info/) supplies one physical random sample per live cast. Eighteen bits from the three-byte sample are divided into six groups of three, reproducing the probabilities of the three-coin method. The result is converted deterministically into six lines and King Wen hexagram numbers. No pseudorandom fallback or automatic retry is used.
 
-| Value | Line | Role |
-| --- | --- | --- |
-| `6` | 老陰 / old yin | Broken, moving |
-| `7` | 少陽 / young yang | Solid, still |
-| `8` | 少陰 / young yin | Broken, still |
-| `9` | 老陽 / old yang | Solid, moving |
+**Astronomy and calendrics.** [NASA JPL DE440s](https://ssd.jpl.nasa.gov/) and [Skyfield](https://rhodesmill.org/skyfield/) provide astronomical calculations. The [Hong Kong Observatory](https://www.hko.gov.hk/en/gts/time/conversion1_text.htm) provides the lunar calendar reference. The four pillars use Li Chun, the twelve solar Jie, and civil time UTC+08, with the day boundary at midnight and no true-solar-time adjustment. The casting time is the client's receipt of the random sample.
 
-The last six bits are discarded. Moving lines (`6` and `9`) produce the relating hexagram (之卦). Hexagram numbers use King Wen order.
+**Transparent results.** JSON schema 0.4.0 records the random input, six lines, hexagrams, and time context. The optional audit output adds calculation and source details. The question is never sent to the randomness provider. Local classical text and time references do not determine the random result.
 
-**One command = one live sample.** No automatic retry, pseudorandom fallback, resampling, or silent switching to another provider.
+The scientific tools describe randomness and time; they do not establish the predictive validity of divination.
 
-### 2. Astronomy and calendars describe the moment
-
-The cast timestamp is the **client's TRNG response receive time**, not the unknown hardware generation time. Python adds independent context:
-
-- **Astronomy:** JPL **DE440s** + Skyfield calculate the Sun and Moon's geocentric apparent ecliptic longitudes at that instant and identify the **current solar term**. The ordinary cast does **not** calculate the exact solar-term transition time.
-- **Lunar calendar:** official [Hong Kong Observatory](https://www.hko.gov.hk/en/gts/time/conversion1_text.htm) calendar reference, from pinned local month starts.
-- **Four pillars:** year/month based on **Li Chun (315°)** and the twelve solar `Jie`; day changes at **00:00 UTC+08**; hours use civil two-hour periods. No true-solar-time correction. The HKO lunar year and the solar-term-based Ganzhi year can legitimately differ.
-
-These are **descriptive time facts**, not inputs to the random casting algorithm.
-
-### 3. Classical text is a reference, not a reading method
-
-The bundled corpus contains 64 hexagram judgments, 384 line statements, 用九 and 用六, 彖傳, 大象傳, 小象傳, the two special-line images and 文言傳 (966 text units). The optional text display shows the primary judgment, all moving-line statements, the applicable special passage for all-moving Qian or Kun, and the relating judgment when different.
-
-These are display conventions, not prescribed interpretation rules. The corpus is a pinned Chinese Wikisource received-text transcription; original source characters are retained. See [data provenance and licensing](data/LICENSE.md) and [source revisions](data/sources.json). Structural and captured-source consistency were audited; independent cross-edition collation was not performed.
-
-## JSON schema and audit mode
-
-The public casting record uses schema `0.4.0`. Human View is a separate presentation of the same record.
-
-| Default field | Meaning |
-| --- | --- |
-| `schema_version` | Cast output contract, `0.4.0` |
-| `mode` | `live_trng_cast` or `manual_reference_cast` |
-| `status` | `complete`, `partial`, or `cast_only` |
-| `timestamp` | UTC+08 client receive time (or null for untimed manual input) |
-| `randomness` | Provenance source and original 3-byte hex |
-| `hexagram` | Bottom-to-top line values, moving positions (1-based), primary and relating names/numbers |
-| `calendar.lunar` | Lunar year, month, day, leap-month flag |
-| `solar_term` | Current solar-term name (not its exact changeover instant) |
-| `ganzhi` | Year, month, day and hour pillars |
-| `errors` | Present only when optional context lookup/calculation raises an error |
-
-If requested, **`--audit` additionally includes `audit`** with the complete original engineering record:
-
-| Audit section | Contents |
-| --- | --- |
-| `audit.capture` | UTC/local timestamps and their meaning |
-| `audit.randomness` | TRNG endpoint, transport, raw hex, request and receive timestamps |
-| `audit.cast` | Six-line conversion, line order, trigram details, original/relating hexagram bits and discarded bits |
-| `audit.context.calendar` | HKO reference URLs, source SHA-256 and month-start data |
-| `audit.context.astronomy` | JPL DE440s SHA-256, Skyfield version, coordinate conventions, Sun/Moon longitude and lunar phase angle |
-| `audit.context.ganzhi` | Four-pillar derivation conventions and boundaries |
-
-A `partial` cast **does not mean the random sample or hexagram was discarded**; it means required time context is incomplete. Stop and investigate the reported issue rather than requesting another cast to bypass it. A successful process exit alone is not proof of `status="complete"`.
-
-A manually supplied `--hex` value is **not a live TRNG result**; without `--at`, it has `mode="manual_reference_cast"`, `status="cast_only"`, and null time context. This is for reference, not live acceptance.
-
-Windows terminals may show Unicode escapes (`\uXXXX`) for Chinese text; JSON parsers decode these normally.
-
-### Compact JSON example
-
-The compact projection of the same recorded cast:
-
-```json
-{
-  "schema_version": "0.4.0",
-  "mode": "live_trng_cast",
-  "status": "complete",
-  "timestamp": "2026-11-24T20:07:13.986461+08:00",
-  "randomness": {
-    "source": "trng.info",
-    "raw_hex": "93e182"
-  },
-  "hexagram": {
-    "lines_bottom_to_top": [7, 7, 9, 8, 6, 8],
-    "moving_lines": [3, 5],
-    "primary": {"number": 11, "name": "地天泰"},
-    "relating": {"number": 60, "name": "水澤節"}
-  },
-  "calendar": {
-    "lunar": {
-      "year": 2026,
-      "month": 10,
-      "day": 16,
-      "is_leap_month": false
-    }
-  },
-  "solar_term": "小雪",
-  "ganzhi": {
-    "year": "丙午",
-    "month": "己亥",
-    "day": "壬寅",
-    "hour": "庚戌"
-  }
-}
-```
-
-## Repository layout
-
-```text
-trng-iching/
-├── main.py                  CLI
-├── sources.py               TRNG acquisition
-├── iching.py                Hexagram conversion
-├── astronomy.py             JPL astronomy
-├── lunisolar.py             Lunar calendar and Ganzhi
-├── human_view.py            ASCII and classical text
-├── requirements.txt
-├── README.md
-├── .gitignore
-└── data/
-    ├── de440s.bsp            Pinned JPL ephemeris
-    ├── calendar_reference.json
-    ├── zhouyi.json
-    ├── sources.json
-    └── LICENSE.md
-```
-
-## Reference commands
-
-These commands do not acquire TRNG randomness:
-
-```powershell
-py .\main.py calendar --date 2026-11-24
-py .\main.py astronomy --at 2026-11-24T11:26:29Z --start 2026-11-01 --days 40
-py .\main.py cast --hex a44916
-```
-
-On Windows, live acquisition uses PowerShell with the system proxy; elsewhere it uses Python `urllib`. The question is never sent to the randomness provider. Classical text, astronomy and calendar lookups for a normal cast use local reference files.
-
-## References
-
-[TRNG.info](https://trng.info/) · [NASA JPL ephemerides](https://ssd.jpl.nasa.gov/) · [Skyfield](https://rhodesmill.org/skyfield/) · [Hong Kong Observatory](https://www.hko.gov.hk/en/gts/time/conversion1_text.htm) · [Chinese Wikisource — Zhouyi](https://zh.wikisource.org/wiki/周易)
-
-This tool does not establish the scientific validity of divination or forecast future events.
+For additional technical options, use `py .\main.py --help` or `py .\main.py cast --help`.
