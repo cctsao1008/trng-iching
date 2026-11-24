@@ -46,13 +46,10 @@ It is a tool for **casting a hexagram (起卦)**, not a system that dictates how
 
 ## Yin, Yang and Change
 
-<pre>
-Yang  陽    █████████
-            █████████
-
-Yin   陰    ████ ████
-            ████ ████
-</pre>
+| Line | Symbol |
+| :--- | :---: |
+| Yang 陽 | <img src="assets/yang.svg" width="144" alt="Solid yang line"> |
+| Yin 陰 | <img src="assets/yin.svg" width="144" alt="Broken yin line"> |
 
 Six lines, read from the bottom upward, form a hexagram. The lower and upper trigrams together express one of the sixty-four configurations of yin and yang.
 
