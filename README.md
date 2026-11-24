@@ -28,15 +28,15 @@ cd trng-iching
 py -m pip install -r .\requirements.txt
 ```
 
-Make one live cast and display the hexagrams and classical text while saving the complete audit JSON:
+Make one live cast and display the hexagrams and classical text without saving any files:
 
 ```powershell
-py .\main.py cast --audit --view human --text --json-out cast_audit.json
+py .\main.py cast --view human --text
 ```
 
-Confirm `Mode: live_trng_cast | Status: complete`. Share the saved JSON with an AI alongside your question, or study the result yourself.
+Confirm `Mode: live_trng_cast | Status: complete`. Study the result yourself or share the displayed information with an AI alongside your question.
 
-The output filename must be new; existing cast records are not overwritten.
+No cast records are stored by default. Saving is entirely optional.
 
 ### Example: Human View
 
@@ -74,13 +74,19 @@ Classical Text / 周易
 
 The terminal also prints the pinned source URLs for the displayed passages. Lines are drawn from top to bottom; line 1 is the bottom line. An asterisk marks a moving line.
 
-### Reopen the same cast
+### Optional file output
+
+If you explicitly want a JSON file, add `--json-out` with a new filename. Existing files are not overwritten. For example, the following is an alternative live casting command, not a second step after Quick Start:
+
+```powershell
+py .\main.py cast --audit --view human --text --json-out cast_audit.json
+```
+
+To display an existing record, without a new TRNG request or time-context calculation:
 
 ```powershell
 py .\main.py view --input cast_audit.json --text
 ```
-
-This reads the existing JSON and local text without contacting TRNG.info or recalculating the time context.
 
 ## Commands
 
@@ -90,12 +96,13 @@ Choose **one** live casting command for each cast.
 | --- | --- |
 | `cast` | Compact JSON |
 | `cast --audit` | JSON with full technical provenance |
-| `cast --view human --json-out cast.json` | ASCII hexagrams + saved compact JSON |
-| `cast --view human --text --json-out cast.json` | ASCII hexagrams and classical text + saved compact JSON |
+| `cast --view human` | ASCII hexagrams |
+| `cast --view human --text` | ASCII hexagrams and classical text |
+| `cast --audit --view human --text` | Full audit JSON followed by ASCII hexagrams and classical text |
 | `view --input cast.json` | Offline ASCII hexagrams |
 | `view --input cast.json --text` | Offline ASCII hexagrams and classical text |
 
-Add `--audit` to a live Human View command to save full audit JSON instead. The `--text` option is for Human View only and never changes JSON.
+Add `--json-out <new-file>` to any live casting command only when you explicitly want file output. With Human View and `--audit`, the audit JSON is printed before the human-readable display unless `--json-out` is supplied, in which case the JSON is saved to the requested file instead. The `--text` option is for Human View only and never changes JSON. Commands using the default JSON view continue to emit pure JSON.
 
 **Every invocation of live `cast` obtains a new sample.** Use `view` to revisit an existing cast, not another live command. If saving fails after acquisition, JSON is emitted to stdout and the command returns an error; do not redraw to bypass a failure.
 
