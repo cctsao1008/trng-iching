@@ -81,6 +81,14 @@ When ready, cast once:
 py .\main.py cast --view human --text
 ```
 
+To choose [LfD QRNG](https://lfdr.de/QRNG/) instead of the default TRNG.info, use the following **alternative** command before casting:
+
+```powershell
+py .\main.py cast --source lfdr.de --view human --text
+```
+
+Choose the source before the cast. Neither provider requires an API key. A failed request stops the cast; the other provider is never selected automatically.
+
 ### An example
 
 The following is an actual earlier cast, showing 泰 changing to 節:
@@ -139,9 +147,9 @@ File output is optional: add `--json-out <new-file>` if desired. Existing files 
 
 Modern tools support the traditional practice without claiming to explain or validate its metaphysical meaning.
 
-**True randomness.** [TRNG.info](https://trng.info/) supplies one physical random sample per live cast. Eighteen bits from the three-byte sample are divided into six groups of three, reproducing the probabilities of the three-coin method. The result is converted deterministically into six lines and King Wen hexagram numbers. No pseudorandom fallback or automatic retry is used.
+**Quantum randomness.** [TRNG.info](https://trng.info/) (default) or [LfD QRNG](https://lfdr.de/QRNG/) supplies one physical random sample per live cast. Both providers describe their entropy source as quantum optical hardware. The user selects one provider before casting; their samples are never combined. Eighteen bits from the three-byte sample are divided into six groups of three, reproducing the probabilities of the three-coin method. The result is converted deterministically into six lines and King Wen hexagram numbers. No pseudorandom fallback or automatic retry is used.
 
-**Astronomy and calendrics.** [NASA JPL DE440s](https://ssd.jpl.nasa.gov/) and [Skyfield](https://rhodesmill.org/skyfield/) provide astronomical calculations. The [Hong Kong Observatory](https://www.hko.gov.hk/en/gts/time/conversion1_text.htm) provides the lunar calendar reference. The four pillars use Li Chun, the twelve solar Jie, and civil time UTC+08, with the day boundary at midnight and no true-solar-time adjustment. The casting time is the client's receipt of the random sample.
+**Astronomy and calendrics.** [NASA JPL DE440s](https://ssd.jpl.nasa.gov/) and [Skyfield](https://rhodesmill.org/skyfield/) provide astronomical calculations. The [Hong Kong Observatory](https://www.hko.gov.hk/en/gts/time/conversion1_text.htm) provides the lunar calendar reference. The four pillars use Li Chun, the twelve solar Jie, and civil time UTC+08, with the day boundary at midnight and no true-solar-time adjustment. The casting time is the client's receipt of the random sample, not the unreported hardware measurement time.
 
 **Transparent results.** JSON schema 0.4.0 records the random input, six lines, hexagrams, and time context. The optional audit output adds calculation and source details. The question is never sent to the randomness provider. Local classical text and time references do not determine the random result.
 

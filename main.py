@@ -15,7 +15,7 @@ from astronomy import PinnedEphemeris, UTC_PLUS_8, calculate_reference
 from iching import cast_from_hex
 from human_view import render_human
 from lunisolar import calculate_four_pillars, lookup_hko_date, sync_hko_years
-from sources import acquire_trng_bytes
+from sources import QRNG_ENDPOINTS, acquire_trng_bytes
 
 ROOT = Path(__file__).resolve().parent
 
@@ -38,7 +38,7 @@ def _cast_context(
     ephemeris_path: Path, reference_file: Path, audit: bool,
 ) -> dict:
     """One immutable cast, plus independent optional reference components."""
-    is_live = sample.get("source") == "trng.info"
+    is_live = sample.get("source") in QRNG_ENDPOINTS
     result = {
         "schema_version": "0.3.0",
         "mode": "live_trng_cast" if is_live else "manual_reference_cast",
@@ -156,7 +156,7 @@ def _manual_reference_cast(args: argparse.Namespace) -> dict:
 
 def _live_cast(args: argparse.Namespace) -> dict:
     """Exactly one TRNG request, regardless of optional JPL/HKO availability."""
-    sample = acquire_trng_bytes()
+    sample = acquire_trng_bytes(args.source or "trng.info")
     cast = cast_from_hex(sample["raw_hex"], audit=args.audit)
     cast_time = _utc_timestamp(sample["receive_time_utc"])
     return _cast_context(
@@ -281,9 +281,14 @@ def main(argv: list[str] | None = None) -> int:
     lookup.add_argument("--reference", type=Path, default=ROOT / "data" / "calendar_reference.json")
 
     cast_parser = commands.add_parser(
-        "cast", help="One TRNG.info sample with local calendar/JPL context"
+        "cast", help="One quantum random sample with local calendar/JPL context"
     )
-    cast_parser.add_argument(
+    cast_input = cast_parser.add_mutually_exclusive_group()
+    cast_input.add_argument(
+        "--source", choices=tuple(QRNG_ENDPOINTS),
+        help="Quantum randomness provider (default: trng.info)",
+    )
+    cast_input.add_argument(
         "--hex", dest="reference_hex",
         help="Manual fixed six-hex-digit verification; never calls TRNG",
     )
