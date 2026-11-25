@@ -214,10 +214,13 @@ flowchart TD
     Q["Quantum randomness"] --> H["Deterministic hexagram"]
     A["JPL astronomy"] --> T["Time context"]
     C["HKO calendar and Ganzhi"] --> T
-    H --> R["Casting record · JSON / Human View"]
+    H --> R["Casting record · JSON"]
     T --> R
-    R --> I["Human / external AI interpretation"]
-    Z["Zhouyi and reference scholarship"] --> I
+    R --> V["Human View · optional classical text"]
+    Z["Local Zhouyi classical text"] -->|"--text"| V
+    R -. Manually share .-> I["Human / external AI interpretation"]
+    V -. Manually share .-> I
+    S["External reference scholarship"] --> I
     P["Question and real-world circumstances"] --> I
     I --> O["Reflection · alternative perspectives · personal choice"]
 
@@ -228,8 +231,8 @@ flowchart TD
     classDef reflection fill:#f0eaf8,stroke:#8c72b5,color:#49336e
     class Q,H randomness
     class A,C,T science
-    class R record
-    class Z,P references
+    class R,V record
+    class Z,S,P references
     class I,O reflection
 ```
 
@@ -244,7 +247,7 @@ flowchart TD
 > Classical text offers a language for reflection.  
 > Interpretation belongs to the reader.
 
-Astronomical and calendrical data describe the moment of casting without influencing the hexagram. Classical references and the question inform interpretation, which takes place outside the casting application. The architecture supports reflection without asserting a predictive mechanism.
+Astronomical and calendrical data describe the moment of casting without influencing the hexagram. The casting record provides structured JSON; Human View renders that record and optionally retrieves passages from the local Zhouyi corpus. The reader may manually share either representation with an external AI assistant. Additional scholarly references and the question inform interpretation outside the casting application. The architecture supports reflection without asserting a predictive mechanism.
 
 ### Software Components
 
