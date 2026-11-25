@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="540" height="28" viewBox="0 0 540 28" role="img" aria-labelledby="title">
+  <title id="title">System architecture color legend</title>
+  <style>text { font-family: system-ui, sans-serif; font-size: 14px; fill: #57606a; } @media (prefers-color-scheme: dark) { text { fill: #adbac7; } }</style>
+  <circle cx="10" cy="14" r="5.5" fill="#4786c6"/><text x="21" y="19">Randomness</text>
+  <circle cx="135" cy="14" r="5.5" fill="#468e78"/><text x="146" y="19">Science</text>
+  <circle cx="224" cy="14" r="5.5" fill="#888888"/><text x="235" y="19">Record</text>
+  <circle cx="307" cy="14" r="5.5" fill="#b58b4b"/><text x="318" y="19">References</text>
+  <circle cx="425" cy="14" r="5.5" fill="#8c72b5"/><text x="436" y="19">Reflection</text>
+</svg>

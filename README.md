@@ -233,6 +233,10 @@ flowchart TD
     class I,O reflection
 ```
 
+<p align="center">
+  <img src="assets/architecture-legend.svg" alt="Blue: Randomness; Green: Science; Gray: Record; Gold: References; Purple: Reflection" width="540">
+</p>
+
 ### Design Principles
 
 > Randomness determines the hexagram.  
