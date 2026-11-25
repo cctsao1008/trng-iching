@@ -138,7 +138,6 @@ py .\main.py cast --hex 649640 --at 2026-11-24T20:07:13.986461+08:00 --view huma
 
 ```text
 Hexagram Casting
-Time: 2026-11-24T20:07:13.986461+08:00
 Source: user_provided_reference / 649640
 Mode: manual_reference_cast | Status: complete
 
@@ -154,15 +153,18 @@ Relating 50: 火風鼎
 1  ---- ----          ---- ----
 
 Moving lines: none
-Solar term: 小雪
-Lunar: 2026-10-16
-Four pillars: 丙午 己亥 壬寅 庚戌
+
+Gregorian    : 2026年11月24日（星期二）
+Lunar        : 丙午年十月十六
+Time         : 20:07:13 (UTC+08:00)
+Solar term   : 小雪
+Four pillars : 丙午年 己亥月 壬寅日 庚戌時
 
 Classical Text / 周易
 本卦 50 鼎：元吉，亨。
 ```
 
-The terminal also displays the classical source link. This fixed example illustrates the output format; live casts are never selected or redrawn for a favorable result.
+The human view shows the Gregorian date, traditional Chinese lunar date (including leap months), local time, solar term and four pillars when available. The JSON retains the original numeric calendar fields and full timestamp precision. The terminal also displays the classical source link. This fixed example illustrates the output format; live casts are never selected or redrawn for a favorable result.
 
 No interpretation is attached to this example. Its meaning depends on the question and the reader's approach.
 
