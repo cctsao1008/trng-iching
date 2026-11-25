@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/emblem.png" width="112" alt="Six-line hexagram emblem">
+  <img src="assets/emblem.png" width="336" alt="Physical, Quantum, and Five Phases–Quantum hexagram emblems">
 </p>
 
 <h1 align="center">TRNG Hexagram Casting</h1>

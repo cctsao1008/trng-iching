@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/emblem.png" width="112" alt="六爻卦象標誌">
+  <img src="assets/emblem.png" width="336" alt="天地卦、量子卦、五行量子卦標誌">
 </p>
 
 <h1 align="center">TRNG Hexagram Casting</h1>
