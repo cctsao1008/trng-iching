@@ -1,6 +1,6 @@
 """Read-only rendering of the v0.4.0 casting record."""
 import json
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
 from iching import cast_from_hex
@@ -50,8 +50,8 @@ def _calendar_rows(record: dict) -> list[str]:
     stamp = record.get("timestamp")
     instant = datetime.fromisoformat(stamp.replace("Z", "+00:00")) if stamp else None
     if instant is not None:
-        weekday = "一二三四五六日"[instant.weekday()]
-        rows.append(f"Gregorian    : {instant.year}年{instant.month}月{instant.day}日（星期{weekday}）")
+        weekday = ("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")[instant.weekday()]
+        rows.append(f"Gregorian    : {instant:%Y-%m-%d} ({weekday})")
     lunar = (record.get("calendar") or {}).get("lunar")
     if lunar:
         # Lunar year follows the lunar new year, not the solar Li Chun boundary.
@@ -68,16 +68,22 @@ def _calendar_rows(record: dict) -> list[str]:
     if instant is not None:
         offset = instant.strftime("%z")
         zone = f"UTC{offset[:3]}:{offset[3:]}" if offset else "timezone not provided"
-        rows.append(f"Time         : {instant:%H:%M:%S} ({zone})")
+        if instant.utcoffset() is not None:
+            utc = instant.astimezone(timezone.utc)
+            rows.append(f"UTC Time     : {utc:%H:%M:%S} (UTC+00:00)")
+        else:
+            rows.append("UTC Time     : not available")
+        rows.append(f"Local Time   : {instant:%H:%M:%S} ({zone})")
     else:
-        rows.append("Time         : not provided")
+        rows.append("UTC Time     : not provided")
+        rows.append("Local Time   : not provided")
     if record.get("solar_term"):
         rows.append(f"Solar term   : {record['solar_term']}")
     pillars = record.get("ganzhi")
     if pillars:
         rows.append("Four pillars : " + " ".join(
-            (pillars[key] + suffix) if pillars.get(key) else "-"
-            for key, suffix in (("year", "年"), ("month", "月"), ("day", "日"), ("hour", "時"))
+            pillars.get(key) or "-"
+            for key in ("year", "month", "day", "hour")
         ))
     return rows
 

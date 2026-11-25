@@ -154,17 +154,18 @@ Relating 50: 火風鼎
 
 Moving lines: none
 
-Gregorian    : 2026年11月24日（星期二）
+Gregorian    : 2026-11-24 (Tuesday)
 Lunar        : 丙午年十月十六
-Time         : 20:07:13 (UTC+08:00)
+UTC Time     : 12:07:13 (UTC+00:00)
+Local Time   : 20:07:13 (UTC+08:00)
 Solar term   : 小雪
-Four pillars : 丙午年 己亥月 壬寅日 庚戌時
+Four pillars : 丙午 己亥 壬寅 庚戌
 
 Classical Text / 周易
 本卦 50 鼎：元吉，亨。
 ```
 
-The human view shows the Gregorian date, traditional Chinese lunar date (including leap months), local time, solar term and four pillars when available. The JSON retains the original numeric calendar fields and full timestamp precision. The terminal also displays the classical source link. This fixed example illustrates the output format; live casts are never selected or redrawn for a favorable result.
+The human view shows the Gregorian date, traditional Chinese lunar date (including leap months), UTC and local time, solar term and four pillars when available. The JSON retains the original numeric calendar fields and full timestamp precision. The terminal also displays the classical source link. This fixed example illustrates the output format; live casts are never selected or redrawn for a favorable result.
 
 No interpretation is attached to this example. Its meaning depends on the question and the reader's approach.
 
