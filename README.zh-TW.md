@@ -1,0 +1,277 @@
+<p align="center">
+  <img src="assets/emblem.png" width="112" alt="六爻卦象標誌">
+</p>
+
+<h1 align="center">TRNG Hexagram Casting</h1>
+
+<p align="center">
+  <a href="README.md"><img src="https://img.shields.io/badge/English-555555" alt="English"></a>
+  <a href="README.zh-TW.md"><img src="https://img.shields.io/badge/%E7%B9%81%E9%AB%94%E4%B8%AD%E6%96%87-007ec6" alt="繁體中文"></a>
+</p>
+
+<p align="center">
+  <strong>問天，觀象，思己。</strong>
+</p>
+
+<p align="center">
+  Ask the universe. Observe the changes. Reflect within.
+</p>
+
+<p align="center">
+  不為預知未來，而為洞察當下。
+</p>
+
+<p align="center">
+  <em>Not to predict the future, but to understand the present.</em>
+</p>
+
+<p align="center">
+  <strong>以現代工具起卦，延續古老的問卦方式。</strong>
+</p>
+
+<p align="center">
+  ⚛️ 量子 &nbsp;·&nbsp; 🔄 變化 &nbsp;·&nbsp; 🌏 天地 &nbsp;·&nbsp; 🪷 智慧
+</p>
+
+<p align="center">
+  問天量子生爻象，<br>
+  觀象乾坤察四方。<br>
+  一卷周經參世理，<br>
+  反觀吾己悟行藏。
+</p>
+
+---
+
+《易經》透過陰陽、八卦與六十四卦的象徵語言，探索萬事萬物的變化。起卦提供一個象徵性的起點，讓人重新思考一個問題、一種處境，或某個尚未明朗的時刻。
+
+本專案結合傳統起卦方法、量子亂數、天文曆象及《周易》經文。
+
+這是一個**起卦工具**，而不是規定如何解卦的系統。
+
+> 亂數決定卦象。  
+> 天地曆象描述起卦的時刻。  
+> 經典提供反思的語言。  
+> 解讀權屬於讀者。
+
+## ☯️ 陰陽與變化
+
+| 爻 | 符號 |
+| :--- | :---: |
+| 陽爻 | <img src="assets/yang.svg" width="144" alt="陽爻"> |
+| 陰爻 | <img src="assets/yin.svg" width="144" alt="陰爻"> |
+
+六爻由下而上排列而成一卦，上下兩個三爻卦共同構成陰陽的六十四種組合之一。
+
+傳統三銅錢法區分四種爻態：
+
+| 爻值 | 性質 | 起卦意義 |
+| --- | --- | --- |
+| 6 — 老陰 | Old yin | 陰變陽 |
+| 7 — 少陽 | Young yang | 陽不變 |
+| 8 — 少陰 | Young yin | 陰不變 |
+| 9 — 老陽 | Old yang | 陽變陰 |
+
+**本卦（Primary Hexagram）**呈現原始卦象，動爻標示其中發生變化的部分。動爻轉換後形成**之卦（Relating Hexagram）**。
+
+兩卦之間的關係提供觀察變化的空間，但並不必然預示特定的未來。
+
+## 🕰️ 起卦的時刻
+
+每一卦都形成於特定的時刻，伴隨著當下所思考的問題。
+
+本專案記錄起卦時間、節氣、農曆日期及四柱干支。這些資料提供天文與曆法背景，但不改變所得的卦象。
+
+過去的起卦紀錄可以保留六爻與時間，卻無法完整保留當時的處境。
+
+**一事一卦，觀其所得，解讀不設限。**
+
+起卦前先選定亂數來源。卦象既成，便接受其原貌。
+
+除非使用者明確要求，否則不儲存起卦紀錄；不自動歸檔、不重新抽取，也不挑選偏好的卦象。
+
+## 📖 周易經文
+
+《周易》提供歷代讀者觀察卦象及其變化的文字依據。
+
+本機參考資料收錄：
+
+- 卦辭：各卦的經文。
+- 爻辭：六爻的經文，包含乾卦用九及坤卦用六。
+- 彖傳：對卦辭的解說。
+- 象傳：卦象與爻象的解說。
+- 文言傳：乾、坤兩卦的解說。
+
+Human View 可呈現本卦卦辭、動爻爻辭及不同於本卦的之卦卦辭，適用時也會呈現乾、坤的特殊爻辭。
+
+這些經文是參考資料，而非強制的解卦規則。讀者可以依不同易學傳統、自我反思或 AI 輔助研究來理解卦象。
+
+中文經文取自[維基文庫 — 周易](https://zh.wikisource.org/wiki/周易)，保留來源文字。詳見[來源版本](data/sources.json)與[著作權及授權說明](data/LICENSE.md)。經文已與擷取的來源資料核對，但尚未完成不同版本的獨立校勘。
+
+## <img src="assets/cash-coin.svg" width="24" height="24" align="absmiddle" alt="古銅錢"> 起卦
+
+安裝 Python 相依套件：
+
+```powershell
+git clone https://github.com/cctsao1008/trng-iching.git
+cd trng-iching
+py -m pip install -r .\requirements.txt
+```
+
+準備好之後，選擇以下任一來源進行一次起卦。
+
+**[TRNG.info](https://trng.info/) — 預設來源**
+
+```powershell
+py .\main.py cast --view human --text
+```
+
+**[LfD QRNG](https://lfdr.de/QRNG/) — 替代來源**
+
+```powershell
+py .\main.py cast --source lfdr.de --view human --text
+```
+
+兩個來源均不需要 API Key。請求失敗即停止，不會自動切換至其他來源。
+
+### 起卦範例
+
+以下固定參考卦展示蒙之坤：山水蒙變為坤為地，九二與上九為動爻。此範例重播先前取得的亂數，不會再次向量子亂數服務發出請求。
+
+```powershell
+py .\main.py cast --hex df67c9 --at 2026-11-25T09:30:06+08:00 --view human --text
+```
+
+```text
+Hexagram Casting
+Source: user_provided_reference / df67c9
+Mode: manual_reference_cast | Status: complete
+
+Primary  04: 山水蒙
+Relating 02: 坤為地
+
+   PRIMARY            RELATING
+6  ---------  *       ---- ----
+5  ---- ----          ---- ----
+4  ---- ----          ---- ----
+3  ---- ----          ---- ----
+2  ---------  *       ---- ----
+1  ---- ----          ---- ----
+
+* Line 2: Old Yang -> Yin
+* Line 6: Old Yang -> Yin
+
+Gregorian    : 2026-11-25 (Wednesday)
+Lunar        : 丙午年十月十七
+UTC Time     : 01:30:06 (UTC+00:00)
+Local Time   : 09:30:06 (UTC+08:00)
+Solar term   : 小雪
+Four pillars : 丙午 己亥 癸卯 丁巳
+
+Classical Text / 周易
+本卦 04 蒙：亨。匪我求童蒙，童蒙求我。初筮告，再三瀆，瀆則不告。利貞。
+九二：包蒙吉，納婦吉，子克家。
+上九：擊蒙，不利為寇，利禦寇。
+之卦 02 坤：元亨。利牝馬之貞。
+君子有攸往，先迷後得主。
+利西南得朋，東北喪朋。安貞，吉。
+```
+
+沒有動爻時，Human View 僅顯示本卦；有動爻時，並列本卦與之卦，並標示動爻。Human View 亦會在資料可用時呈現西曆、傳統農曆日期（含閏月）、UTC 與本地時間、節氣及四柱。JSON 保留原始數值欄位及完整時間戳精度。終端機也會顯示經文來源連結。此固定範例用於展示輸出格式，不代表即時起卦會挑選或重抽吉利卦象。
+
+如欲閱讀此卦的中文、英文或中英對照解讀，可參考[蒙之坤解卦範例](https://github.com/cctsao1008/trng-iching/issues/1#issuecomment-7153460638)。這些是參考範例，而非規定的解卦方法。
+
+### 輸出選項
+
+以下為即時起卦指令：
+
+| 指令（接在 `py .\main.py` 後） | 顯示內容 | 建議用途 |
+| --- | --- | --- |
+| `cast` | JSON | 提供 ChatGPT 或其他 AI 助理依卦問事，亦可供軟體使用 |
+| `cast --audit` | 含來源與計算細節的完整 JSON | 檢視亂數來源及起卦計算 |
+| `cast --view human` | 卦象 | 快速閱讀本卦及之卦 |
+| `cast --view human --text` | 卦象與經文 | 自我反思與傳統解卦 |
+| `cast --audit --view human --text` | 完整 JSON、卦象及經文 | 具有完整來源資訊及經文參考的 AI 輔助研究 |
+
+上述即時起卦指令均可加入 `--source trng.info` 或 `--source lfdr.de` 明確選擇亂數來源。省略時使用 TRNG.info。
+
+每次即時起卦指令都會形成新卦。使用前確認結果完整，不要為了繞過失敗而重新起卦。
+
+如需儲存檔案，可選擇加入 `--json-out <new-file>`，不會覆寫既有檔案。已明確儲存的紀錄可透過 `py .\main.py view --input cast.json --text` 再次顯示，無須重新起卦。
+
+## 🔬 現代科學基礎
+
+現代工具輔助傳統起卦方式，但不宣稱能解釋或證實其玄學意涵。
+
+**量子亂數。** [TRNG.info](https://trng.info/)（預設）或 [LfD QRNG](https://lfdr.de/QRNG/) 為每次即時起卦提供一份物理亂數樣本。兩個供應者均表示其熵源來自量子光學硬體。使用者在起卦前選定一個來源，不混合樣本。從三個位元組取出 18 bits，分為六組、每組三個位元，以重現三銅錢法的機率分布。亂數經確定性計算轉換為六爻與文王卦序編號，不使用偽亂數備援或自動重試。
+
+**天文與曆法。** 使用 [NASA JPL DE440s](https://ssd.jpl.nasa.gov/) 與 [Skyfield](https://rhodesmill.org/skyfield/) 進行天文計算，並採用[香港天文台](https://www.hko.gov.hk/en/gts/time/conversion1_text.htm)的官方農曆資料。四柱干支以立春、十二個節氣中的「節」及 UTC+08 民用時間為計算依據，以午夜為日界，不進行真太陽時修正。起卦時間是客戶端收到亂數樣本的時刻，而非供應者未提供的硬體量測時間。
+
+**透明且可追溯的結果。** JSON Schema 0.4.0 記錄亂數輸入、六爻、卦象及時間背景。選用 Audit 輸出可取得額外的計算與來源細節。所問之事不會傳送給亂數服務，本機經文與曆象亦不決定亂數結果。
+
+科學工具描述亂數與時間，並不證實占卜具備預測能力。
+
+## ⚙️ 系統架構
+
+系統結合量子亂數、天文曆象、古典經文與人類反思，同時保持各部分的責任獨立。
+
+```mermaid
+flowchart TD
+    Q["量子亂數"] --> H["確定性卦象計算"]
+    A["JPL 天文計算"] --> T["時間與曆象"]
+    C["HKO 農曆與干支"] --> T
+    H --> R["起卦資料 · JSON"]
+    T --> R
+    R --> V["Human View · 選用經文"]
+    Z["本機《周易》經文"] -->|"--text"| V
+    R -. 手動分享 .-> I["人或外部 AI 解卦"]
+    V -. 手動分享 .-> I
+    S["外部研究文獻"] --> I
+    P["所問之事與現實處境"] --> I
+    I --> O["反思 · 多元觀點 · 自主選擇"]
+
+    classDef randomness fill:#e8f1fa,stroke:#4786c6,color:#173b60
+    classDef science fill:#e5f3ed,stroke:#468e78,color:#194c3c
+    classDef record fill:#f0f0f0,stroke:#888,color:#333
+    classDef references fill:#faf1df,stroke:#b58b4b,color:#604414
+    classDef reflection fill:#f0eaf8,stroke:#8c72b5,color:#49336e
+    class Q,H randomness
+    class A,C,T science
+    class R,V record
+    class Z,S,P references
+    class I,O reflection
+```
+
+<p align="center">
+  <img src="assets/architecture-legend.svg" alt="藍色：亂數；綠色：科學；灰色：紀錄；金色：參考資料；紫色：反思" width="540">
+</p>
+
+<sub>Randomness：亂數 · Science：科學 · Record：紀錄 · References：參考資料 · Reflection：反思</sub>
+
+### 設計原則
+
+> 亂數決定卦象。  
+> 天地曆象描述起卦的時刻。  
+> 經典提供反思的語言。  
+> 解讀權屬於讀者。
+
+天文與曆法資料描述起卦時刻，不影響卦象。起卦資料提供結構化 JSON；Human View 將資料轉為易讀形式，並可選擇從本機《周易》資料庫取得相關經文。讀者可自行將任一形式分享給外部 AI 助理。其他研究文獻及所問之事則供程式外部的解讀參考。此架構支持反思，但不主張存在預測未來的機制。
+
+### 軟體組件
+
+| 模組 | 職責 |
+| --- | --- |
+| `main.py` | CLI、起卦流程協調與 JSON 輸出 |
+| `sources.py` | 從選定的量子亂數來源取得一份三位元組樣本 |
+| `iching.py` | 計算六爻、動爻及卦象 |
+| `astronomy.py` | 以本機 JPL 資料計算天體位置及節氣 |
+| `lunisolar.py` | 查詢農曆及計算四柱干支 |
+| `human_view.py` | 呈現卦象及選用經文 |
+| `data/` | 本機星曆、農曆資料與周易經文 |
+
+### 🧠 依卦問事
+
+起卦一次後，可將所得 JSON 分享給 ChatGPT 或其他 AI 助理，提出你所思考的問題。AI 可結合卦象、經文與當下處境進行解讀；Human View 則可提供相關經文作為參考。
+
+解卦在應用程式之外進行。起卦工具不內建 AI 連線、卦象與現代事件的固定映射規則，或自動判斷機制。
+
+更多技術選項請參考 `py .\main.py --help` 或 `py .\main.py cast --help`。

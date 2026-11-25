@@ -5,6 +5,11 @@
 <h1 align="center">TRNG Hexagram Casting</h1>
 
 <p align="center">
+  <a href="README.md"><img src="https://img.shields.io/badge/English-007ec6" alt="English"></a>
+  <a href="README.zh-TW.md"><img src="https://img.shields.io/badge/%E7%B9%81%E9%AB%94%E4%B8%AD%E6%96%87-555555" alt="繁體中文"></a>
+</p>
+
+<p align="center">
   <strong>問天，觀象，思己。</strong>
 </p>
 
