@@ -115,7 +115,8 @@
         {
           "position": 1,
           "label": "初九",
-          "text": ".mw-parser-output .variant-text{color:light-dark(black,white);border-bottom:1px dotted red;background:light-dark(linen,#311);cursor:pointer;position:relative}.mw-parser-output .variant-tooltip{display:none;position:absolute;bottom:100%;left:50%;transform:translateX(-50%);background:#333;color:#fff;padding:3px 8px;border-radius:4px;white-space:nowrap;font-size:0.9em;z-index:100}.mw-parser-output .variant-text:hover .variant-tooltip,.mw-parser-output .variant-text:focus .variant-tooltip,.mw-parser-output .variant-text:active .variant-tooltip{display:block}磐一作「盤」桓，利居貞，利建侯。"
+          "text": "磐桓，利居貞，利建侯。",
+          "text_with_variants": "磐一作「盤」桓，利居貞，利建侯。"
         },
         {
           "position": 2,
@@ -174,7 +175,8 @@
         {
           "position": 3,
           "label": "六三",
-          "text": "勿用.mw-parser-output .variant-text{color:light-dark(black,white);border-bottom:1px dotted red;background:light-dark(linen,#311);cursor:pointer;position:relative}.mw-parser-output .variant-tooltip{display:none;position:absolute;bottom:100%;left:50%;transform:translateX(-50%);background:#333;color:#fff;padding:3px 8px;border-radius:4px;white-space:nowrap;font-size:0.9em;z-index:100}.mw-parser-output .variant-text:hover .variant-tooltip,.mw-parser-output .variant-text:focus .variant-tooltip,.mw-parser-output .variant-text:active .variant-tooltip{display:block}取一作「娶」女，見金夫，不有躬，无攸利。"
+          "text": "勿用取女，見金夫，不有躬，无攸利。",
+          "text_with_variants": "勿用取一作「娶」女，見金夫，不有躬，无攸利。"
         },
         {
           "position": 4,
@@ -287,7 +289,8 @@
         {
           "position": 6,
           "label": "上九",
-          "text": "或錫之鞶帶，終朝三.mw-parser-output .variant-text{color:light-dark(black,white);border-bottom:1px dotted red;background:light-dark(linen,#311);cursor:pointer;position:relative}.mw-parser-output .variant-tooltip{display:none;position:absolute;bottom:100%;left:50%;transform:translateX(-50%);background:#333;color:#fff;padding:3px 8px;border-radius:4px;white-space:nowrap;font-size:0.9em;z-index:100}.mw-parser-output .variant-text:hover .variant-tooltip,.mw-parser-output .variant-text:focus .variant-tooltip,.mw-parser-output .variant-text:active .variant-tooltip{display:block}褫一作「拕」之。"
+          "text": "或錫之鞶帶，終朝三褫之。",
+          "text_with_variants": "或錫之鞶帶，終朝三褫一作「拕」之。"
         }
       ],
       "tuan": "訟，上剛下險，險而健，訟。訟，有孚，窒，惕，中吉，剛來而得中也。終凶，訟不可成也。利見大人，尚中正也。不利涉大川，入于淵也。",
@@ -380,7 +383,8 @@
         {
           "position": 5,
           "label": "九五",
-          "text": "顯比。王用三.mw-parser-output .variant-text{color:light-dark(black,white);border-bottom:1px dotted red;background:light-dark(linen,#311);cursor:pointer;position:relative}.mw-parser-output .variant-tooltip{display:none;position:absolute;bottom:100%;left:50%;transform:translateX(-50%);background:#333;color:#fff;padding:3px 8px;border-radius:4px;white-space:nowrap;font-size:0.9em;z-index:100}.mw-parser-output .variant-text:hover .variant-tooltip,.mw-parser-output .variant-text:focus .variant-tooltip,.mw-parser-output .variant-text:active .variant-tooltip{display:block}敺一作「驅」，失前禽，邑人不誡，吉。"
+          "text": "顯比。王用三敺，失前禽，邑人不誡，吉。",
+          "text_with_variants": "顯比。王用三敺一作「驅」，失前禽，邑人不誡，吉。"
         },
         {
           "position": 6,
@@ -419,7 +423,8 @@
         {
           "position": 3,
           "label": "九三",
-          "text": ".mw-parser-output .variant-text{color:light-dark(black,white);border-bottom:1px dotted red;background:light-dark(linen,#311);cursor:pointer;position:relative}.mw-parser-output .variant-tooltip{display:none;position:absolute;bottom:100%;left:50%;transform:translateX(-50%);background:#333;color:#fff;padding:3px 8px;border-radius:4px;white-space:nowrap;font-size:0.9em;z-index:100}.mw-parser-output .variant-text:hover .variant-tooltip,.mw-parser-output .variant-text:focus .variant-tooltip,.mw-parser-output .variant-text:active .variant-tooltip{display:block}車一作「輿」說輹一作「輻」，夫妻反目。"
+          "text": "車說輹，夫妻反目。",
+          "text_with_variants": "車一作「輿」說輹一作「輻」，夫妻反目。"
         },
         {
           "position": 4,
@@ -434,7 +439,8 @@
         {
           "position": 6,
           "label": "上九",
-          "text": "既雨既處，尚得一作「德」載，婦貞厲，月幾望，君子征凶。"
+          "text": "既雨既處，尚得載，婦貞厲，月幾望，君子征凶。",
+          "text_with_variants": "既雨既處，尚得一作「德」載，婦貞厲，月幾望，君子征凶。"
         }
       ],
       "tuan": "小畜，柔得位而上下應之，曰小畜。健而巽，剛中而志行，乃亨。密雲不雨，尚往也。自我西郊，施未行也。",
@@ -576,7 +582,8 @@
         {
           "position": 5,
           "label": "九五",
-          "text": "休否，大人吉。其亡其亡，繫于.mw-parser-output .variant-text{color:light-dark(black,white);border-bottom:1px dotted red;background:light-dark(linen,#311);cursor:pointer;position:relative}.mw-parser-output .variant-tooltip{display:none;position:absolute;bottom:100%;left:50%;transform:translateX(-50%);background:#333;color:#fff;padding:3px 8px;border-radius:4px;white-space:nowrap;font-size:0.9em;z-index:100}.mw-parser-output .variant-text:hover .variant-tooltip,.mw-parser-output .variant-text:focus .variant-tooltip,.mw-parser-output .variant-text:active .variant-tooltip{display:block}包一作「苞」桑。"
+          "text": "休否，大人吉。其亡其亡，繫于包桑。",
+          "text_with_variants": "休否，大人吉。其亡其亡，繫于包一作「苞」桑。"
         },
         {
           "position": 6,
@@ -620,7 +627,8 @@
         {
           "position": 4,
           "label": "九四",
-          "text": "乘其.mw-parser-output .variant-text{color:light-dark(black,white);border-bottom:1px dotted red;background:light-dark(linen,#311);cursor:pointer;position:relative}.mw-parser-output .variant-tooltip{display:none;position:absolute;bottom:100%;left:50%;transform:translateX(-50%);background:#333;color:#fff;padding:3px 8px;border-radius:4px;white-space:nowrap;font-size:0.9em;z-index:100}.mw-parser-output .variant-text:hover .variant-tooltip,.mw-parser-output .variant-text:focus .variant-tooltip,.mw-parser-output .variant-text:active .variant-tooltip{display:block}庸一作「墉」，弗克攻，吉。"
+          "text": "乘其庸，弗克攻，吉。",
+          "text_with_variants": "乘其庸一作「墉」，弗克攻，吉。"
         },
         {
           "position": 5,
@@ -659,7 +667,8 @@
         {
           "position": 2,
           "label": "九二",
-          "text": "大.mw-parser-output .variant-text{color:light-dark(black,white);border-bottom:1px dotted red;background:light-dark(linen,#311);cursor:pointer;position:relative}.mw-parser-output .variant-tooltip{display:none;position:absolute;bottom:100%;left:50%;transform:translateX(-50%);background:#333;color:#fff;padding:3px 8px;border-radius:4px;white-space:nowrap;font-size:0.9em;z-index:100}.mw-parser-output .variant-text:hover .variant-tooltip,.mw-parser-output .variant-text:focus .variant-tooltip,.mw-parser-output .variant-text:active .variant-tooltip{display:block}轝一作「車」以載，有攸往，无咎。"
+          "text": "大轝以載，有攸往，无咎。",
+          "text_with_variants": "大轝一作「車」以載，有攸往，无咎。"
         },
         {
           "position": 3,
@@ -669,7 +678,8 @@
         {
           "position": 4,
           "label": "九四",
-          "text": "匪其尫一作「彭」，无咎。"
+          "text": "匪其尫，无咎。",
+          "text_with_variants": "匪其尫一作「彭」，无咎。"
         },
         {
           "position": 5,
@@ -679,7 +689,8 @@
         {
           "position": 6,
           "label": "上九",
-          "text": "自天佑一作「右」之，吉无不利。"
+          "text": "自天佑之，吉无不利。",
+          "text_with_variants": "自天佑一作「右」之，吉无不利。"
         }
       ],
       "tuan": "大有，柔得尊位，大中而上下應之，曰大有。其德剛健而文明，應乎天而時行，是以元亨。",
@@ -767,7 +778,8 @@
         {
           "position": 4,
           "label": "九四",
-          "text": "由豫，大有得。勿疑。朋盍.mw-parser-output .variant-text{color:light-dark(black,white);border-bottom:1px dotted red;background:light-dark(linen,#311);cursor:pointer;position:relative}.mw-parser-output .variant-tooltip{display:none;position:absolute;bottom:100%;left:50%;transform:translateX(-50%);background:#333;color:#fff;padding:3px 8px;border-radius:4px;white-space:nowrap;font-size:0.9em;z-index:100}.mw-parser-output .variant-text:hover .variant-tooltip,.mw-parser-output .variant-text:focus .variant-tooltip,.mw-parser-output .variant-text:active .variant-tooltip{display:block}戠一作「簪」。"
+          "text": "由豫，大有得。勿疑。朋盍戠。",
+          "text_with_variants": "由豫，大有得。勿疑。朋盍戠一作「簪」。"
         },
         {
           "position": 5,
@@ -1007,7 +1019,8 @@
         {
           "position": 3,
           "label": "六三",
-          "text": "噬.mw-parser-output .variant-text{color:light-dark(black,white);border-bottom:1px dotted red;background:light-dark(linen,#311);cursor:pointer;position:relative}.mw-parser-output .variant-tooltip{display:none;position:absolute;bottom:100%;left:50%;transform:translateX(-50%);background:#333;color:#fff;padding:3px 8px;border-radius:4px;white-space:nowrap;font-size:0.9em;z-index:100}.mw-parser-output .variant-text:hover .variant-tooltip,.mw-parser-output .variant-text:focus .variant-tooltip,.mw-parser-output .variant-text:active .variant-tooltip{display:block}昔一作「臘」肉，遇毒；小吝，无咎。"
+          "text": "噬昔肉，遇毒；小吝，无咎。",
+          "text_with_variants": "噬昔一作「臘」肉，遇毒；小吝，无咎。"
         },
         {
           "position": 4,
@@ -1120,7 +1133,8 @@
         {
           "position": 6,
           "label": "上九",
-          "text": "碩果不食，君子.mw-parser-output .variant-text{color:light-dark(black,white);border-bottom:1px dotted red;background:light-dark(linen,#311);cursor:pointer;position:relative}.mw-parser-output .variant-tooltip{display:none;position:absolute;bottom:100%;left:50%;transform:translateX(-50%);background:#333;color:#fff;padding:3px 8px;border-radius:4px;white-space:nowrap;font-size:0.9em;z-index:100}.mw-parser-output .variant-text:hover .variant-tooltip,.mw-parser-output .variant-text:focus .variant-tooltip,.mw-parser-output .variant-text:active .variant-tooltip{display:block}德車一作「得輿」，小人剝廬。"
+          "text": "碩果不食，君子德車，小人剝廬。",
+          "text_with_variants": "碩果不食，君子德車一作「得輿」，小人剝廬。"
         }
       ],
       "tuan": "剝，剝也，柔變剛也。不利有攸往，小人長也。順而止之，觀象也。君子尚消息盈虛，天行也。",
@@ -1247,7 +1261,8 @@
         {
           "position": 2,
           "label": "九二",
-          "text": "輿說.mw-parser-output .variant-text{color:light-dark(black,white);border-bottom:1px dotted red;background:light-dark(linen,#311);cursor:pointer;position:relative}.mw-parser-output .variant-tooltip{display:none;position:absolute;bottom:100%;left:50%;transform:translateX(-50%);background:#333;color:#fff;padding:3px 8px;border-radius:4px;white-space:nowrap;font-size:0.9em;z-index:100}.mw-parser-output .variant-text:hover .variant-tooltip,.mw-parser-output .variant-text:focus .variant-tooltip,.mw-parser-output .variant-text:active .variant-tooltip{display:block}輹一作「腹」。"
+          "text": "輿說輹。",
+          "text_with_variants": "輿說輹一作「腹」。"
         },
         {
           "position": 3,
@@ -1257,7 +1272,8 @@
         {
           "position": 4,
           "label": "六四",
-          "text": "童牛之告一作「牿」，元吉。"
+          "text": "童牛之告，元吉。",
+          "text_with_variants": "童牛之告一作「牿」，元吉。"
         },
         {
           "position": 5,
@@ -1404,12 +1420,14 @@
         {
           "position": 4,
           "label": "六四",
-          "text": ".mw-parser-output .variant-text{color:light-dark(black,white);border-bottom:1px dotted red;background:light-dark(linen,#311);cursor:pointer;position:relative}.mw-parser-output .variant-tooltip{display:none;position:absolute;bottom:100%;left:50%;transform:translateX(-50%);background:#333;color:#fff;padding:3px 8px;border-radius:4px;white-space:nowrap;font-size:0.9em;z-index:100}.mw-parser-output .variant-text:hover .variant-tooltip,.mw-parser-output .variant-text:focus .variant-tooltip,.mw-parser-output .variant-text:active .variant-tooltip{display:block}尊酒簋，貳用缶。内約自牖一作「樽酒簋貳，用缶，納約自牖」，終无咎。"
+          "text": "尊酒簋，貳用缶。内約自牖，終无咎。",
+          "text_with_variants": "尊酒簋，貳用缶。内約自牖一作「樽酒簋貳，用缶，納約自牖」，終无咎。"
         },
         {
           "position": 5,
           "label": "九五",
-          "text": "坎不盈，禔一作「祗」既平，无咎。"
+          "text": "坎不盈，禔既平，无咎。",
+          "text_with_variants": "坎不盈，禔一作「祗」既平，无咎。"
         },
         {
           "position": 6,
@@ -1448,7 +1466,8 @@
         {
           "position": 3,
           "label": "九三",
-          "text": "日昃之離，不鼓缶而歌，則大耋之.mw-parser-output .variant-text{color:light-dark(black,white);border-bottom:1px dotted red;background:light-dark(linen,#311);cursor:pointer;position:relative}.mw-parser-output .variant-tooltip{display:none;position:absolute;bottom:100%;left:50%;transform:translateX(-50%);background:#333;color:#fff;padding:3px 8px;border-radius:4px;white-space:nowrap;font-size:0.9em;z-index:100}.mw-parser-output .variant-text:hover .variant-tooltip,.mw-parser-output .variant-text:focus .variant-tooltip,.mw-parser-output .variant-text:active .variant-tooltip{display:block}差一作「嗟」，凶。"
+          "text": "日昃之離，不鼓缶而歌，則大耋之差，凶。",
+          "text_with_variants": "日昃之離，不鼓缶而歌，則大耋之差一作「嗟」，凶。"
         },
         {
           "position": 4,
@@ -1487,7 +1506,8 @@
         {
           "position": 1,
           "label": "初六",
-          "text": "咸其.mw-parser-output .variant-text{color:light-dark(black,white);border-bottom:1px dotted red;background:light-dark(linen,#311);cursor:pointer;position:relative}.mw-parser-output .variant-tooltip{display:none;position:absolute;bottom:100%;left:50%;transform:translateX(-50%);background:#333;color:#fff;padding:3px 8px;border-radius:4px;white-space:nowrap;font-size:0.9em;z-index:100}.mw-parser-output .variant-text:hover .variant-tooltip,.mw-parser-output .variant-text:focus .variant-tooltip,.mw-parser-output .variant-text:active .variant-tooltip{display:block}拇一作「母」。"
+          "text": "咸其拇。",
+          "text_with_variants": "咸其拇一作「母」。"
         },
         {
           "position": 2,
@@ -1561,7 +1581,8 @@
         {
           "position": 6,
           "label": "上六",
-          "text": ".mw-parser-output .variant-text{color:light-dark(black,white);border-bottom:1px dotted red;background:light-dark(linen,#311);cursor:pointer;position:relative}.mw-parser-output .variant-tooltip{display:none;position:absolute;bottom:100%;left:50%;transform:translateX(-50%);background:#333;color:#fff;padding:3px 8px;border-radius:4px;white-space:nowrap;font-size:0.9em;z-index:100}.mw-parser-output .variant-text:hover .variant-tooltip,.mw-parser-output .variant-text:focus .variant-tooltip,.mw-parser-output .variant-text:active .variant-tooltip{display:block}震一作「振」恆，凶。"
+          "text": "震恆，凶。",
+          "text_with_variants": "震一作「振」恆，凶。"
         }
       ],
       "tuan": "恆，久也。剛上而柔下，雷風相與，巽而動，剛柔皆應，恆。恆亨无咎，利貞；久于其道也，天地之道，恆久而不已也。利有攸往，終則有始也。日月得天，而能久照，四時變化，而能久成，聖人久于其道，而天下化成；觀其所恆，而天地萬物之情可見矣！",
@@ -1649,7 +1670,8 @@
         {
           "position": 4,
           "label": "九四",
-          "text": "貞吉悔亡，藩決不羸，壯于大.mw-parser-output .variant-text{color:light-dark(black,white);border-bottom:1px dotted red;background:light-dark(linen,#311);cursor:pointer;position:relative}.mw-parser-output .variant-tooltip{display:none;position:absolute;bottom:100%;left:50%;transform:translateX(-50%);background:#333;color:#fff;padding:3px 8px;border-radius:4px;white-space:nowrap;font-size:0.9em;z-index:100}.mw-parser-output .variant-text:hover .variant-tooltip,.mw-parser-output .variant-text:focus .variant-tooltip,.mw-parser-output .variant-text:active .variant-tooltip{display:block}轝一作「輿」之腹一作「輹」。"
+          "text": "貞吉悔亡，藩決不羸，壯于大轝之腹。",
+          "text_with_variants": "貞吉悔亡，藩決不羸，壯于大轝一作「輿」之腹一作「輹」。"
         },
         {
           "position": 5,
@@ -1698,12 +1720,14 @@
         {
           "position": 4,
           "label": "九四",
-          "text": "晉如.mw-parser-output .variant-text{color:light-dark(black,white);border-bottom:1px dotted red;background:light-dark(linen,#311);cursor:pointer;position:relative}.mw-parser-output .variant-tooltip{display:none;position:absolute;bottom:100%;left:50%;transform:translateX(-50%);background:#333;color:#fff;padding:3px 8px;border-radius:4px;white-space:nowrap;font-size:0.9em;z-index:100}.mw-parser-output .variant-text:hover .variant-tooltip,.mw-parser-output .variant-text:focus .variant-tooltip,.mw-parser-output .variant-text:active .variant-tooltip{display:block}鼫一作「碩」鼠，貞厲。"
+          "text": "晉如鼫鼠，貞厲。",
+          "text_with_variants": "晉如鼫一作「碩」鼠，貞厲。"
         },
         {
           "position": 5,
           "label": "六五",
-          "text": "悔亡，矢一作「失」得勿恤，往吉无不利。"
+          "text": "悔亡，矢得勿恤，往吉无不利。",
+          "text_with_variants": "悔亡，矢一作「失」得勿恤，往吉无不利。"
         },
         {
           "position": 6,
@@ -1840,7 +1864,8 @@
         {
           "position": 3,
           "label": "六三",
-          "text": "見輿曳，其牛.mw-parser-output .variant-text{color:light-dark(black,white);border-bottom:1px dotted red;background:light-dark(linen,#311);cursor:pointer;position:relative}.mw-parser-output .variant-tooltip{display:none;position:absolute;bottom:100%;left:50%;transform:translateX(-50%);background:#333;color:#fff;padding:3px 8px;border-radius:4px;white-space:nowrap;font-size:0.9em;z-index:100}.mw-parser-output .variant-text:hover .variant-tooltip,.mw-parser-output .variant-text:focus .variant-tooltip,.mw-parser-output .variant-text:active .variant-tooltip{display:block}𧤊一作「掣」，其人天且劓，无初有終。"
+          "text": "見輿曳，其牛𧤊，其人天且劓，无初有終。",
+          "text_with_variants": "見輿曳，其牛𧤊一作「掣」，其人天且劓，无初有終。"
         },
         {
           "position": 4,
@@ -1948,12 +1973,14 @@
         {
           "position": 5,
           "label": "六五",
-          "text": "君子.mw-parser-output .variant-text{color:light-dark(black,white);border-bottom:1px dotted red;background:light-dark(linen,#311);cursor:pointer;position:relative}.mw-parser-output .variant-tooltip{display:none;position:absolute;bottom:100%;left:50%;transform:translateX(-50%);background:#333;color:#fff;padding:3px 8px;border-radius:4px;white-space:nowrap;font-size:0.9em;z-index:100}.mw-parser-output .variant-text:hover .variant-tooltip,.mw-parser-output .variant-text:focus .variant-tooltip,.mw-parser-output .variant-text:active .variant-tooltip{display:block}惟一作「維」有解，吉；有孚于小人。"
+          "text": "君子惟有解，吉；有孚于小人。",
+          "text_with_variants": "君子惟一作「維」有解，吉；有孚于小人。"
         },
         {
           "position": 6,
           "label": "上六",
-          "text": "公用射隼，于高墉一作「庸」之上，獲之，无不利。"
+          "text": "公用射隼，于高墉之上，獲之，无不利。",
+          "text_with_variants": "公用射隼，于高墉一作「庸」之上，獲之，无不利。"
         }
       ],
       "tuan": "解，險以動，動而免乎險，解。解利西南，往得眾也。其來復吉，乃得中也。有攸往夙吉，往有功也。天地解，而雷雨作，雷雨作，而百果草木皆甲坼，解之時義大矣哉！",
@@ -1977,7 +2004,8 @@
         {
           "position": 1,
           "label": "初九",
-          "text": ".mw-parser-output .variant-text{color:light-dark(black,white);border-bottom:1px dotted red;background:light-dark(linen,#311);cursor:pointer;position:relative}.mw-parser-output .variant-tooltip{display:none;position:absolute;bottom:100%;left:50%;transform:translateX(-50%);background:#333;color:#fff;padding:3px 8px;border-radius:4px;white-space:nowrap;font-size:0.9em;z-index:100}.mw-parser-output .variant-text:hover .variant-tooltip,.mw-parser-output .variant-text:focus .variant-tooltip,.mw-parser-output .variant-text:active .variant-tooltip{display:block}祀一作「已」事遄往，无咎，酌損之。"
+          "text": "祀事遄往，无咎，酌損之。",
+          "text_with_variants": "祀一作「已」事遄往，无咎，酌損之。"
         },
         {
           "position": 2,
@@ -2041,7 +2069,8 @@
         {
           "position": 4,
           "label": "六四",
-          "text": "中行，告公從。利用為依遷.mw-parser-output .variant-text{color:light-dark(black,white);border-bottom:1px dotted red;background:light-dark(linen,#311);cursor:pointer;position:relative}.mw-parser-output .variant-tooltip{display:none;position:absolute;bottom:100%;left:50%;transform:translateX(-50%);background:#333;color:#fff;padding:3px 8px;border-radius:4px;white-space:nowrap;font-size:0.9em;z-index:100}.mw-parser-output .variant-text:hover .variant-tooltip,.mw-parser-output .variant-text:focus .variant-tooltip,.mw-parser-output .variant-text:active .variant-tooltip{display:block}國一作「邦」。"
+          "text": "中行，告公從。利用為依遷國。",
+          "text_with_variants": "中行，告公從。利用為依遷國一作「邦」。"
         },
         {
           "position": 5,
@@ -2124,7 +2153,8 @@
         {
           "position": 1,
           "label": "初六",
-          "text": "系于金柅，貞吉，有攸往，見凶，羸豕，孚，.mw-parser-output .variant-text{color:light-dark(black,white);border-bottom:1px dotted red;background:light-dark(linen,#311);cursor:pointer;position:relative}.mw-parser-output .variant-tooltip{display:none;position:absolute;bottom:100%;left:50%;transform:translateX(-50%);background:#333;color:#fff;padding:3px 8px;border-radius:4px;white-space:nowrap;font-size:0.9em;z-index:100}.mw-parser-output .variant-text:hover .variant-tooltip,.mw-parser-output .variant-text:focus .variant-tooltip,.mw-parser-output .variant-text:active .variant-tooltip{display:block}蹢躅一作「𨅙𨄃」。"
+          "text": "系于金柅，貞吉，有攸往，見凶，羸豕，孚，蹢躅。",
+          "text_with_variants": "系于金柅，貞吉，有攸往，見凶，羸豕，孚，蹢躅一作「𨅙𨄃」。"
         },
         {
           "position": 2,
@@ -2144,7 +2174,8 @@
         {
           "position": 5,
           "label": "九五",
-          "text": "以杞包一作「苞」瓜，含章，有隕自天。"
+          "text": "以杞包瓜，含章，有隕自天。",
+          "text_with_variants": "以杞包一作「苞」瓜，含章，有隕自天。"
         },
         {
           "position": 6,
@@ -2198,7 +2229,8 @@
         {
           "position": 6,
           "label": "上六",
-          "text": "齎.mw-parser-output .variant-text{color:light-dark(black,white);border-bottom:1px dotted red;background:light-dark(linen,#311);cursor:pointer;position:relative}.mw-parser-output .variant-tooltip{display:none;position:absolute;bottom:100%;left:50%;transform:translateX(-50%);background:#333;color:#fff;padding:3px 8px;border-radius:4px;white-space:nowrap;font-size:0.9em;z-index:100}.mw-parser-output .variant-text:hover .variant-tooltip,.mw-parser-output .variant-text:focus .variant-tooltip,.mw-parser-output .variant-text:active .variant-tooltip{display:block}資一作「咨」涕洟，无咎。"
+          "text": "齎資涕洟，无咎。",
+          "text_with_variants": "齎資一作「咨」涕洟，无咎。"
         }
       ],
       "tuan": "萃，聚也；順以說，剛中而應，故聚也。王假有廟，致孝享也。利見大人亨，聚以正也。用大牲吉，利有攸往，順天命也。觀其所聚，而天地萬物之情可見矣。",
@@ -2237,7 +2269,8 @@
         {
           "position": 4,
           "label": "六四",
-          "text": "王用.mw-parser-output .variant-text{color:light-dark(black,white);border-bottom:1px dotted red;background:light-dark(linen,#311);cursor:pointer;position:relative}.mw-parser-output .variant-tooltip{display:none;position:absolute;bottom:100%;left:50%;transform:translateX(-50%);background:#333;color:#fff;padding:3px 8px;border-radius:4px;white-space:nowrap;font-size:0.9em;z-index:100}.mw-parser-output .variant-text:hover .variant-tooltip,.mw-parser-output .variant-text:focus .variant-tooltip,.mw-parser-output .variant-text:active .variant-tooltip{display:block}享一作「亨」于岐山，吉无咎。"
+          "text": "王用享于岐山，吉无咎。",
+          "text_with_variants": "王用享一作「亨」于岐山，吉无咎。"
         },
         {
           "position": 5,
@@ -2281,12 +2314,14 @@
         {
           "position": 3,
           "label": "六三",
-          "text": "困于石，據于蒺.mw-parser-output .variant-text{color:light-dark(black,white);border-bottom:1px dotted red;background:light-dark(linen,#311);cursor:pointer;position:relative}.mw-parser-output .variant-tooltip{display:none;position:absolute;bottom:100%;left:50%;transform:translateX(-50%);background:#333;color:#fff;padding:3px 8px;border-radius:4px;white-space:nowrap;font-size:0.9em;z-index:100}.mw-parser-output .variant-text:hover .variant-tooltip,.mw-parser-output .variant-text:focus .variant-tooltip,.mw-parser-output .variant-text:active .variant-tooltip{display:block}蔾一作「藜」，入于其宮，不見其妻，凶。"
+          "text": "困于石，據于蒺蔾，入于其宮，不見其妻，凶。",
+          "text_with_variants": "困于石，據于蒺蔾一作「藜」，入于其宮，不見其妻，凶。"
         },
         {
           "position": 4,
           "label": "九四",
-          "text": "來荼荼一作「徐徐」，困于金轝一作「車」，吝，有終。"
+          "text": "來荼荼，困于金轝，吝，有終。",
+          "text_with_variants": "來荼荼一作「徐徐」，困于金轝一作「車」，吝，有終。"
         },
         {
           "position": 5,
@@ -2433,7 +2468,8 @@
         {
           "position": 4,
           "label": "九四",
-          "text": "鼎折足，覆公餗，其.mw-parser-output .variant-text{color:light-dark(black,white);border-bottom:1px dotted red;background:light-dark(linen,#311);cursor:pointer;position:relative}.mw-parser-output .variant-tooltip{display:none;position:absolute;bottom:100%;left:50%;transform:translateX(-50%);background:#333;color:#fff;padding:3px 8px;border-radius:4px;white-space:nowrap;font-size:0.9em;z-index:100}.mw-parser-output .variant-text:hover .variant-tooltip,.mw-parser-output .variant-text:focus .variant-tooltip,.mw-parser-output .variant-text:active .variant-tooltip{display:block}刑一作「形」渥，凶。"
+          "text": "鼎折足，覆公餗，其刑渥，凶。",
+          "text_with_variants": "鼎折足，覆公餗，其刑一作「形」渥，凶。"
         },
         {
           "position": 5,
@@ -2526,7 +2562,8 @@
         {
           "position": 3,
           "label": "九三",
-          "text": "艮其限，.mw-parser-output .variant-text{color:light-dark(black,white);border-bottom:1px dotted red;background:light-dark(linen,#311);cursor:pointer;position:relative}.mw-parser-output .variant-tooltip{display:none;position:absolute;bottom:100%;left:50%;transform:translateX(-50%);background:#333;color:#fff;padding:3px 8px;border-radius:4px;white-space:nowrap;font-size:0.9em;z-index:100}.mw-parser-output .variant-text:hover .variant-tooltip,.mw-parser-output .variant-text:focus .variant-tooltip,.mw-parser-output .variant-text:active .variant-tooltip{display:block}裂一作「列」其夤，厲閽一作「薰」心。"
+          "text": "艮其限，裂其夤，厲閽心。",
+          "text_with_variants": "艮其限，裂一作「列」其夤，厲閽一作「薰」心。"
         },
         {
           "position": 4,
@@ -2536,7 +2573,8 @@
         {
           "position": 5,
           "label": "六五",
-          "text": "艮其輔，言有孚一作「序」，悔亡。"
+          "text": "艮其輔，言有孚，悔亡。",
+          "text_with_variants": "艮其輔，言有孚一作「序」，悔亡。"
         },
         {
           "position": 6,
@@ -2619,7 +2657,8 @@
         {
           "position": 2,
           "label": "九二",
-          "text": "眇.mw-parser-output .variant-text{color:light-dark(black,white);border-bottom:1px dotted red;background:light-dark(linen,#311);cursor:pointer;position:relative}.mw-parser-output .variant-tooltip{display:none;position:absolute;bottom:100%;left:50%;transform:translateX(-50%);background:#333;color:#fff;padding:3px 8px;border-radius:4px;white-space:nowrap;font-size:0.9em;z-index:100}.mw-parser-output .variant-text:hover .variant-tooltip,.mw-parser-output .variant-text:focus .variant-tooltip,.mw-parser-output .variant-text:active .variant-tooltip{display:block}能一作「而」視，利幽人之貞。"
+          "text": "眇能視，利幽人之貞。",
+          "text_with_variants": "眇能一作「而」視，利幽人之貞。"
         },
         {
           "position": 3,
@@ -2717,12 +2756,14 @@
         {
           "position": 2,
           "label": "六二",
-          "text": "旅即次，懷其資，得.mw-parser-output .variant-text{color:light-dark(black,white);border-bottom:1px dotted red;background:light-dark(linen,#311);cursor:pointer;position:relative}.mw-parser-output .variant-tooltip{display:none;position:absolute;bottom:100%;left:50%;transform:translateX(-50%);background:#333;color:#fff;padding:3px 8px;border-radius:4px;white-space:nowrap;font-size:0.9em;z-index:100}.mw-parser-output .variant-text:hover .variant-tooltip,.mw-parser-output .variant-text:focus .variant-tooltip,.mw-parser-output .variant-text:active .variant-tooltip{display:block}僮一作「童」僕貞。"
+          "text": "旅即次，懷其資，得僮僕貞。",
+          "text_with_variants": "旅即次，懷其資，得僮一作「童」僕貞。"
         },
         {
           "position": 3,
           "label": "九三",
-          "text": "旅焚其次，喪其僮一作「童」僕，貞厲。"
+          "text": "旅焚其次，喪其僮僕，貞厲。",
+          "text_with_variants": "旅焚其次，喪其僮一作「童」僕，貞厲。"
         },
         {
           "position": 4,
@@ -2957,7 +2998,8 @@
         {
           "position": 1,
           "label": "初九",
-          "text": "虞吉，有.mw-parser-output .variant-text{color:light-dark(black,white);border-bottom:1px dotted red;background:light-dark(linen,#311);cursor:pointer;position:relative}.mw-parser-output .variant-tooltip{display:none;position:absolute;bottom:100%;left:50%;transform:translateX(-50%);background:#333;color:#fff;padding:3px 8px;border-radius:4px;white-space:nowrap;font-size:0.9em;z-index:100}.mw-parser-output .variant-text:hover .variant-tooltip,.mw-parser-output .variant-text:focus .variant-tooltip,.mw-parser-output .variant-text:active .variant-tooltip{display:block}它一作「他」不燕。"
+          "text": "虞吉，有它不燕。",
+          "text_with_variants": "虞吉，有它一作「他」不燕。"
         },
         {
           "position": 2,
@@ -2972,7 +3014,8 @@
         {
           "position": 4,
           "label": "六四",
-          "text": "月既一作「几、幾」望，馬匹亡，无咎。"
+          "text": "月既望，馬匹亡，无咎。",
+          "text_with_variants": "月既一作「几、幾」望，馬匹亡，无咎。"
         },
         {
           "position": 5,
@@ -3119,7 +3162,8 @@
         {
           "position": 4,
           "label": "九四",
-          "text": "貞吉，悔亡，震用伐鬼方，三年有賞于大.mw-parser-output .variant-text{color:light-dark(black,white);border-bottom:1px dotted red;background:light-dark(linen,#311);cursor:pointer;position:relative}.mw-parser-output .variant-tooltip{display:none;position:absolute;bottom:100%;left:50%;transform:translateX(-50%);background:#333;color:#fff;padding:3px 8px;border-radius:4px;white-space:nowrap;font-size:0.9em;z-index:100}.mw-parser-output .variant-text:hover .variant-tooltip,.mw-parser-output .variant-text:focus .variant-tooltip,.mw-parser-output .variant-text:active .variant-tooltip{display:block}國一作「邦」。"
+          "text": "貞吉，悔亡，震用伐鬼方，三年有賞于大國。",
+          "text_with_variants": "貞吉，悔亡，震用伐鬼方，三年有賞于大國一作「邦」。"
         },
         {
           "position": 5,

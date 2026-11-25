@@ -16,6 +16,8 @@ retained where extracted. No endorsement is implied.
 Source policy: https://zh.wikisource.org/wiki/Wikisource:版權信息
 
 Corpus acquisition and captured-source projection audit: 64/64, 966 text units.
+2026-11-25 extraction cleanup: removed a repeated Wikisource variant-tooltip CSS block from 32 ordinary line statements. Explicit inline variant annotations in ordinary lines are separated from the base reading; `text_with_variants` preserves the CSS-free annotated source string. Source revision IDs and captured HTML hashes remain unchanged. This is a lossless textual cleanup relative to the captured transcription (excluding CSS), not a fresh retrieval or edition collation.
+
 Independent cross-edition collation was not performed. The historical
 acquisition and audit tools remain available in Git history at
 `6f09df4a6c5aff6e3537e5e47fe7ec6c02963685`.
