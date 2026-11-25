@@ -9,7 +9,9 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 import re
+import tempfile
 from bisect import bisect_right
 from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
@@ -92,6 +94,25 @@ def _parse_hko_year(year: int, raw: bytes) -> dict:
     }
 
 
+def _write_reference_atomic(path: Path, reference: dict) -> None:
+    """Replace the cache only after a complete UTF-8 write in the same directory."""
+    payload = json.dumps(reference, ensure_ascii=False, indent=2) + "\n"
+    temporary = None
+    try:
+        with tempfile.NamedTemporaryFile(
+            mode="w", encoding="utf-8", newline="\n", dir=path.parent,
+            prefix=f".{path.name}.", suffix=".tmp", delete=False,
+        ) as output:
+            temporary = Path(output.name)
+            output.write(payload)
+            output.flush()
+            os.fsync(output.fileno())
+        os.replace(temporary, path)
+    finally:
+        if temporary is not None:
+            temporary.unlink(missing_ok=True)
+
+
 def sync_hko_years(*, years: list[int], path: Path = REFERENCE_FILE) -> dict:
     """Explicit network operation; acquire just the missing years and their predecessors."""
     requested = set(years)
@@ -113,10 +134,7 @@ def sync_hko_years(*, years: list[int], path: Path = REFERENCE_FILE) -> dict:
         added.append(year)
 
     if added:
-        path.write_text(
-            json.dumps(reference, ensure_ascii=False, indent=2) + "\n",
-            encoding="utf-8",
-        )
+        _write_reference_atomic(path, reference)
     return {
         "mode": "calendar_reference_sync",
         "reference_file": str(path),
