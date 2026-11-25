@@ -205,28 +205,44 @@ Modern tools support the traditional practice without claiming to explain or val
 
 The scientific tools describe randomness and time; they do not establish the predictive validity of divination.
 
-## ⚙️ Software Architecture
+## ⚙️ System Architecture
 
-The application keeps casting, time context, presentation, and interpretation separate.
+The system brings together quantum randomness, astronomical and calendrical context, classical text, and human reflection, while keeping their responsibilities distinct.
 
 ```mermaid
 flowchart TD
-    U[Choose a source] --> S["sources.py · TRNG.info or LfD QRNG"]
-    S --> M["main.py · Casting coordinator"]
-    M --> I["iching.py · Six lines and hexagrams"]
-    M --> A["astronomy.py · Celestial context"]
-    A --> L["lunisolar.py · Calendar and four pillars"]
-    M --> L
-    I --> R["Cast result"]
-    A --> R
-    L --> R
-    R --> J["JSON"]
-    R --> H["human_view.py · Hexagrams and optional classical text"]
-    D["data/zhouyi.json"] --> H
-    J -. Manually share .-> Q["Human or AI interpretation"]
-    H -. Reference .-> Q
-    P["Question"] --> Q
+    Q["Quantum randomness"] --> H["Deterministic hexagram"]
+    A["JPL astronomy"] --> T["Time context"]
+    C["HKO calendar and Ganzhi"] --> T
+    H --> R["Casting record · JSON / Human View"]
+    T --> R
+    R --> I["Human / external AI interpretation"]
+    Z["Zhouyi and reference scholarship"] --> I
+    P["Question and real-world circumstances"] --> I
+    I --> O["Reflection · alternative perspectives · personal choice"]
+
+    classDef randomness fill:#e8f1fa,stroke:#4786c6,color:#173b60
+    classDef science fill:#e5f3ed,stroke:#468e78,color:#194c3c
+    classDef record fill:#f0f0f0,stroke:#888,color:#333
+    classDef references fill:#faf1df,stroke:#b58b4b,color:#604414
+    classDef reflection fill:#f0eaf8,stroke:#8c72b5,color:#49336e
+    class Q,H randomness
+    class A,C,T science
+    class R record
+    class Z,P references
+    class I,O reflection
 ```
+
+### Design Principles
+
+> Randomness determines the hexagram.  
+> Heaven and the calendar describe the moment.  
+> Classical text offers a language for reflection.  
+> Interpretation belongs to the reader.
+
+Astronomical and calendrical data describe the moment of casting without influencing the hexagram. Classical references and the question inform interpretation, which takes place outside the casting application. The architecture supports reflection without asserting a predictive mechanism.
+
+### Software Components
 
 | Module | Responsibility |
 | --- | --- |
