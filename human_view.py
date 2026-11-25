@@ -108,17 +108,22 @@ def render_human(record: dict, *, classical: bool = False) -> str:
         f"Source: {record['randomness']['source']} / {record['randomness']['raw_hex']}",
         f"Mode: {record['mode']} | Status: {record['status']}",
         "",
-        f"Primary {h['primary']['number']:02d}: {h['primary']['name']}",
-        f"Relating {h['relating']['number']:02d}: {h['relating']['name']}",
-        "",
-        "   PRIMARY            RELATING",
     ]
+    moving = h["moving_lines"]
+    primary_label = "Primary " if moving else "Primary"
+    rows.append(f"{primary_label} {h['primary']['number']:02d}: {h['primary']['name']}")
+    if moving:
+        rows.append(f"Relating {h['relating']['number']:02d}: {h['relating']['name']}")
+    rows.extend(["", "   PRIMARY            RELATING" if moving else "   HEXAGRAM"])
     for i in range(5, -1, -1):
         n = lines[i]
-        mark = "*" if n in (6, 9) else " "
-        rows.append(f"{i+1}  {stroke(n in (7,9))}  {mark}       {stroke(n in (6,7))}")
+        primary_stroke = stroke(n in (7, 9))
+        if moving:
+            mark = "*" if n in (6, 9) else " "
+            rows.append(f"{i+1}  {primary_stroke}  {mark}       {stroke(n in (6, 7))}")
+        else:
+            rows.append(f"{i+1}  {primary_stroke}")
     rows.append("")
-    moving = h["moving_lines"]
     if not moving:
         rows.append("Moving lines: none")
     else:
