@@ -130,43 +130,50 @@ Both sources require no API key. A failed request stops the cast; the other prov
 
 ### An example
 
-The following illustrative reference cast shows 火風鼎, whose judgment begins with 元吉. The fixed input and reference time are chosen for documentation, not obtained by a live quantum request.
+The following fixed reference cast illustrates 蒙之坤: 山水蒙 (Youthful Inexperience) changing into 坤為地 (The Receptive), with the second and sixth lines changing. It replays a previously observed sample without making a new quantum request.
 
 ```powershell
-py .\main.py cast --hex 649640 --at 2026-11-24T20:07:13.986461+08:00 --view human --text
+py .\main.py cast --hex df67c9 --at 2026-11-25T09:30:06+08:00 --view human --text
 ```
 
 ```text
 Hexagram Casting
-Source: user_provided_reference / 649640
+Source: user_provided_reference / df67c9
 Mode: manual_reference_cast | Status: complete
 
-Primary 50: 火風鼎
+Primary  04: 山水蒙
+Relating 02: 坤為地
 
-   HEXAGRAM
-6  ---------
-5  ---- ----
-4  ---------
-3  ---------
-2  ---------
-1  ---- ----
+   PRIMARY            RELATING
+6  ---------  *       ---- ----
+5  ---- ----          ---- ----
+4  ---- ----          ---- ----
+3  ---- ----          ---- ----
+2  ---------  *       ---- ----
+1  ---- ----          ---- ----
 
-Moving lines: none
+* Line 2: Old Yang -> Yin
+* Line 6: Old Yang -> Yin
 
-Gregorian    : 2026-11-24 (Tuesday)
-Lunar        : 丙午年十月十六
-UTC Time     : 12:07:13 (UTC+00:00)
-Local Time   : 20:07:13 (UTC+08:00)
+Gregorian    : 2026-11-25 (Wednesday)
+Lunar        : 丙午年十月十七
+UTC Time     : 01:30:06 (UTC+00:00)
+Local Time   : 09:30:06 (UTC+08:00)
 Solar term   : 小雪
-Four pillars : 丙午 己亥 壬寅 庚戌
+Four pillars : 丙午 己亥 癸卯 丁巳
 
 Classical Text / 周易
-本卦 50 鼎：元吉，亨。
+本卦 04 蒙：亨。匪我求童蒙，童蒙求我。初筮告，再三瀆，瀆則不告。利貞。
+九二：包蒙吉，納婦吉，子克家。
+上九：擊蒙，不利為寇，利禦寇。
+之卦 02 坤：元亨。利牝馬之貞。
+君子有攸往，先迷後得主。
+利西南得朋，東北喪朋。安貞，吉。
 ```
 
-When no lines change, the human view displays only the primary hexagram. When lines change, it displays the primary and relating hexagrams side by side, marking the changing lines. The human view shows the Gregorian date, traditional Chinese lunar date (including leap months), UTC and local time, solar term and four pillars when available. The JSON retains the original numeric calendar fields and full timestamp precision. The terminal also displays the classical source link. This fixed example illustrates the output format; live casts are never selected or redrawn for a favorable result.
+When no lines change, the human view displays only the primary hexagram. When lines change, it displays the primary and relating hexagrams side by side, marking the changing lines. The human view shows the Gregorian date, traditional Chinese lunar date (including leap months), UTC and local time, solar term and four pillars when available. The JSON retains the original numeric calendar fields and full timestamp precision. The terminal also displays the classical source links. This fixed example illustrates the output format; live casts are never selected or redrawn for a favorable result.
 
-No interpretation is attached to this example. Its meaning depends on the question and the reader's approach.
+For an optional reading of this example in Traditional Chinese, English, or both languages, see [Reference Interpretation — Meng to Kun (蒙之坤)](https://github.com/cctsao1008/trng-iching/issues/1#issuecomment-7153460638). These readings are examples, not prescribed interpretations.
 
 ### Output options
 
