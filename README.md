@@ -105,7 +105,7 @@ The human-readable display presents the primary judgment, the moving-line statem
 
 These passages are references, not compulsory rules for reading a hexagram. Different interpretive traditions, personal reflection, and AI-assisted study remain open to the reader.
 
-The Chinese text comes from [Wikisource — Zhouyi](https://zh.wikisource.org/wiki/周易), with its source characters preserved. See [source revisions](data/sources.json) and [attribution and licensing](data/LICENSE.md). The transcription has been checked against captured source material; independent comparison of textual editions has not been performed.
+The Chinese text comes from [Wikisource — Zhouyi](https://zh.wikisource.org/wiki/周易), with its source characters preserved. See [source revisions](data/sources.json) and [attribution and licensing](data/LICENSE.md). The transcription has been checked against captured source material. Known extraction CSS was removed from 32 ordinary lines; explicit inline variants are preserved separately from the base reading. Independent comparison of textual editions has not been performed.
 
 ## <img src="assets/cash-coin.svg" width="24" height="24" align="absmiddle" alt="Ancient Chinese cash coin"> Casting a Hexagram
 
@@ -162,8 +162,8 @@ Relating 02: 坤為地
 
 Gregorian    : 2026-11-25 (Wednesday)
 Lunar        : 丙午年十月十七
-UTC Time     : 01:30:06 (UTC+00:00)
-Local Time   : 09:30:06 (UTC+08:00)
+UTC Time     : 2026-11-25 01:30:06 (UTC+00:00)
+Local Time   : 2026-11-25 09:30:06 (UTC+08:00)
 Solar term   : 小雪
 Four pillars : 丙午 己亥 癸卯 丁巳
 
@@ -176,7 +176,7 @@ Classical Text / 周易
 利西南得朋，東北喪朋。安貞，吉。
 ```
 
-When no lines change, the human view displays only the primary hexagram. When lines change, it displays the primary and relating hexagrams side by side, marking the changing lines. The human view shows the Gregorian date, traditional Chinese lunar date (including leap months), UTC and local time, solar term and four pillars when available. The JSON retains the original numeric calendar fields and full timestamp precision. The terminal also displays the classical source links. This fixed example illustrates the output format; live casts are never selected or redrawn for a favorable result.
+When no lines change, the human view displays only the primary hexagram. When lines change, it displays the primary and relating hexagrams side by side, marking the changing lines. The human view shows the Gregorian date, traditional Chinese lunar date (including leap months), UTC and local date/time, solar term and four pillars when available. The JSON retains the original numeric calendar fields and full timestamp precision. The terminal also displays the classical source links. This fixed example illustrates the output format; live casts are never selected or redrawn for a favorable result.
 
 For an optional reading of this example in Traditional Chinese, English, or both languages, see [Reference Interpretation — Meng to Kun (蒙之坤)](https://github.com/cctsao1008/trng-iching/issues/1#issuecomment-7153460638). These readings are examples, not prescribed interpretations.
 
@@ -196,7 +196,7 @@ Add `--source trng.info` or `--source lfdr.de` to any of these live commands to 
 
 Each live command casts a new hexagram. Confirm that the result is complete before using it; do not redraw to bypass a failure.
 
-File output is optional: add `--json-out <new-file>` if desired. Existing files are not overwritten. An explicitly saved record can be displayed with `py .\main.py view --input cast.json --text` without casting again.
+File output is optional: add `--json-out <new-file>` if desired. Existing files are not overwritten. If Human View rendering fails after a cast is formed, the existing JSON is exposed on stdout and the error is reported on stderr; no new cast is made. An explicitly saved record can be displayed with `py .\main.py view --input cast.json --text` without casting again.
 
 ## 🔬 Modern Foundations
 

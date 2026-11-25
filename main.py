@@ -374,10 +374,20 @@ def main(argv: list[str] | None = None) -> int:
                 sys.stdout.write(payload)
                 raise
         if args.command == "cast" and args.view == "human":
-            if args.audit and args.json_out is None:
+            json_emitted = args.audit and args.json_out is None
+            if json_emitted:
                 sys.stdout.write(payload + "\n")
                 sys.stdout.flush()
-            _write_human(render_human(result, classical=args.text))
+            try:
+                human = render_human(result, classical=args.text)
+            except Exception:
+                # The cast is already formed. Expose it even if optional
+                # presentation fails, without saving or requesting entropy again.
+                if not json_emitted:
+                    sys.stdout.write(payload)
+                    sys.stdout.flush()
+                raise
+            _write_human(human)
         else:
             sys.stdout.write(payload)
     except Exception as exc:

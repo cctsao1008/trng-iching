@@ -105,7 +105,7 @@ Human View 可呈現本卦卦辭、動爻爻辭及不同於本卦的之卦卦辭
 
 這些經文是參考資料，而非強制的解卦規則。讀者可以依不同易學傳統、自我反思或 AI 輔助研究來理解卦象。
 
-中文經文取自[維基文庫 — 周易](https://zh.wikisource.org/wiki/周易)，保留來源文字。詳見[來源版本](data/sources.json)與[著作權及授權說明](data/LICENSE.md)。經文已與擷取的來源資料核對，但尚未完成不同版本的獨立校勘。
+中文經文取自[維基文庫 — 周易](https://zh.wikisource.org/wiki/周易)，保留來源文字。詳見[來源版本](data/sources.json)與[著作權及授權說明](data/LICENSE.md)。經文已與擷取的來源資料核對，並移除 32 筆普通爻辭的已知 CSS 污染；明確的行內異文與正文分開保留，但尚未完成不同版本的獨立校勘。
 
 ## <img src="assets/cash-coin.svg" width="24" height="24" align="absmiddle" alt="古銅錢"> 起卦
 
@@ -162,8 +162,8 @@ Relating 02: 坤為地
 
 Gregorian    : 2026-11-25 (Wednesday)
 Lunar        : 丙午年十月十七
-UTC Time     : 01:30:06 (UTC+00:00)
-Local Time   : 09:30:06 (UTC+08:00)
+UTC Time     : 2026-11-25 01:30:06 (UTC+00:00)
+Local Time   : 2026-11-25 09:30:06 (UTC+08:00)
 Solar term   : 小雪
 Four pillars : 丙午 己亥 癸卯 丁巳
 
@@ -176,7 +176,7 @@ Classical Text / 周易
 利西南得朋，東北喪朋。安貞，吉。
 ```
 
-沒有動爻時，Human View 僅顯示本卦；有動爻時，並列本卦與之卦，並標示動爻。Human View 亦會在資料可用時呈現西曆、傳統農曆日期（含閏月）、UTC 與本地時間、節氣及四柱。JSON 保留原始數值欄位及完整時間戳精度。終端機也會顯示經文來源連結。此固定範例用於展示輸出格式，不代表即時起卦會挑選或重抽吉利卦象。
+沒有動爻時，Human View 僅顯示本卦；有動爻時，並列本卦與之卦，並標示動爻。Human View 亦會在資料可用時呈現西曆、傳統農曆日期（含閏月）、UTC 與本地日期時間、節氣及四柱。JSON 保留原始數值欄位及完整時間戳精度。終端機也會顯示經文來源連結。此固定範例用於展示輸出格式，不代表即時起卦會挑選或重抽吉利卦象。
 
 如欲閱讀此卦的中文、英文或中英對照解讀，可參考[蒙之坤解卦範例](https://github.com/cctsao1008/trng-iching/issues/1#issuecomment-7153460638)。這些是參考範例，而非規定的解卦方法。
 
@@ -196,7 +196,7 @@ Classical Text / 周易
 
 每次即時起卦指令都會形成新卦。使用前確認結果完整，不要為了繞過失敗而重新起卦。
 
-如需儲存檔案，可選擇加入 `--json-out <new-file>`，不會覆寫既有檔案。已明確儲存的紀錄可透過 `py .\main.py view --input cast.json --text` 再次顯示，無須重新起卦。
+如需儲存檔案，可選擇加入 `--json-out <new-file>`，不會覆寫既有檔案。若卦已形成但 Human View 呈現失敗，既有 JSON 會輸出至 stdout，錯誤則輸出至 stderr，不會重新起卦。已明確儲存的紀錄可透過 `py .\main.py view --input cast.json --text` 再次顯示，無須重新起卦。
 
 ## 🔬 現代科學基礎
 

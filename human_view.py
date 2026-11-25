@@ -1,6 +1,6 @@
 """Read-only rendering of the v0.4.0 casting record."""
 import json
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 from iching import cast_from_hex
@@ -48,12 +48,27 @@ def _calendar_rows(record: dict) -> list[str]:
     """Present the civil and lunar dates without changing the cast record."""
     rows = []
     stamp = record.get("timestamp")
-    instant = datetime.fromisoformat(stamp.replace("Z", "+00:00")) if stamp else None
+    instant = None
+    if stamp is not None:
+        if not isinstance(stamp, str):
+            raise ValueError("Invalid cast timestamp: expected an ISO 8601 string")
+        instant = datetime.fromisoformat(stamp.replace("Z", "+00:00"))
+        if instant.utcoffset() != timedelta(hours=8):
+            raise ValueError("Cast timestamp must use the UTC+08:00 reference offset")
     if instant is not None:
         weekday = ("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")[instant.weekday()]
         rows.append(f"Gregorian    : {instant:%Y-%m-%d} ({weekday})")
-    lunar = (record.get("calendar") or {}).get("lunar")
-    if lunar:
+    calendar = record.get("calendar")
+    if calendar is not None:
+        if not isinstance(calendar, dict) or not isinstance(calendar.get("lunar"), dict):
+            raise ValueError("Invalid calendar: expected a lunar object")
+        lunar = calendar["lunar"]
+        for key, low, high in (("year", 1900, 2100), ("month", 1, 12), ("day", 1, 30)):
+            value = lunar.get(key)
+            if type(value) is not int or not low <= value <= high:
+                raise ValueError(f"Invalid lunar {key}: expected integer in {low}..{high}")
+        if type(lunar.get("is_leap_month")) is not bool:
+            raise ValueError("Invalid lunar leap-month flag: expected boolean")
         # Lunar year follows the lunar new year, not the solar Li Chun boundary.
         year_index = lunar["year"] - 1984
         year = "甲乙丙丁戊己庚辛壬癸"[year_index % 10] + "子丑寅卯辰巳午未申酉戌亥"[year_index % 12]
@@ -66,14 +81,9 @@ def _calendar_rows(record: dict) -> list[str]:
         leap = "閏" if lunar["is_leap_month"] else ""
         rows.append(f"Lunar        : {year}年{leap}{month}月{day}")
     if instant is not None:
-        offset = instant.strftime("%z")
-        zone = f"UTC{offset[:3]}:{offset[3:]}" if offset else "timezone not provided"
-        if instant.utcoffset() is not None:
-            utc = instant.astimezone(timezone.utc)
-            rows.append(f"UTC Time     : {utc:%H:%M:%S} (UTC+00:00)")
-        else:
-            rows.append("UTC Time     : not available")
-        rows.append(f"Local Time   : {instant:%H:%M:%S} ({zone})")
+        utc = instant.astimezone(timezone.utc)
+        rows.append(f"UTC Time     : {utc:%Y-%m-%d %H:%M:%S} (UTC+00:00)")
+        rows.append(f"Local Time   : {instant:%Y-%m-%d %H:%M:%S} (UTC+08:00)")
     else:
         rows.append("UTC Time     : not provided")
         rows.append("Local Time   : not provided")
