@@ -754,3 +754,179 @@ def validate_selected_observation(record, domain, anchor, completed):
     for key in ('line', 'values', 'deltas', 'signs'):
         _require_observation(json.dumps(replay[key]) == json.dumps(r[key]), 'endpoint replay mismatch: ' + key)
     return r['line']
+
+
+# ---------------------------------------------------------------------------
+# Physical candidate sources — native observation only; no line mapping
+# ---------------------------------------------------------------------------
+
+PHYSICAL_SOURCE_IDS = ('D06', 'D26-NEST')
+
+
+def _physical_bounds(start, end):
+    """Use bounded, half-open UTC intervals; never infer a casting window."""
+    if not aware(start) or not aware(end):
+        raise ValueError('physical source bounds require timezones')
+    start, end = start.astimezone(timezone.utc), end.astimezone(timezone.utc)
+    if any(t.second or t.microsecond for t in (start, end)):
+        raise ValueError('physical source bounds must be minute aligned')
+    if not timedelta(0) < end-start <= timedelta(days=1):
+        raise ValueError('physical source interval must be within 24 hours')
+    return start, end
+
+
+def physical_source_url(source, start, end):
+    """Build an explicit native-product request, without source fallback."""
+    start, end = _physical_bounds(start, end)
+    if source == 'D06':
+        fmt = '%Y-%m-%dT%H:%M:%SZ'
+        return 'https://geomag.usgs.gov/ws/data/?' + urlencode(dict(
+            id='BOU', elements='F', sampling_period=1, type='R0', format='json',
+            starttime=start.strftime(fmt),
+            endtime=(end-timedelta(seconds=1)).strftime(fmt)))
+    if source == 'D26-NEST':
+        # NEST documents 0 as best available resolution, not guaranteed 1 min.
+        params = {'formchk': 1, 'stations[]': 'OULU', 'output': 'ascii',
+                  'tabchoice': 'ori', 'dtype': 'corr_for_efficiency',
+                  'date_choice': 'bydate', 'tresolution': 0, 'yunits': 0}
+        for prefix, t in (('start', start), ('end', end)):
+            for name, attr in (('year', 'year'), ('month', 'month'), ('day', 'day'),
+                               ('hour', 'hour'), ('min', 'minute')):
+                params[prefix+'_'+name] = getattr(t, attr)
+        return 'https://www.nmdb.eu/nest/draw_graph.php?' + urlencode(params)
+    raise ValueError('unknown physical source')
+
+
+def parse_physical_geomag(doc):
+    """Candidate USGS JSON shape; retain native F, never derive it from XYZ."""
+    imo = doc['metadata']['intermagnet']['imo']
+    if imo['iaga_code'] != 'BOU':
+        raise ValueError('unexpected geomagnetic observatory')
+    channels = doc['values']
+    if not isinstance(channels, list) or len(channels) != 1:
+        raise ValueError('expected one geomagnetic channel')
+    channel = channels[0]
+    if channel['metadata']['element'] != 'F':
+        raise ValueError('expected native F channel')
+    times, values = doc['times'], channel['values']
+    if not isinstance(times, list) or not isinstance(values, list) or len(times) != len(values):
+        raise ValueError('geomagnetic array mismatch')
+    return [(utc_label(t), number(v)) for t, v in zip(times, values)], {
+        'station': 'BOU', 'channel': 'F', 'unit_requested': 'nT',
+        'channel_metadata': channel['metadata'], 'generated': doc['metadata'].get('generated')}
+
+
+def parse_physical_nest(text):
+    """Strict candidate single-station ASCII grammar; unknown formats reject."""
+    import html
+
+    if not isinstance(text, str):
+        raise ValueError('expected NEST text')
+    if text.lstrip().startswith('<'):
+        blocks = re.findall(r'<pre\b[^>]*>(.*?)</pre\s*>', text, re.I | re.S)
+        if len(blocks) != 1:
+            raise ValueError('expected one NEST ASCII block')
+        text = html.unescape(blocks[0])
+    rows, headers = [], []
+    station_header = False
+    for line in text.splitlines():
+        line = line.strip()
+        if not line:
+            continue
+        if line.startswith('#') or re.fullmatch(r'start_date_time\s*;\s*OULU', line, re.I):
+            headers.append(line)
+            if re.fullmatch(r'#?\s*start_date_time\s*;\s*OULU', line, re.I):
+                station_header = True
+            continue
+        match = re.fullmatch(r'(\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}:\d{2})\s*;\s*([^;]*)', line)
+        if not match:
+            raise ValueError('unrecognized NEST ASCII row')
+        stamp, raw = match.groups()
+        value = None if raw.strip().lower() in ('', 'null', 'nan') else number(raw.strip())
+        if value is None and raw.strip().lower() not in ('', 'null', 'nan'):
+            raise ValueError('unrecognized NEST numeric field')
+        rows.append((utc_label(stamp), value))
+    if not station_header:
+        raise ValueError('NEST station header not verified')
+    return rows, {'station': 'OULU', 'headers': headers, 'unit_requested': 'counts/s'}
+
+
+def inspect_physical_rows(source, rows, start, end):
+    """Preserve missing/duplicate labels; report native cadence as a candidate."""
+    start, end = _physical_bounds(start, end)
+    if source not in PHYSICAL_SOURCE_IDS:
+        raise ValueError('unknown physical source')
+    step = 1 if source == 'D06' else 60
+    indexed = {}
+    off_grid = outside = 0
+    for stamp, value in rows:
+        if not aware(stamp):
+            raise ValueError('naive physical observation label')
+        stamp = stamp.astimezone(timezone.utc)
+        if not start <= stamp < end:
+            outside += 1
+            continue
+        if grid_floor(stamp, step) != stamp:
+            off_grid += 1
+            continue
+        indexed.setdefault(stamp, []).append(value)
+    expected = int((end-start).total_seconds()) // step
+    unique = sorted(indexed)
+    valid = sum(len(v) == 1 and v[0] is not None and v[0] > 0
+                for v in indexed.values())
+    return dict(expected_labels=expected, distinct_labels=len(unique),
+                unique_positive_labels=valid, missing_labels=expected-len(unique),
+                duplicate_epochs=sum(len(v) > 1 for v in indexed.values()),
+                off_grid_rows=off_grid, outside_rows=outside,
+                candidate_cadence_seconds=step,
+                observed_step_seconds=sorted({int((b-a).total_seconds())
+                                              for a,b in zip(unique, unique[1:])}),
+                earliest_label_utc=iso(unique[0]) if unique else None,
+                latest_label_utc=iso(unique[-1]) if unique else None)
+
+
+def acquire_physical_observation(source, *, start, end, research_acknowledged=False,
+                                 fetch=None, clock=utcnow):
+    """One bounded research request; no live casting qualification implied.
+
+    The caller must review provider terms before explicitly acknowledging
+    research use. No automatic saving, retry, fallback or QRNG invocation.
+    """
+    if research_acknowledged is not True:
+        raise ValueError('explicit physical research-use acknowledgement required')
+    start, end = _physical_bounds(start, end)
+    url = physical_source_url(source, start, end)
+    requested = clock()
+    if not aware(requested) or end > requested:
+        raise ValueError('physical interval must be completed before request')
+    fetch = fetch or (windows_fetch if sys.platform == 'win32' else urllib_fetch)
+    _LOG.debug("physical source=%s research request started", source)
+    meta, body = fetch(url)
+    received = clock()
+    if not aware(received) or received < requested:
+        raise TransportError('physical request chronology')
+    if type(meta.get('status')) is not int or meta['status'] != 200 or meta.get('url') != url:
+        raise TransportError('physical response identity mismatch')
+    if not isinstance(body, bytes) or not 0 < len(body) <= MAX_BYTES:
+        raise TransportError('empty or oversized physical response')
+    if source == 'D06':
+        rows, native = parse_physical_geomag(_decode_response(url, meta, body, parse_float=Decimal))
+    else:
+        media = str(meta.get('content_type', '')).lower()
+        if not ('text/plain' in media or 'text/html' in media):
+            raise TransportError('expected NEST ASCII response')
+        rows, native = parse_physical_nest(body.decode('utf-8-sig'))
+    coverage = inspect_physical_rows(source, rows, start, end)
+    evidence = dict(source=source, status='candidate_parsed', request_url=url,
+                    start_utc=iso(start), end_exclusive_utc=iso(end),
+                    requested_at=iso(requested), received_at=iso(received),
+                    http_status=meta['status'], content_type=meta.get('content_type'),
+                    entity_sha256=hashlib.sha256(body).hexdigest(),
+                    entity_bytes=len(body), native_metadata=native, coverage=coverage,
+                    timestamp_semantics=('measurement_interval_start' if source == 'D26-NEST'
+                                         else 'native_sample_label_support_unverified'),
+                    native_resolution_verified=False, source_qc_validated=False,
+                    historical_as_of_verified=False, publication_time_utc=None,
+                    actual_source_use_approved=False, ready_for_cast=False)
+    _LOG.debug("physical source=%s candidate parsed rows=%s", source, len(rows))
+    return evidence, rows
