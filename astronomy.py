@@ -7,6 +7,7 @@ This module does not assign Chinese lunar dates or claim official accuracy.
 from __future__ import annotations
 
 import hashlib
+import math
 from datetime import date, datetime, time, timedelta, timezone
 from pathlib import Path
 
@@ -18,6 +19,43 @@ JPL_DE440S_URL = (
 # published third-party DE440s inventory; original file remains unmodified.
 JPL_DE440S_SHA256 = "c1c7feeab882263fc493a9d5a5b2ddd71b54826cdf65d8d17a76126b260a49f2"
 UTC_PLUS_8 = timezone(timedelta(hours=8))
+
+
+# Frozen MPH Earth observation model (P1D2a).
+EARTH_SITE = (37.8063, -122.4659, 0.0)
+EARTH_GM = {"sun": 1.32712440041279419e20, "moon": 4.902800118e12}
+EARTH_SOURCE = "M01:SF:DE440s"
+EARTH_MODEL = "candidate geometric rigid radial differential Sun+Moon"
+EARTH_SKYFIELD_VERSION = "1.55"
+
+
+def radial_differential_microgal(r, body, gm):
+    """Geometric differential acceleration projected onto the geocentric radial."""
+    s = tuple(x - y for x, y in zip(body, r))
+    a, b, c = (math.sqrt(sum(x * x for x in v)) for v in (s, body, r))
+    return gm * sum((x / a**3 - y / b**3) * z / c
+                    for x, y, z in zip(s, body, r)) * 1e8
+
+
+def validate_earth_endpoint(endpoint):
+    """Validate selected endpoint model provenance before requesting entropy.
+
+    A successful check does not independently reproduce the physical model.
+    """
+    qc = endpoint["native_qc"]
+    if (endpoint["source"] != EARTH_SOURCE or endpoint["eligible"] is not True
+            or qc["kernel"] != JPL_DE440S_SHA256
+            or qc["skyfield"] != EARTH_SKYFIELD_VERSION
+            or tuple(qc["site"]) != EARTH_SITE or qc["gm"] != EARTH_GM
+            or qc["model"] != EARTH_MODEL):
+        raise ValueError("Earth model metadata mismatch")
+    components = qc["components_microgal"]
+    if (set(components) != set(EARTH_GM)
+            or any(type(v) not in (float, int) or not math.isfinite(v)
+                   for v in components.values())
+            or not math.isfinite(float(endpoint["value"]))
+            or float(endpoint["value"]) != sum(components.values())):
+        raise ValueError("Earth model component sum mismatch")
 
 
 def _iso_utc(value: datetime) -> str:
@@ -88,6 +126,44 @@ class PinnedEphemeris:
             self.kernel.close()
         self.kernel = None
         return False
+
+    def earth_observations(self, anchor: datetime) -> tuple[list[dict], str]:
+        """Return the three frozen P1D2a model rows and verified kernel digest.
+
+        The caller applies the observation data contract and R-Trend. The
+        session may also supply the common astronomical reference snapshot.
+        """
+        if self.kernel is None or self.ts is None:
+            raise RuntimeError("PinnedEphemeris must be opened first")
+        if anchor.tzinfo is None or anchor.utcoffset() is None:
+            raise ValueError("Earth anchor must be timezone-aware")
+        if self.skyfield_version != EARTH_SKYFIELD_VERSION:
+            raise ValueError("Skyfield version mismatch")
+        if self.digest != JPL_DE440S_SHA256:
+            raise ValueError("DE440s hash mismatch")
+
+        from skyfield.api import wgs84
+
+        t = datetime.fromtimestamp(int(anchor.timestamp()) // 360 * 360, timezone.utc)
+        site = wgs84.latlon(EARTH_SITE[0], EARTH_SITE[1], elevation_m=EARTH_SITE[2])
+        earth = self.kernel["earth"]
+        rows = []
+        for minutes in (60, 30, 0):
+            stamp = t - timedelta(minutes=minutes)
+            tm = self.ts.from_datetime(stamp)
+            r = site.at(tm).position.m
+            components = {
+                name: float(radial_differential_microgal(
+                    r, (self.kernel[name] - earth).at(tm).position.m, gm))
+                for name, gm in EARTH_GM.items()
+            }
+            value = sum(components.values())
+            rows.append(dict(time=stamp, source=EARTH_SOURCE, value=value,
+                             eligible=math.isfinite(value), qc=dict(
+                                 kernel=self.digest, skyfield=self.skyfield_version,
+                                 site=EARTH_SITE, gm=dict(EARTH_GM),
+                                 components_microgal=components, model=EARTH_MODEL)))
+        return rows, self.digest
 
     def snapshot(self, cast_time_utc: datetime) -> dict:
         """Geocentric apparent ecliptic longitudes at exactly one UTC instant."""

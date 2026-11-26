@@ -1,4 +1,4 @@
-"""Single-sample deterministic TRNG data pipeline; GPT handles all interpretation.
+"""Unified deterministic observation-to-hexagram pipeline; interpretation is external.
 
 Optional astronomy/calendar failures never trigger a redraw or erase a valid cast.
 """
@@ -36,6 +36,7 @@ def _iso_utc(value: datetime) -> str:
 def _cast_context(
     *, sample: dict, cast: dict, cast_time: datetime | None,
     ephemeris_path: Path, reference_file: Path, audit: bool,
+    ephemeris_session: PinnedEphemeris | None = None,
 ) -> dict:
     """One immutable cast, plus independent optional reference components."""
     is_live = sample.get("source") in QRNG_ENDPOINTS
@@ -90,8 +91,11 @@ def _cast_context(
 
     solar_longitude = None
     try:
-        with PinnedEphemeris(ephemeris_path) as ephemeris:
-            raw_astronomy = ephemeris.snapshot(cast_time)
+        if ephemeris_session is not None:
+            raw_astronomy = ephemeris_session.snapshot(cast_time)
+        else:
+            with PinnedEphemeris(ephemeris_path) as ephemeris:
+                raw_astronomy = ephemeris.snapshot(cast_time)
         solar_longitude = raw_astronomy["sun_apparent_ecliptic_longitude_degrees"]
         context["astronomy"] = raw_astronomy if audit else {
             "status": raw_astronomy["status"],
@@ -246,6 +250,362 @@ def _write_human(value: str) -> None:
         sys.stdout.buffer.flush()
 
 
+_MPH_DOMAINS = ('Metal', 'Wood', 'Water', 'Fire', 'Earth')
+_MPH_TIMESTAMP_SEMANTICS = 'client request and reception, not TRNG hardware generation'
+
+
+def _mph_require(condition, message):
+    if not condition:
+        raise ValueError(message)
+
+
+def _mph_utc(value):
+    from datetime import datetime, timedelta
+    if isinstance(value, str):
+        value = datetime.fromisoformat(value.replace('Z', '+00:00'))
+    _mph_require(isinstance(value, datetime) and value.utcoffset() == timedelta(0),
+                 'MPH requires UTC timestamps')
+    return value
+
+
+def _mph_validate_record(record, domain, anchor, completed):
+    """Recheck selected endpoints from the same in-process acquisition.
+
+    This is not an independent provider or publication-finality audit.
+    """
+    import json
+    from decimal import Decimal
+    import sources as s
+    from astronomy import validate_earth_endpoint
+
+    r = record
+    source, unit, cadence, cap, _ = s.PROFILES[domain]
+    _mph_require(r['domain'] == domain and r['contract'] == s.VERSION
+                 and r['source'] == source and r['unit'] == unit, 'domain identity')
+    _mph_require(r['status'] == 'candidate_resolved' and r['reason'] == 'ok'
+                 and type(r['line']) is int and r['line'] in (6, 7, 8, 9), 'domain state')
+    _mph_require(_mph_utc(r['anchor']) == anchor, 'domain anchor')
+    times = [_mph_utc(t) for t in r['endpoint_times']]
+    _mph_require(len(times) == 3 and times[0] < times[1] < times[2] <= anchor, 'endpoint order')
+    _mph_require(r['age_seconds'] == (anchor - times[-1]).total_seconds(), 'endpoint age')
+    if domain == 'Earth':
+        _mph_require(r['input_sha256'] == s.KERNEL and anchor <= _mph_utc(r['computed_at']) <= completed,
+                     'Earth computation provenance')
+    else:
+        m = r['transport']
+        _mph_require(m['source'] == s.HTTP[domain] and m['endpoint'] == s.endpoint(s.HTTP[domain], anchor)
+                     and m['status'] == 'transport_shape_pass' and m['http_status'] == 200
+                     and m['entity_sha256'] == r['input_sha256'], 'transport identity')
+        _mph_require(isinstance(r['input_sha256'], str) and len(r['input_sha256']) == 64
+                     and all(c in '0123456789abcdef' for c in r['input_sha256']), 'digest shape')
+        _mph_require(_mph_utc(m['anchor']) == anchor <= _mph_utc(m['requested_at'])
+                     <= _mph_utc(m['received_at']) == _mph_utc(r['received_at']) <= completed,
+                     'transport chronology')
+        _mph_require(m['ready_for_cast'] is False and type(m['qrng_requests']) is int
+                     and m['qrng_requests'] == 0, 'transport safety')
+    if domain == 'Wood':
+        n = r['native_adapter']
+        _mph_require(r['profile'] == s.PROFILE and n['profile'] == s.PROFILE
+                     and n['source'] == s.SOURCE and n['endpoints'] == r['endpoints']
+                     and n['line'] == r['line'], 'Wood profile')
+        replay = s.evaluate_wood(r['endpoints'], anchor, source=s.SOURCE,
+                                 received_at=_mph_utc(r['received_at']))
+        _mph_require(replay['endpoint_close_utc'] == r['endpoint_times'], 'Wood session replay')
+    else:
+        if domain in ('Metal', 'Fire'):
+            diag = r['duplicate_diagnostics']
+            _mph_require(diag['policy'] == 'required_endpoint_unique_v0.1'
+                         and diag['required_duplicate_groups'] == 0
+                         and all(_mph_utc(g['time']) not in times and g['required_endpoint'] is False
+                                 for g in diag['groups']), 'solar duplicate endpoints')
+        endpoints = r['endpoints']
+        _mph_require(len(endpoints) == 3 and [_mph_utc(e['time']) for e in endpoints] == times,
+                     'selected endpoint identity')
+        rows = []
+        for e in endpoints:
+            qc = e['native_qc']
+            value = s.number(e['value'])
+            if domain in ('Metal', 'Fire'):
+                _mph_require(qc['active'] is True and qc['source'] == 'SOLAR1'
+                             and set(qc['flags']) == set(s.FLAGS[domain])
+                             and all(type(v) is int and v == 0 for v in qc['flags'].values())
+                             and value is not None and value > 0, 'solar QC')
+                if domain == 'Fire':
+                    den, temp = s.number(qc['density']), s.number(qc['temperature'])
+                    _mph_require(den is not None and temp is not None and den > 0 and temp > 0
+                                 and value == den * temp * Decimal('1.380649e-8'), 'Fire derivation')
+            elif domain == 'Water':
+                f = qc['flags']
+                _mph_require(qc['q'] == 'p' and len(f) == 4 and f[0].isascii() and f[0].isdigit()
+                             and f[1:] == ['0', '0', '0'] and value is not None
+                             and value == value.to_integral_value(), 'Water QC')
+            else:
+                validate_earth_endpoint(e)
+            rows.append(dict(time=_mph_utc(e['time']), source=e['source'], value=e['value'],
+                             eligible=e['eligible'], qc=qc))
+        replay = s.normalize(domain, rows, anchor, r['input_sha256'], r['evidence_kind'], r.get('received_at'))
+        _mph_require(replay['endpoint_times'] == r['endpoint_times'], 'selected endpoint replay')
+    _mph_require(replay['status'] == 'candidate_resolved', 'endpoint replay incomplete')
+    for key in ('line', 'values', 'deltas', 'signs'):
+        _mph_require(json.dumps(replay[key]) == json.dumps(r[key]), 'endpoint replay mismatch: ' + key)
+    return r['line']
+
+
+def _mph_check_dependencies():
+    """Required only for MPH; leave Quantum startup independent of Wood dependencies."""
+    from importlib.metadata import version
+    from zoneinfo import ZoneInfo
+    import exchange_calendars as xc
+    import pandas  # Verify actual imports before external acquisition.
+    import skyfield
+    _mph_require(version('exchange-calendars') == xc.__version__ == '4.13.1', 'calendar version mismatch')
+    _mph_require(version('skyfield') == skyfield.__version__ == '1.55', 'Skyfield version mismatch')
+    ZoneInfo('America/New_York')
+
+
+def _mph_observe_and_cast(*, source, permitted, session, audit=False):
+    """Single private evaluation; caller owns the verified kernel session.
+
+    The returned redacted summary is separate from the private in-process cast.
+    Assembly success is not a claim of complete reference or presentation.
+    """
+    import sys
+    import sources as s
+    from astronomy import JPL_DE440S_SHA256, EARTH_SKYFIELD_VERSION
+    from iching import cast_from_lines, lines_from_hex
+
+    summary = dict(status='aborted', source=source, events=[], domains=[],
+                   resolved_domains=0, five_domain_http_attempts=0, qrng_logical_attempts=0,
+                   qrng_response_validated=False, top_line_validated=False, hexagram_assembled=False,
+                   ready_for_cast=False, ready_for_production=False, actual_source_use_approved=False,
+                   source_policy_review='DEFERRED_TO_P3_NOT_APPROVED')
+    phase = 'input'
+    private = None
+    try:
+        _mph_require(permitted is True and source in s.QRNG_ENDPOINTS, 'private evaluation required')
+        phase = 'dependency_preflight'
+        _mph_check_dependencies()
+        _mph_require(session.kernel is not None and session.ts is not None
+                     and session.digest == JPL_DE440S_SHA256
+                     and session.skyfield_version == EARTH_SKYFIELD_VERSION, 'verified open kernel required')
+        anchor = _mph_utc(s.utcnow())
+        summary['anchor_utc'] = anchor.isoformat()
+        phase = 'five_domain_acquisition'
+        summary['events'].append(phase)
+        records = []
+        for domain in _MPH_DOMAINS:
+            try:
+                if domain == 'Earth':
+                    rows, digest = session.earth_observations(anchor)
+                    r = s.normalize(domain, rows, anchor, digest, 'local_model_candidate')
+                    r.update(computed_at=_mph_utc(s.utcnow()).isoformat(), model_reproduction_verified=False)
+                else:
+                    summary['five_domain_http_attempts'] += 1
+                    r = s.observe_domain(domain, anchor)
+            except Exception as exc:
+                r = dict(domain=domain, status='incomplete', reason='acquisition_or_adapter_failed',
+                         error_type=type(exc).__name__)
+            records.append(r)
+            summary['domains'].append(dict(domain=domain, status=r['status'], reason=r['reason'],
+                                           http_status=(r.get('transport') or {}).get('http_status'),
+                                           error_type=r.get('error_type')))
+        completed = _mph_utc(s.utcnow())
+        summary['five_domain_completed_at_utc'] = completed.isoformat()
+        summary['resolved_domains'] = sum(r['status'] == 'candidate_resolved' for r in records)
+        phase = 'five_domain_preflight'
+        summary['events'].append(phase)
+        _mph_require(summary['resolved_domains'] == 5 and summary['five_domain_http_attempts'] == 4
+                     and completed >= anchor, 'incomplete five-domain evaluation')
+        lines = [_mph_validate_record(r, domain, anchor, completed)
+                 for r, domain in zip(records, _MPH_DOMAINS)]
+        before = _mph_utc(s.utcnow())
+        _mph_require(before >= completed, 'preflight chronology')
+        summary['preflight_completed_at_utc'] = before.isoformat()
+        summary['events'].append('five_domain_preflight_pass')
+        phase = 'qrng_acquisition'
+        summary['events'].append(phase)
+        summary['qrng_logical_attempts'] = 1
+        sample = s.acquire_trng_bytes(source)
+        after = _mph_utc(s.utcnow())
+        phase = 'qrng_response_validation'
+        summary['events'].append(phase)
+        transport = 'windows_powershell_system_proxy' if sys.platform == 'win32' else 'python_urllib'
+        _mph_require(type(sample) is dict and sample['source'] == source
+                     and sample['source_endpoint'] == s.QRNG_ENDPOINTS[source]
+                     and sample['source_transport'] == transport
+                     and sample['timestamp_semantics'] == _MPH_TIMESTAMP_SEMANTICS, 'QRNG identity')
+        req, rec = _mph_utc(sample['request_time_utc']), _mph_utc(sample['receive_time_utc'])
+        _mph_require(before <= req <= rec <= after, 'QRNG chronology')
+        raw = sample['raw_hex']
+        # Exact six-digit validation is performed by the shared decoder.
+        decoded = lines_from_hex(raw)
+        summary.update(qrng_response_validated=True, qrng_request_time_utc=req.isoformat(),
+                       qrng_receive_time_utc=rec.isoformat())
+        phase = 'top_line_validation'
+        summary['events'].append(phase)
+        group = f'{int(raw, 16):024b}'[15:18]
+        value = 6 + group.count('1')
+        _mph_require(value == decoded[5], 'quantum top-line parity')
+        summary['top_line_validated'] = True
+        summary['events'].append('top_line_validation_pass')
+        phase = 'assembly'
+        cast = cast_from_lines(lines + [value], audit=audit)
+        cast['method'] = 'mph_rtrend_quantum_top_group'
+        private = dict(anchor=anchor, sample=sample, cast=cast, records=records)
+        summary.update(status='assembled', hexagram_assembled=True)
+        summary['events'].append('assembly_pass')
+    except Exception as exc:
+        summary.update(failure_phase=phase, error_type=type(exc).__name__)
+        summary['events'].append('abort')
+    return summary, private
+
+
+_MPH_MODE = 'mph_private_live_evaluation'
+_MPH_BOUNDARY = 'selected_endpoints_not_full_history_or_independent_provider_authentication'
+
+
+def _mph_project(private, summary, args, session):
+    """Project the already formed cast; never acquire again."""
+    import hashlib
+    import sources as s
+
+    context = _cast_context(sample=private['sample'], cast=private['cast'],
+                            cast_time=private['anchor'], ephemeris_path=args.ephemeris,
+                            reference_file=args.reference, audit=args.audit,
+                            ephemeris_session=session)
+    context['mode'] = _MPH_MODE
+    context['capture']['cast_time_source'] = 'live_common_five_domain_anchor_not_qrng_receive_time'
+    context['status'] = ('private_complete' if context['status'] == 'complete'
+                         else 'private_context_partial')
+    if context.get('errors'):
+        context['errors'] = [{'component': e['component'], 'error': 'local reference unavailable'}
+                             for e in context['errors']]
+    record = _present_cast_result(context, audit=args.audit)
+    # Compact selected-endpoint provenance, not a source-byte replay artifact.
+    keys = ('domain', 'source', 'status', 'anchor', 'endpoint_times', 'input_sha256', 'line')
+    evidence = [{k: r[k] for k in keys} for r in private['records']]
+    digest = hashlib.sha256(json.dumps(evidence, sort_keys=True, separators=(',', ':'),
+                                       allow_nan=False).encode()).hexdigest()
+    summary['selected_evidence_sha256'] = digest
+    raw = private['sample']['raw_hex']
+    group = f'{int(raw, 16):024b}'[15:18]
+    record['mph'] = dict(source_kind='fresh_private_observation',
+                         upstream_contract_version=s.VERSION,
+                         domains_bottom_to_top=[*_MPH_DOMAINS, 'Quantum'],
+                         request_anchor_utc=summary['anchor_utc'],
+                         timestamp_semantics=context['capture']['cast_time_source'],
+                         preflight_completed_at_utc=summary['preflight_completed_at_utc'],
+                         qrng_request_time_utc=summary['qrng_request_time_utc'],
+                         qrng_receive_time_utc=summary['qrng_receive_time_utc'],
+                         top_line_bits=group, events=list(summary['events']),
+                         five_domain_http_attempts=4, qrng_logical_attempts=1,
+                         network_count_semantics='logical_interface_invocations_not_packet_count',
+                         actual_source_use_approved=False, ready_for_cast=False,
+                         ready_for_production=False, source_policy_review='DEFERRED_TO_P3_NOT_APPROVED',
+                         selected_evidence_sha256=digest, domain_evidence=evidence,
+                         validation_boundary=_MPH_BOUNDARY)
+    if args.audit:
+        record['audit']['mph'] = dict(domain_evidence=[{**e, **{k: r[k] for k in ('values', 'deltas', 'signs')}}
+                                                      for e, r in zip(evidence, private['records'])],
+                                     entropy=dict(top_line_bit_positions_zero_based=[15, 16, 17],
+                                                  top_line_bits=group, top_line_value=private['cast']['lines_bottom_to_top'][5]))
+    return record
+
+
+def _mph_minimal(private):
+    """Explicitly incomplete private record, not a canonical saved-view record."""
+    cast = private['cast']
+    return dict(schema_version='mph-assembly-only-v0.1', mode=_MPH_MODE,
+                status='private_presentation_partial', timestamp=_iso_utc(private['anchor']),
+                randomness={k: private['sample'][k] for k in ('source', 'raw_hex')},
+                hexagram={k: cast[k] for k in ('lines_bottom_to_top', 'moving_lines', 'primary', 'relating')},
+                ready_for_production=False)
+
+
+def _mph_run(args):
+    """Single private transaction; redacted summary on stdout by default.
+
+    For explicit private views, put the diagnostic summary on stderr and leave
+    stdout for the requested view. Never automatically save, retry or redraw.
+    """
+    from human_view import validate_mph_record
+
+    summary = dict(mode=_MPH_MODE, status='aborted', source=args.source or 'trng.info',
+                   hexagram_assembled=False, five_domain_http_attempts=0, qrng_logical_attempts=0,
+                   actual_source_use_approved=False, ready_for_cast=False, ready_for_production=False,
+                   source_policy_review='DEFERRED_TO_P3_NOT_APPROVED')
+    private = record = human = payload = None
+    output_attempted = False
+    phase = 'preflight'
+    try:
+        # Fail before loading the kernel or requesting any source.
+        _mph_require(args.allow_private_evaluation is True, 'private evaluation required')
+        _mph_check_dependencies()
+        with PinnedEphemeris(args.ephemeris) as session:
+            summary, private = _mph_observe_and_cast(source=summary['source'],
+                                                     permitted=args.allow_private_evaluation,
+                                                     session=session, audit=args.audit)
+            summary['mode'] = _MPH_MODE
+            if private is not None:
+                phase = 'projection'
+                record = _mph_project(private, summary, args, session)
+                validate_mph_record(record)
+                payload = json.dumps(record, ensure_ascii=True, indent=2, allow_nan=False) + '\n'
+                summary['reference_context'] = ('COMPLETE' if record['status'] == 'private_complete' else 'PARTIAL')
+                summary['events'].append('projection_pass')
+            else:
+                summary['reference_context'] = 'NOT_RUN'
+        if private is not None:
+            # Saved records describe assembly/context, not success of the output channel.
+            summary['classical_text'] = 'NOT_REQUESTED'
+            if args.text:
+                summary['classical_text'] = 'PENDING'
+            if args.json_out is not None:
+                phase = 'save'
+                with args.json_out.open('x', encoding='utf-8', newline='\n') as out:
+                    out.write(payload)
+                summary['save'] = 'PASS'
+            if args.view == 'human':
+                phase = 'human_view'
+                human = render_human(record, classical=args.text)
+                summary['events'].append('human_view_pass')
+                if args.text:
+                    summary['classical_text'] = 'PASS'
+            phase = 'output'
+            if args.view == 'human':
+                if args.audit and args.json_out is None:
+                    output_attempted = True
+                    sys.stdout.write(payload + '\n')
+                output_attempted = True
+                _write_human(human)
+            elif args.view == 'json':
+                output_attempted = True
+                sys.stdout.write(payload)
+            summary['presentation'] = ('NOT_REQUESTED' if args.view == 'summary' else 'PASS')
+            if summary['reference_context'] != 'COMPLETE':
+                summary['status'] = 'LIVE_PRIVATE_CONTEXT_PARTIAL'
+            elif args.view == 'summary':
+                summary['status'] = 'LIVE_PRIVATE_SUMMARY_PASS'
+            else:
+                summary['status'] = 'LIVE_PRIVATE_END_TO_END_PASS'
+    except Exception as exc:
+        summary.update(status='LIVE_PRIVATE_PRESENTATION_PARTIAL' if private is not None else 'aborted',
+                       failure_phase=phase, error_type=type(exc).__name__, presentation='FAILED')
+        if args.text and summary.get('classical_text') == 'PENDING':
+            summary['classical_text'] = 'FAILED' if phase == 'human_view' else 'NOT_RUN'
+        if private is not None:
+            summary['hexagram_assembled'] = True
+            # Explicit private view may recover the formed record, even if projection fails.
+            # Never expose private data through the default summary.
+            if args.view != 'summary' and not output_attempted:
+                recovery = payload or json.dumps(_mph_minimal(private), ensure_ascii=True, indent=2) + '\n'
+                sys.stdout.write(recovery)
+    summary['disclosure'] = 'Redacted acceptance summary; no raw entropy, observed values, lines or hexagram'
+    stream = sys.stdout if args.view == 'summary' else sys.stderr
+    stream.write(json.dumps(summary, ensure_ascii=True, indent=2, allow_nan=False) + '\n')
+    return 0 if summary['status'] in ('LIVE_PRIVATE_SUMMARY_PASS', 'LIVE_PRIVATE_END_TO_END_PASS') else 1
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="TRNG I Ching deterministic research CLI")
     commands = parser.add_subparsers(dest="command", required=True)
@@ -281,8 +641,11 @@ def main(argv: list[str] | None = None) -> int:
     lookup.add_argument("--reference", type=Path, default=ROOT / "data" / "calendar_reference.json")
 
     cast_parser = commands.add_parser(
-        "cast", help="One quantum random sample with local calendar/JPL context"
+        "cast", help="Quantum or private mixed-observation casting with local calendar/JPL context"
     )
+    cast_parser.add_argument("--method", choices=("quantum", "mph"), default="quantum")
+    cast_parser.add_argument("--allow-private-evaluation", action="store_true",
+                             help="Confirm permitted private MPH technical evaluation (not a license)")
     cast_input = cast_parser.add_mutually_exclusive_group()
     cast_input.add_argument(
         "--source", choices=tuple(QRNG_ENDPOINTS),
@@ -310,7 +673,8 @@ def main(argv: list[str] | None = None) -> int:
         help="Include full provenance, bit groups and conversion conventions",
     )
 
-    cast_parser.add_argument("--view", choices=("json", "human"), default="json")
+    cast_parser.add_argument("--view", choices=("summary", "json", "human"),
+                             help="Default JSON for Quantum, redacted summary for MPH")
     cast_parser.add_argument("--json-out", type=Path,
                              help="Optionally save the same cast JSON to a new file")
     view = commands.add_parser("view", help="Render a saved cast without TRNG")
@@ -320,10 +684,23 @@ def main(argv: list[str] | None = None) -> int:
 
     args = parser.parse_args(argv)
     if args.command == "cast":
+        if args.view is None:
+            args.view = "summary" if args.method == "mph" else "json"
+        if args.method == "mph":
+            if not args.allow_private_evaluation:
+                parser.error("MPH requires --allow-private-evaluation")
+            if args.reference_hex is not None or args.at is not None:
+                parser.error("MPH does not accept --hex or --at")
+            if args.view == "summary" and (args.audit or args.json_out is not None):
+                parser.error("MPH audit or saving requires explicit --view json or human")
+        elif args.allow_private_evaluation or args.view == "summary":
+            parser.error("Private evaluation and summary view are MPH only")
         if args.text and args.view != "human":
             parser.error("--text requires --view human")
         if args.json_out is not None and args.json_out.exists():
             parser.error("--json-out must be a new file; existing records are not overwritten")
+    if args.command == "cast" and args.method == "mph":
+        return _mph_run(args)
     try:
         if args.command == "view":
             result = json.loads(args.input.read_text(encoding="utf-8-sig"))

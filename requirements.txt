@@ -1,1 +1,3 @@
 skyfield==1.55
+exchange-calendars==4.13.1
+tzdata

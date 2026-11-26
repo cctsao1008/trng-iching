@@ -1,4 +1,4 @@
-"""Deterministic 18-bit I Ching three-coin cast and King Wen mappings.
+"""Deterministic line generation and common I Ching hexagram assembly.
 
 All line arrays run bottom-to-top. No randomness, clocks, I/O, or interpretation
 is performed inside this module.
@@ -7,6 +7,7 @@ is performed inside this module.
 from __future__ import annotations
 
 import re
+from decimal import Decimal, InvalidOperation
 
 # Trigrams in the conventional upper/lower 8x8 King Wen lookup order.
 # Each triple is encoded bottom-to-top, yin=0, yang=1.
@@ -73,13 +74,43 @@ def _hexagram(bits_bottom_to_top: str) -> dict:
     }
 
 
-def cast_from_hex(raw_hex: str, *, audit: bool = False) -> dict:
-    """Convert 3 bytes to six ordered lines and two hexagrams; no interpretation."""
+def _coin_bits(raw_hex: str) -> str:
+    """Validate one three-byte sample; all bits remain available for audit."""
     if not isinstance(raw_hex, str) or _HEX.fullmatch(raw_hex) is None:
         raise ValueError("Cast requires exactly 6 hexadecimal digits (3 bytes)")
-    bits = f"{int(raw_hex, 16):024b}"
-    groups = [bits[i:i + 3] for i in range(0, 18, 3)]
-    lines = [6 + group.count("1") for group in groups]
+    return f"{int(raw_hex, 16):024b}"
+
+
+def _coin_groups(bits: str) -> list[str]:
+    return [bits[i:i + 3] for i in range(0, 18, 3)]
+
+
+def lines_from_hex(raw_hex: str) -> list[int]:
+    """Convert the first 18 bits, MSB first, into six bottom-to-top lines."""
+    return [6 + group.count("1") for group in _coin_groups(_coin_bits(raw_hex))]
+
+
+def line_from_trend(values) -> dict:
+    """Frozen R-Trend rule for three ordered observations; no I/O or selection."""
+    mapping = {(-1, -1): 8, (-1, 1): 6, (1, -1): 9, (1, 1): 7}
+    try:
+        a, b, c = [Decimal(str(x)) for x in values]
+        if not all(x.is_finite() for x in (a, b, c)):
+            return dict(line=None, reason="nonfinite")
+    except (InvalidOperation, TypeError, ValueError):
+        return dict(line=None, reason="invalid_value")
+    signs = ((b > a) - (b < a), (c > b) - (c < b))
+    return dict(line=mapping.get(signs), reason="ok" if signs in mapping else "zero_change",
+                signs=signs, values=[str(a), str(b), str(c)],
+                deltas=[str(b - a), str(c - b)])
+
+
+def cast_from_lines(lines: list[int] | tuple[int, ...], *, audit: bool = False) -> dict:
+    """Assemble six validated line values; callers own observation provenance."""
+    if (not isinstance(lines, (list, tuple)) or len(lines) != 6
+            or any(type(n) is not int or n not in (6, 7, 8, 9) for n in lines)):
+        raise ValueError("Cast requires six integer line values in 6..9")
+    lines = list(lines)
     moving = [i for i, value in enumerate(lines, 1) if value in (6, 9)]
     original_bits = "".join("1" if line in (7, 9) else "0" for line in lines)
     changed_bits = "".join("1" if line in (6, 7) else "0" for line in lines)
@@ -88,14 +119,21 @@ def cast_from_hex(raw_hex: str, *, audit: bool = False) -> dict:
     if not audit:
         primary.pop("bits_bottom_to_top")
         relating.pop("bits_bottom_to_top")
-    cast = {
-        "method": "three_coins_18bit_msb_first",
+    return {
         "line_order": "bottom_to_top",
         "lines_bottom_to_top": lines,
         "moving_lines": moving,
         "primary": primary,
         "relating": relating,
     }
+
+
+def cast_from_hex(raw_hex: str, *, audit: bool = False) -> dict:
+    """Legacy Quantum interface; preserve its complete output contract."""
+    bits = _coin_bits(raw_hex)
+    groups = _coin_groups(bits)
+    lines = [6 + group.count("1") for group in groups]
+    cast = {"method": "three_coins_18bit_msb_first", **cast_from_lines(lines, audit=audit)}
     if audit:
         cast.update({
             "bits_used": bits[:18],

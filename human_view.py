@@ -98,18 +98,126 @@ def _calendar_rows(record: dict) -> list[str]:
     return rows
 
 
+_MPH_MODE = 'mph_private_live_evaluation'
+_MPH_DOMAINS = ('Metal', 'Wood', 'Water', 'Fire', 'Earth', 'Quantum')
+_MPH_LABELS = ('金', '木', '水', '火', '土', '量子')
+
+
+def validate_mph_record(record: dict) -> None:
+    """Check saved record consistency, not provider authenticity or finality."""
+    import hashlib
+    from iching import cast_from_lines, lines_from_hex, line_from_trend
+    from sources import PROFILES, VERSION, QRNG_ENDPOINTS
+
+    def require(condition, message):
+        if not condition:
+            raise ValueError(message)
+
+    def utc(value):
+        instant = datetime.fromisoformat(value.replace('Z', '+00:00'))
+        require(instant.utcoffset() == timedelta(0), 'MPH evidence must use UTC')
+        return instant
+
+    require(record.get('schema_version') == '0.4.0' and record.get('mode') == _MPH_MODE
+            and record.get('status') in ('private_complete', 'private_context_partial'), 'Invalid MPH record mode/status')
+    h, m, sample = record['hexagram'], record['mph'], record['randomness']
+    lines = h['lines_bottom_to_top']
+    expected = cast_from_lines(lines)
+    require(h['moving_lines'] == expected['moving_lines'] and all(
+        h[k] == {'number': expected[k]['number'], 'name': expected[k]['display_name']}
+        for k in ('primary', 'relating')), 'Inconsistent MPH hexagram')
+    require(sample['source'] in QRNG_ENDPOINTS, 'Invalid MPH QRNG source')
+    raw = sample['raw_hex']
+    require(lines_from_hex(raw)[5] == lines[5] and m['top_line_bits'] == f'{int(raw, 16):024b}'[15:18],
+            'Inconsistent MPH top line')
+    require(m['source_kind'] == 'fresh_private_observation' and m['upstream_contract_version'] == VERSION
+            and m['domains_bottom_to_top'] == list(_MPH_DOMAINS), 'Invalid MPH contract/order')
+    require(all(m[k] is False for k in ('actual_source_use_approved','ready_for_cast','ready_for_production'))
+            and m['source_policy_review'] == 'DEFERRED_TO_P3_NOT_APPROVED', 'Invalid MPH release flags')
+    require(type(m['five_domain_http_attempts']) is int and m['five_domain_http_attempts'] == 4
+            and type(m['qrng_logical_attempts']) is int and m['qrng_logical_attempts'] == 1,
+            'Invalid MPH logical acquisition count')
+    require(m['network_count_semantics'] == 'logical_interface_invocations_not_packet_count'
+            and m['validation_boundary'] == 'selected_endpoints_not_full_history_or_independent_provider_authentication',
+            'Invalid MPH evidence boundary')
+    require(m['events'] == ['five_domain_acquisition','five_domain_preflight','five_domain_preflight_pass',
+                            'qrng_acquisition','qrng_response_validation','top_line_validation',
+                            'top_line_validation_pass','assembly_pass'], 'Invalid MPH event order')
+    anchor = utc(m['request_anchor_utc'])
+    timestamp = datetime.fromisoformat(record['timestamp'])
+    require(timestamp.utcoffset() == timedelta(hours=8) and timestamp == anchor
+            and m['timestamp_semantics'] == 'live_common_five_domain_anchor_not_qrng_receive_time'
+            and anchor <= utc(m['preflight_completed_at_utc']) <= utc(m['qrng_request_time_utc']) <= utc(m['qrng_receive_time_utc']),
+            'Invalid MPH anchor or chronology')
+    evidence = m['domain_evidence']
+    require(isinstance(evidence, list) and len(evidence) == 5, 'Invalid MPH domain evidence')
+    digest = hashlib.sha256(json.dumps(evidence, sort_keys=True, separators=(',', ':'), allow_nan=False).encode()).hexdigest()
+    require(digest == m['selected_evidence_sha256'], 'MPH selected evidence digest mismatch')
+    for i, (domain, e) in enumerate(zip(_MPH_DOMAINS[:5], evidence)):
+        require(e['domain'] == domain and e['source'] == PROFILES[domain][0]
+                and e['status'] == 'candidate_resolved' and utc(e['anchor']) == anchor
+                and type(e['line']) is int and e['line'] == lines[i], 'MPH selected evidence mismatch')
+        times = [utc(t) for t in e['endpoint_times']]
+        require(len(times) == 3 and times[0] < times[1] < times[2] <= anchor, 'MPH endpoint order')
+        sha = e['input_sha256']
+        require(isinstance(sha, str) and len(sha) == 64 and all(c in '0123456789abcdef' for c in sha),
+                'MPH evidence hash shape')
+        if domain != 'Wood':
+            cadence, cap = PROFILES[domain][2:4]
+            require(times[1]-times[0] == times[2]-times[1] == timedelta(minutes=30), 'MPH horizon mismatch')
+            require(all(t.microsecond == 0 and int(t.timestamp()) % cadence == 0 for t in times),
+                    'MPH native grid mismatch')
+            age = (anchor-times[-1]).total_seconds()
+            require(age < cap if domain == 'Earth' else age <= cap, 'MPH endpoint freshness')
+        if domain == 'Earth':
+            from astronomy import JPL_DE440S_SHA256
+            require(sha == JPL_DE440S_SHA256, 'MPH Earth kernel mismatch')
+    if record['status'] == 'private_complete':
+        require(record.get('calendar') is not None and record.get('solar_term') is not None
+                and isinstance(record.get('ganzhi'), dict) and all(record['ganzhi'].get(k) for k in ('year','month','day','hour')),
+                'Complete MPH record lacks reference context')
+    if 'audit' in record:
+        audit = record['audit']
+        require(audit['cast']['lines_bottom_to_top'] == lines and audit['cast']['moving_lines'] == h['moving_lines']
+                and audit['randomness']['raw_hex'] == raw and audit['randomness']['source'] == sample['source']
+                and utc(audit['capture']['cast_time_utc']) == anchor
+                and audit['capture']['cast_time_source'] == m['timestamp_semantics']
+                and utc(audit['randomness']['request_time_utc']) == utc(m['qrng_request_time_utc'])
+                and utc(audit['randomness']['receive_time_utc']) == utc(m['qrng_receive_time_utc'])
+                and audit['randomness']['source_endpoint'] == QRNG_ENDPOINTS[sample['source']]
+                and audit['randomness']['source_transport'] in ('windows_powershell_system_proxy', 'python_urllib')
+                and audit['randomness']['timestamp_semantics'] == 'client request and reception, not TRNG hardware generation',
+                'MPH audit mismatch')
+        for k in ('primary','relating'):
+            require(audit['cast'][k]['number'] == expected[k]['number']
+                    and audit['cast'][k]['display_name'] == expected[k]['display_name'], 'MPH audit hexagram mismatch')
+        ae = audit['mph']['domain_evidence']
+        require(len(ae) == 5, 'MPH audit domain count')
+        for e, a in zip(evidence, ae):
+            require(all(a[k] == e[k] for k in e), 'MPH audit selected evidence mismatch')
+            trend = line_from_trend(a['values'])
+            require(trend['line'] == a['line'] and trend['deltas'] == a['deltas']
+                    and list(trend['signs']) == list(a['signs']), 'MPH audit trend mismatch')
+        require(audit['mph']['entropy'] == dict(top_line_bit_positions_zero_based=[15,16,17],
+                top_line_bits=m['top_line_bits'], top_line_value=lines[-1]), 'MPH audit entropy mismatch')
+
+
 def render_human(record: dict, *, classical: bool = False) -> str:
     if not isinstance(record, dict) or record.get("schema_version") != "0.4.0":
         raise ValueError("Human View requires a v0.4.0 cast record")
     h = record["hexagram"]
     lines = h["lines_bottom_to_top"]
-    expected = cast_from_hex(record["randomness"]["raw_hex"])
-    if (lines != expected["lines_bottom_to_top"]
-            or h["moving_lines"] != expected["moving_lines"]
-            or any(h[k] != {"number": expected[k]["number"],
-                            "name": expected[k]["display_name"]}
-                   for k in ("primary", "relating"))):
-        raise ValueError("Inconsistent cast record")
+    mph = record.get('mode') == _MPH_MODE or 'mph' in record
+    if mph:
+        validate_mph_record(record)
+    else:
+        expected = cast_from_hex(record["randomness"]["raw_hex"])
+        if (lines != expected["lines_bottom_to_top"]
+                or h["moving_lines"] != expected["moving_lines"]
+                or any(h[k] != {"number": expected[k]["number"],
+                                "name": expected[k]["display_name"]}
+                       for k in ("primary", "relating"))):
+            raise ValueError("Inconsistent cast record")
     def stroke(yang):
         return "---------" if yang else "---- ----"
 
@@ -119,12 +227,18 @@ def render_human(record: dict, *, classical: bool = False) -> str:
         f"Mode: {record['mode']} | Status: {record['status']}",
         "",
     ]
+    if mph:
+        rows[0] = 'Myriad Phenomena Hexagram / 萬象卦'
+        rows[1] += ' (top line only)'
+        rows.insert(1, 'PRIVATE TECHNICAL EVALUATION / 私人技術驗證，非正式發布')
     moving = h["moving_lines"]
     primary_label = "Primary " if moving else "Primary"
     rows.append(f"{primary_label} {h['primary']['number']:02d}: {h['primary']['name']}")
     if moving:
         rows.append(f"Relating {h['relating']['number']:02d}: {h['relating']['name']}")
     rows.extend(["", "   PRIMARY            RELATING" if moving else "   HEXAGRAM"])
+    if mph:
+        rows[-1] += "     DOMAIN"
     for i in range(5, -1, -1):
         n = lines[i]
         primary_stroke = stroke(n in (7, 9))
@@ -133,6 +247,8 @@ def render_human(record: dict, *, classical: bool = False) -> str:
             rows.append(f"{i+1}  {primary_stroke}  {mark}       {stroke(n in (6, 7))}")
         else:
             rows.append(f"{i+1}  {primary_stroke}")
+        if mph:
+            rows[-1] += f"    {_MPH_DOMAINS[i]} ({_MPH_LABELS[i]})"
     rows.append("")
     if not moving:
         rows.append("Moving lines: none")
@@ -141,7 +257,11 @@ def render_human(record: dict, *, classical: bool = False) -> str:
             change = "Old Yin -> Yang" if lines[i-1] == 6 else "Old Yang -> Yin"
             rows.append(f"* Line {i}: {change}")
     rows.append("")
+    if mph:
+        rows.append("Reference time: live common five-domain anchor (not QRNG receive time)")
     rows.extend(_calendar_rows(record))
+    if mph and record["status"] == "private_context_partial":
+        rows.append("Reference context partially unavailable (see JSON).")
     if classical:
         rows.extend(_classical_rows(h))
     return "\n".join(rows) + "\n"
