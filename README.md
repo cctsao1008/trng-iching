@@ -2,7 +2,7 @@
   <img src="assets/emblem.png" width="336" alt="Physical, Quantum, and Five Phases–Quantum hexagram emblems">
 </p>
 
-<h1 align="center">TRNG Hexagram Casting</h1>
+<h1 align="center">Hexagram Casting</h1>
 
 <p align="center">
   <a href="README.md"><img src="https://img.shields.io/badge/English-007ec6" alt="English"></a>
@@ -26,7 +26,7 @@
 </p>
 
 <p align="center">
-  <strong>An ancient way of asking, with modern tools for casting.</strong>
+  <strong>Exploring change through nature, quantum randomness, and ancient wisdom.</strong>
 </p>
 
 <p align="center">
@@ -44,14 +44,25 @@
 
 The *I Ching* (易經) explores change through the language of yin and yang, the eight trigrams, and the sixty-four hexagrams. Casting a hexagram offers a symbolic starting point for reflecting on a question, a situation, or a moment of uncertainty.
 
-This project brings together traditional hexagram casting, quantum randomness, astronomical and calendrical context, and the classical text of the *Zhouyi* (周易).
+This project brings together traditional hexagram casting, quantum randomness, astronomical and calendrical context, and the classical text of the *Zhouyi* (周易). It also explores how the structures and changes of the physical world might be represented through hexagrams.
 
-It is a tool for **casting a hexagram (起卦)**, not a system that dictates how the hexagram should be interpreted.
+It is a tool for **casting a hexagram (起卦)** and a space for exploring change, not a system that dictates how the hexagram should be interpreted.
 
-> Randomness determines the hexagram.  
-> Heaven and the calendar describe the moment.  
-> Classical text offers a language for reflection.  
+> Nature reveals patterns.  
+> Quantum randomness offers possibilities.  
+> Hexagrams express change.  
+> Classical wisdom invites reflection.  
 > Interpretation belongs to the reader.
+
+## Three Hexagram Frameworks
+
+| Framework | Approach | Status |
+| --- | --- | --- |
+| **Physical Hexagram (天地卦)** | Explore the representation of natural physical states, changes, and relationships as six lines. | Research |
+| **Quantum Hexagram (量子卦)** | Generate six lines using quantum randomness and the traditional three-coin method. | Implemented |
+| **Five Phases–Quantum Hexagram (五行量子卦)** | Explore five symbolic information domains (Metal, Wood, Water, Fire, Earth) combined with a quantum line. | Research |
+
+The physical and hybrid frameworks are experimental. Their mappings are not finalized, and neither is available as a casting mode. Research focuses on symbolic dynamics, information preservation, and the limits of representing change, without claiming predictive validity or a scientific equivalence between the Five Phases and physical phenomena. Follow the research in [Issue #3 — Physical World Sampling](https://github.com/cctsao1008/trng-iching/issues/3).
 
 ## ☯️ Yin, Yang and Change
 
@@ -79,7 +90,7 @@ The relationship between the two hexagrams opens a space for contemplating chang
 
 A hexagram is encountered at a particular moment, in the presence of a particular question.
 
-The project records the time of casting alongside the solar term (節氣), lunar date (農曆), and four pillars (干支). These provide calendrical and astronomical context without changing the hexagram drawn.
+The project records the time of casting alongside the solar term (節氣), lunar date (農曆), and four pillars (干支). In the implemented Quantum Hexagram, these provide calendrical and astronomical context without changing the hexagram drawn.
 
 A past casting record may preserve the lines and the time, but it cannot preserve the circumstances of that moment.
 
@@ -117,7 +128,7 @@ cd trng-iching
 py -m pip install -r .\requirements.txt
 ```
 
-When ready, choose one of the following sources and cast once.
+The available casting commands implement the Quantum Hexagram. When ready, choose one of the following sources and cast once.
 
 **[TRNG.info](https://trng.info/) — default**
 
@@ -210,9 +221,9 @@ Modern tools support the traditional practice without claiming to explain or val
 
 The scientific tools describe randomness and time; they do not establish the predictive validity of divination.
 
-## ⚙️ System Architecture
+## ⚙️ System Architecture — Quantum Hexagram
 
-The system brings together quantum randomness, astronomical and calendrical context, classical text, and human reflection, while keeping their responsibilities distinct.
+The implemented Quantum Hexagram brings together quantum randomness, astronomical and calendrical context, classical text, and human reflection, while keeping their responsibilities distinct. The following diagram describes the current implementation, not the experimental Physical or Five Phases–Quantum frameworks.
 
 ```mermaid
 flowchart TD
@@ -247,12 +258,13 @@ flowchart TD
 
 ### Design Principles
 
-> Randomness determines the hexagram.  
-> Heaven and the calendar describe the moment.  
-> Classical text offers a language for reflection.  
+> Nature reveals patterns.  
+> Quantum randomness offers possibilities.  
+> Hexagrams express change.  
+> Classical wisdom invites reflection.  
 > Interpretation belongs to the reader.
 
-Astronomical and calendrical data describe the moment of casting without influencing the hexagram. The casting record provides structured JSON; Human View renders that record and optionally retrieves passages from the local Zhouyi corpus. The reader may manually share either representation with an external AI assistant. Additional scholarly references and the question inform interpretation outside the casting application. The architecture supports reflection without asserting a predictive mechanism.
+In the implemented Quantum Hexagram, astronomical and calendrical data describe the moment of casting without influencing the hexagram. The casting record provides structured JSON; Human View renders that record and optionally retrieves passages from the local Zhouyi corpus. The reader may manually share either representation with an external AI assistant. Additional scholarly references and the question inform interpretation outside the casting application. The architecture supports reflection without asserting a predictive mechanism.
 
 ### Software Components
 
