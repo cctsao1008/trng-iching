@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/emblem.png" width="336" alt="天地卦、量子卦、五行量子卦標誌">
+  <img src="assets/emblem.png" width="336" alt="天地卦、量子卦、萬象卦標誌">
 </p>
 
 <h1 align="center">Hexagram Casting</h1>
@@ -34,7 +34,7 @@
 </p>
 
 <p align="center">
-  <strong>天地卦</strong> Physical &nbsp;·&nbsp; <strong>量子卦</strong> Quantum &nbsp;·&nbsp; <strong>五行量子卦</strong> Five Phases–Quantum
+  <strong>天地卦</strong> Physical &nbsp;·&nbsp; <strong>量子卦</strong> Quantum &nbsp;·&nbsp; <strong>萬象卦</strong> Myriad Phenomena
 </p>
 
 <p align="center">
@@ -43,7 +43,7 @@
 
 <p align="center">
   乾坤萬象化陰陽，<br>
-  五行量子演玄章。<br>
+  五行取象演玄章。<br>
   格物求真參易理，<br>
   觀時察變悟行藏。
 </p>
@@ -68,9 +68,9 @@
 | --- | --- | --- |
 | **天地卦（Physical Hexagram）** | 探索如何以六爻表達自然物理資訊的狀態、變化與交互關係。 | 研究中 |
 | **量子卦（Quantum Hexagram）** | 以量子亂數及傳統三銅錢法生成六爻。 | 已實作 |
-| **五行量子卦（Five Phases–Quantum Hexagram）** | 探索金、木、水、火、土五個象徵性資訊領域與量子爻的結合。 | 研究中 |
+| **萬象卦（Myriad Phenomena Hexagram）** | 探索金、木、水、火、土五個象徵性資訊領域與量子爻的結合。 | 研究中 |
 
-天地卦與五行量子卦仍屬探索性研究，映射規則尚未定案，尚未提供起卦模式。研究聚焦於符號動力學、資訊保留及變化的表示極限，不宣稱具有預測能力，也不預設五行與物理現象存在科學上的等價關係。研究進度請見 [Issue #3 — Physical World Sampling](https://github.com/cctsao1008/trng-iching/issues/3)。
+天地卦與萬象卦仍屬探索性研究，映射規則尚未定案，尚未提供起卦模式。研究聚焦於符號動力學、資訊保留及變化的表示極限，不宣稱具有預測能力，也不預設五行與物理現象存在科學上的等價關係。研究進度請見 [Issue #3 — Physical World Sampling](https://github.com/cctsao1008/trng-iching/issues/3)。
 
 ## ☯️ 陰陽與變化
 
@@ -231,7 +231,7 @@ Classical Text / 周易
 
 ## ⚙️ 系統架構 — 量子卦
 
-目前已實作的量子卦結合量子亂數、天文曆象、古典經文與人類反思，同時保持各部分的責任獨立。下圖描述現有實作，不包含研究中的天地卦與五行量子卦。
+目前已實作的量子卦結合量子亂數、天文曆象、古典經文與人類反思，同時保持各部分的責任獨立。下圖描述現有實作，不包含研究中的天地卦與萬象卦。
 
 ```mermaid
 flowchart TD
