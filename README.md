@@ -234,6 +234,13 @@ The scientific tools describe randomness and time; they do not establish the pre
 The overall architecture brings together three alternative casting frameworks (Physical, Quantum, and Myriad Phenomena, abbreviated MPH in the diagram), astronomical and calendrical context, classical text, and human reflection, while keeping their responsibilities distinct. Only the Quantum Hexagram is currently implemented; the Physical and Myriad Phenomena Hexagram paths represent research candidates, not available casting modes.
 
 ```mermaid
+---
+config:
+  htmlLabels: false
+  flowchart:
+    htmlLabels: false
+    wrappingWidth: 240
+---
 flowchart TD
     N["Physical and five-phase data"] --> M["Physical · Quantum · MPH"]
     Q["Quantum randomness"] --> M
