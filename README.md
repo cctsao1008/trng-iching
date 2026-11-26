@@ -231,15 +231,15 @@ The scientific tools describe randomness and time; they do not establish the pre
 
 ## ⚙️ System Architecture
 
-The overall architecture brings together three alternative casting frameworks, astronomical and calendrical context, classical text, and human reflection, while keeping their responsibilities distinct. Only the Quantum Hexagram is currently implemented; the Physical and Myriad Phenomena Hexagram paths represent research candidates, not available casting modes.
+The overall architecture brings together three alternative casting frameworks (Physical, Quantum, and Myriad Phenomena, abbreviated MPH in the diagram), astronomical and calendrical context, classical text, and human reflection, while keeping their responsibilities distinct. Only the Quantum Hexagram is currently implemented; the Physical and Myriad Phenomena Hexagram paths represent research candidates, not available casting modes.
 
 ```mermaid
 flowchart TD
-    N["Natural phenomena<br/>Five-phase observations"] --> M["Casting framework<br/>Physical · Quantum · Myriad Phenomena"]
+    N["Physical and five-phase data"] --> M["Physical · Quantum · MPH"]
     Q["Quantum randomness"] --> M
     M --> H["Deterministic hexagram"]
 
-    A["JPL astronomy<br/>HKO calendar and Ganzhi"] --> T["Time context"]
+    A["JPL · HKO calendar"] --> T["Time context"]
 
     H --> R["Casting record · JSON"]
     T --> R
@@ -247,12 +247,12 @@ flowchart TD
     R --> V["Human View"]
     Z["Local Zhouyi classical text"] -->|"--text"| V
 
-    R -. Manually share .-> I["Human / external AI interpretation"]
+    R -. Manually share .-> I["Human / AI interpretation"]
     V -. Manually share .-> I
 
-    S["Reference scholarship<br/>Question and circumstances"] --> I
+    S["Research and question context"] --> I
 
-    I --> O["Reflection<br/>Alternative perspectives · Personal choice"]
+    I --> O["Reflection and personal choice"]
 
     classDef randomness fill:#e8f1fa,stroke:#4786c6,color:#173b60
     classDef science fill:#e5f3ed,stroke:#468e78,color:#194c3c
