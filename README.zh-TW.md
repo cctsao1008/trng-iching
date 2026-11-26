@@ -18,11 +18,11 @@
 </p>
 
 <p align="center">
-  不為預知未來，而為洞察當下。
+  觀天地之變，探萬物之理，悟自身之道。
 </p>
 
 <p align="center">
-  <em>Not to predict the future, but to understand the present.</em>
+  <em>Observe the changes of nature. Explore the principles of existence. Discover one's own path.</em>
 </p>
 
 <p align="center">
