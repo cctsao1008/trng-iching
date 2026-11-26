@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/emblem.png" width="336" alt="Physical, Quantum, and Five Phases–Quantum hexagram emblems">
+  <img src="assets/emblem.png" width="336" alt="Physical, Quantum, and Myriad Phenomena hexagram emblems">
 </p>
 
 <h1 align="center">Hexagram Casting</h1>
@@ -34,7 +34,7 @@
 </p>
 
 <p align="center">
-  <strong>天地卦</strong> Physical &nbsp;·&nbsp; <strong>量子卦</strong> Quantum &nbsp;·&nbsp; <strong>五行量子卦</strong> Five Phases–Quantum
+  <strong>天地卦</strong> Physical &nbsp;·&nbsp; <strong>量子卦</strong> Quantum &nbsp;·&nbsp; <strong>萬象卦</strong> Myriad Phenomena
 </p>
 
 <p align="center">
@@ -43,7 +43,7 @@
 
 <p align="center">
   乾坤萬象化陰陽，<br>
-  五行量子演玄章。<br>
+  五行取象演玄章。<br>
   格物求真參易理，<br>
   觀時察變悟行藏。
 </p>
@@ -68,7 +68,7 @@ It is a tool for **casting a hexagram (起卦)** and a space for exploring chang
 | --- | --- | --- |
 | **Physical Hexagram (天地卦)** | Explore the representation of natural physical states, changes, and relationships as six lines. | Research |
 | **Quantum Hexagram (量子卦)** | Generate six lines using quantum randomness and the traditional three-coin method. | Implemented |
-| **Five Phases–Quantum Hexagram (五行量子卦)** | Explore five symbolic information domains (Metal, Wood, Water, Fire, Earth) combined with a quantum line. | Research |
+| **Myriad Phenomena Hexagram (萬象卦)** | Explore five symbolic information domains (Metal, Wood, Water, Fire, Earth) combined with a quantum line. | Research |
 
 The physical and hybrid frameworks are experimental. Their mappings are not finalized, and neither is available as a casting mode. Research focuses on symbolic dynamics, information preservation, and the limits of representing change, without claiming predictive validity or a scientific equivalence between the Five Phases and physical phenomena. Follow the research in [Issue #3 — Physical World Sampling](https://github.com/cctsao1008/trng-iching/issues/3).
 
@@ -231,7 +231,7 @@ The scientific tools describe randomness and time; they do not establish the pre
 
 ## ⚙️ System Architecture — Quantum Hexagram
 
-The implemented Quantum Hexagram brings together quantum randomness, astronomical and calendrical context, classical text, and human reflection, while keeping their responsibilities distinct. The following diagram describes the current implementation, not the experimental Physical or Five Phases–Quantum frameworks.
+The implemented Quantum Hexagram brings together quantum randomness, astronomical and calendrical context, classical text, and human reflection, while keeping their responsibilities distinct. The following diagram describes the current implementation, not the experimental Physical or Myriad Phenomena frameworks.
 
 ```mermaid
 flowchart TD
