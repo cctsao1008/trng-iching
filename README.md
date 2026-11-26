@@ -10,11 +10,11 @@
 </p>
 
 <p align="center">
-  <strong>問天，觀象，思己。</strong>
+  <strong>觀象，察變，求真，思己。</strong>
 </p>
 
 <p align="center">
-  Ask the universe. Observe the changes. Reflect within.
+  Observe patterns. Discern change. Seek truth. Reflect within.
 </p>
 
 <p align="center">
