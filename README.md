@@ -62,15 +62,15 @@ It is a tool for **casting a hexagram (起卦)** and a space for exploring chang
 > Classical wisdom invites reflection.  
 > Interpretation belongs to the reader.
 
-## Three Hexagram Frameworks
+## Observation and Casting Methods
 
 | Framework | Approach | Status |
 | --- | --- | --- |
 | **Physical**<br>天地卦 | Natural physical states, changes and relationships. | Research |
 | **Quantum**<br>量子卦 | Quantum randomness and the traditional three-coin method. | Implemented |
-| **Myriad Phenomena**<br>萬象卦 | Five-phase observations combined with a quantum line. | Research |
+| **Myriad Phenomena**<br>萬象卦 | Five-phase observations combined with a quantum line. | Implemented |
 
-The physical and hybrid frameworks are experimental. Their mappings are not finalized, and neither is available as a casting mode. Research focuses on symbolic dynamics, information preservation, and the limits of representing change, without claiming predictive validity or a scientific equivalence between the Five Phases and physical phenomena. Follow the research in [Issue #3 — Physical World Sampling](https://github.com/cctsao1008/trng-iching/issues/3).
+Myriad phenomena (萬象) is the overarching observation concept. Physical observations and quantum randomness are constituent dimensions. Quantum and MPH are selectable methods in one casting application; the separate six-line Physical model remains research-only. The MPH mapping is an experimental symbolic model, not evidence of predictive validity or a scientific equivalence between the Five Phases and physical phenomena. See [Physical research #3](https://github.com/cctsao1008/trng-iching/issues/3), [MPH research #4](https://github.com/cctsao1008/trng-iching/issues/4), and [implementation #5](https://github.com/cctsao1008/trng-iching/issues/5).
 
 ## ☯️ Yin, Yang and Change
 
@@ -98,7 +98,7 @@ The relationship between the two hexagrams opens a space for contemplating chang
 
 A hexagram is encountered at a particular moment, in the presence of a particular question.
 
-The project records the time of casting alongside the solar term (節氣), lunar date (農曆), and four pillars (干支). In the implemented Quantum Hexagram, these provide calendrical and astronomical context without changing the hexagram drawn.
+The project records the time of casting alongside the solar term (節氣), lunar date (農曆), and four pillars (干支). Quantum uses the client receipt time of its random sample; MPH uses a common observation anchor before collecting the five domains. Calendrical context and classical passages do not change the formed hexagram.
 
 A past casting record may preserve the lines and the time, but it cannot preserve the circumstances of that moment.
 
@@ -136,7 +136,7 @@ cd trng-iching
 py -m pip install -r .\requirements.txt
 ```
 
-The available casting commands implement the Quantum Hexagram. When ready, choose one of the following sources and cast once.
+Quantum is the default casting method. Choose one of the following sources, or select MPH explicitly.
 
 **[TRNG.info](https://trng.info/) — default**
 
@@ -150,7 +150,17 @@ py .\main.py cast --view human --text
 py .\main.py cast --source lfdr.de --view human --text
 ```
 
-Both sources require no API key. A failed request stops the cast; the other provider is never selected automatically.
+Both quantum providers require no API key. A failed request stops the cast; the other provider is never selected automatically.
+
+### Myriad Phenomena (MPH)
+
+```powershell
+py .\main.py cast --method mph --source lfdr.de --view human --text
+```
+
+The same JSON, Human View, classical text, audit and optional file-output interfaces are available. Omit `--view` for JSON. For the redacted acquisition diagnostic, use `--view summary` (a new cast) or `--audit` with the desired view (diagnostics on stderr). The default method remains Quantum. `--hex` and `--at` are Quantum-only.
+
+MPH is integrated into the application; provider-use authorization is a separate unresolved release condition. The Wood adapter currently uses the EODHD VTI.US demo endpoint. Verify applicable provider terms and permissions before live use; production and redistribution rights have not been established.
 
 ### An example
 
@@ -201,7 +211,7 @@ For an optional reading of this example in Traditional Chinese, English, or both
 
 ### Output options
 
-Choose one of the following live commands:
+Choose one of the following live commands (Quantum by default; add `--method mph` for mixed observations):
 
 | Command (after `py .\main.py`) | Display | Recommended use |
 | --- | --- | --- |
@@ -213,7 +223,7 @@ Choose one of the following live commands:
 
 Add `--source trng.info` or `--source lfdr.de` to any of these live commands to choose the randomness source explicitly. If omitted, TRNG.info is used.
 
-Each live command casts a new hexagram. Confirm that the result is complete before using it; do not redraw to bypass a failure.
+Each live command attempts a new cast. Confirm that the result is complete before using it; do not redraw to bypass a failure. `--view summary` is an MPH-only diagnostic and cannot be combined with audit or file output.
 
 File output is optional: add `--json-out <new-file>` if desired. Existing files are not overwritten. If Human View rendering fails after a cast is formed, the existing JSON is exposed on stdout and the error is reported on stderr; no new cast is made. An explicitly saved record can be displayed with `py .\main.py view --input cast.json --text` without casting again.
 
@@ -221,17 +231,19 @@ File output is optional: add `--json-out <new-file>` if desired. Existing files 
 
 Modern tools support the traditional practice without claiming to explain or validate its metaphysical meaning.
 
-**Quantum randomness.** [TRNG.info](https://trng.info/) (default) or [LfD QRNG](https://lfdr.de/QRNG/) supplies one physical random sample per live cast. Both providers describe their entropy source as quantum optical hardware. The user selects one provider before casting; their samples are never combined. Eighteen bits from the three-byte sample are divided into six groups of three, reproducing the probabilities of the three-coin method. The result is converted deterministically into six lines and King Wen hexagram numbers. No pseudorandom fallback or automatic retry is used.
+**Quantum randomness.** [TRNG.info](https://trng.info/) (default) or [LfD QRNG](https://lfdr.de/QRNG/) supplies one physical random sample per live cast. Both providers describe their entropy source as quantum optical hardware. The user selects one provider before casting; their samples are never combined. Eighteen bits from the three-byte sample are divided into six groups of three, reproducing the probabilities of the three-coin method. Quantum uses all six groups; MPH uses only the sixth group, after the five observation domains pass validation. No pseudorandom fallback or automatic retry is used.
 
-**Astronomy and calendrics.** [NASA JPL DE440s](https://ssd.jpl.nasa.gov/) and [Skyfield](https://rhodesmill.org/skyfield/) provide astronomical calculations. The [Hong Kong Observatory](https://www.hko.gov.hk/en/gts/time/conversion1_text.htm) provides the lunar calendar reference. The local month-start index contains all 200 official Gregorian year tables from 1901 through 2100, with 2,474 lunar month starts and 73 leap months. Offline lunar date lookup supports 1901-01-20 through 2100-12-31 inclusive (UTC+08 civil dates); 1901-01-01 through 1901-01-19 are not supported because the preceding lunar month start falls outside the index. The four pillars use Li Chun, the twelve solar Jie, and civil time UTC+08, with the day boundary at midnight and no true-solar-time adjustment. The casting time is the client's receipt of the random sample, not the unreported hardware measurement time.
+**Mixed observations (MPH).** The six lines, bottom to top, are Metal (NOAA solar-wind magnetic field magnitude), Wood (VTI adjusted close via the EODHD demo endpoint), Water (NOAA observed water level), Fire (NOAA proton thermal pressure), Earth (JPL Sun/Moon radial differential acceleration at the fixed model site), and Quantum. Each of the first five lines uses three exact observations on its native time grid or completed trading sessions. The signs of the two consecutive differences map to 6, 7, 8 or 9: (-,+), (+,+), (-,-), (+,-), respectively. A zero difference or invalid endpoint stops casting; no interpolation, alternative source or redraw is used. A single QRNG request follows successful five-domain validation. Source labels, observation epochs and client receipt times do not establish publication finality or hardware generation time.
 
-**Transparent results.** JSON schema 0.4.0 records the random input, six lines, hexagrams, and time context. The optional audit output adds calculation and source details. The question is never sent to the randomness provider. Local classical text and time references do not determine the random result.
+**Astronomy and calendrics.** [NASA JPL DE440s](https://ssd.jpl.nasa.gov/) and [Skyfield](https://rhodesmill.org/skyfield/) provide astronomical calculations. The [Hong Kong Observatory](https://www.hko.gov.hk/en/gts/time/conversion1_text.htm) provides the lunar calendar reference. The local month-start index contains all 200 official Gregorian year tables from 1901 through 2100, with 2,474 lunar month starts and 73 leap months. Offline lunar date lookup supports 1901-01-20 through 2100-12-31 inclusive (UTC+08 civil dates); 1901-01-01 through 1901-01-19 are not supported because the preceding lunar month start falls outside the index. The four pillars use Li Chun, the twelve solar Jie, and civil time UTC+08, with the day boundary at midnight and no true-solar-time adjustment. Quantum uses the client's receipt of the random sample, not the unreported hardware measurement time. MPH uses its common observation anchor for the reference context, sharing the local pinned ephemeris session with the Earth observation calculation.
+
+**Transparent results.** JSON schema 0.4.0 records the random input, six lines, hexagrams, and time context. The optional audit output adds calculation and source details. The question is never sent to the randomness provider. MPH adds selected-endpoint evidence and the top-line quantum scope. Local classical text and calendrical references do not determine the lines. Source-use review and release readiness remain separate from a successful cast; selected evidence does not authenticate original provider responses or full history.
 
 The scientific tools describe randomness and time; they do not establish the predictive validity of divination.
 
 ## ⚙️ System Architecture
 
-The overall architecture brings together three alternative casting frameworks (Physical, Quantum, and Myriad Phenomena, abbreviated MPH in the diagram), astronomical and calendrical context, classical text, and human reflection, while keeping their responsibilities distinct. Only the Quantum Hexagram is currently implemented; the Physical and Myriad Phenomena Hexagram paths represent research candidates, not available casting modes.
+One application combines observation, deterministic line conversion, shared hexagram assembly, reference context and presentation. Quantum and MPH use the same engine; the separate Physical research model is not yet an executable method.
 
 ```mermaid
 ---
@@ -242,7 +254,7 @@ config:
     wrappingWidth: 240
 ---
 flowchart TD
-    N["Physical and five-phase data"] --> M["Physical · Quantum · MPH"]
+    N["Five-phase observations"] --> M["Observation methods: Quantum · MPH"]
     Q["Quantum randomness"] --> M
     M --> H["Deterministic hexagram"]
 
@@ -286,23 +298,23 @@ flowchart TD
 > Classical wisdom invites reflection.  
 > Interpretation belongs to the reader.
 
-In the implemented Quantum Hexagram, astronomical and calendrical data describe the moment of casting without influencing the hexagram. The casting record provides structured JSON; Human View renders that record and optionally retrieves passages from the local Zhouyi corpus. The reader may manually share either representation with an external AI assistant. Additional scholarly references and the question inform interpretation outside the casting application. The architecture supports reflection without asserting a predictive mechanism.
+In Quantum, astronomical and calendrical context describes the moment without influencing the hexagram. MPH uses physical and market observations plus quantum randomness to form lines; its reference context remains separate. The casting record provides structured JSON; Human View renders that record and optionally retrieves passages from the local Zhouyi corpus. The reader may manually share either representation with an external AI assistant. Additional scholarly references and the question inform interpretation outside the casting application. The architecture supports reflection without asserting a predictive mechanism.
 
 ### Software Components
 
 | Module | Responsibility |
 | --- | --- |
-| `main.py` | CLI, casting coordination and JSON output |
-| `sources.py` | Acquire one three-byte quantum random sample from the selected provider |
-| `iching.py` | Derive the six lines, moving lines and hexagrams |
-| `astronomy.py` | Calculate celestial positions and solar terms using local JPL data |
+| `main.py` | CLI, method dispatch, validation, casting coordination and JSON output |
+| `sources.py` | Shared HTTP transport, source contracts, external observations and QRNG |
+| `iching.py` | Pure quantum/trend line conversion and common hexagram assembly |
+| `astronomy.py` | Pinned JPL session, Earth observation model and astronomical context |
 | `lunisolar.py` | Look up lunar dates and calculate the four pillars |
-| `human_view.py` | Render hexagrams and optionally retrieve classical passages |
+| `human_view.py` | Method-aware saved-record validation, hexagram display and optional classical passages |
 | `data/` | Local ephemeris, lunar calendar and Zhouyi references |
 
 ### 🧠 Asking through the hexagram (依卦問事)
 
-Cast once, then share the resulting JSON with an AI assistant such as ChatGPT and ask your question. The assistant can interpret the hexagram in the context of the question, the classical text and present circumstances. The optional human view provides the relevant classical passages for reference.
+Cast once, then, where the applicable source-use terms permit sharing, provide the resulting JSON to an AI assistant such as ChatGPT and ask your question. The assistant can interpret the hexagram in the context of the question, the classical text and present circumstances. The optional human view provides the relevant classical passages for reference.
 
 Interpretation takes place outside the application. No AI connection, fixed mapping between hexagrams and modern events, or automatic judgment is built into the casting tool.
 

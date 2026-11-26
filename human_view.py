@@ -98,7 +98,8 @@ def _calendar_rows(record: dict) -> list[str]:
     return rows
 
 
-_MPH_MODE = 'mph_private_live_evaluation'
+_MPH_MODE = 'live_mph_cast'
+_MPH_LEGACY_MODE = 'mph_private_live_evaluation'
 _MPH_DOMAINS = ('Metal', 'Wood', 'Water', 'Fire', 'Earth', 'Quantum')
 _MPH_LABELS = ('金', '木', '水', '火', '土', '量子')
 
@@ -118,8 +119,10 @@ def validate_mph_record(record: dict) -> None:
         require(instant.utcoffset() == timedelta(0), 'MPH evidence must use UTC')
         return instant
 
-    require(record.get('schema_version') == '0.4.0' and record.get('mode') == _MPH_MODE
-            and record.get('status') in ('private_complete', 'private_context_partial'), 'Invalid MPH record mode/status')
+    legacy = record.get('mode') == _MPH_LEGACY_MODE
+    statuses = ('private_complete', 'private_context_partial') if legacy else ('complete', 'partial')
+    require(record.get('schema_version') == '0.4.0' and record.get('mode') in (_MPH_MODE, _MPH_LEGACY_MODE)
+            and record.get('status') in statuses, 'Invalid MPH record mode/status')
     h, m, sample = record['hexagram'], record['mph'], record['randomness']
     lines = h['lines_bottom_to_top']
     expected = cast_from_lines(lines)
@@ -130,10 +133,11 @@ def validate_mph_record(record: dict) -> None:
     raw = sample['raw_hex']
     require(lines_from_hex(raw)[5] == lines[5] and m['top_line_bits'] == f'{int(raw, 16):024b}'[15:18],
             'Inconsistent MPH top line')
-    require(m['source_kind'] == 'fresh_private_observation' and m['upstream_contract_version'] == VERSION
+    require(m['source_kind'] == ('fresh_private_observation' if legacy else 'fresh_observation') and m['upstream_contract_version'] == VERSION
             and m['domains_bottom_to_top'] == list(_MPH_DOMAINS), 'Invalid MPH contract/order')
-    require(all(m[k] is False for k in ('actual_source_use_approved','ready_for_cast','ready_for_production'))
-            and m['source_policy_review'] == 'DEFERRED_TO_P3_NOT_APPROVED', 'Invalid MPH release flags')
+    require(all(m[k] is False for k in ('actual_source_use_approved', 'ready_for_production'))
+            and m['source_policy_review'] == 'DEFERRED_TO_P3_NOT_APPROVED'
+            and (m['ready_for_cast'] is False if legacy else 'ready_for_cast' not in m), 'Invalid MPH release flags')
     require(type(m['five_domain_http_attempts']) is int and m['five_domain_http_attempts'] == 4
             and type(m['qrng_logical_attempts']) is int and m['qrng_logical_attempts'] == 1,
             'Invalid MPH logical acquisition count')
@@ -172,7 +176,7 @@ def validate_mph_record(record: dict) -> None:
         if domain == 'Earth':
             from astronomy import JPL_DE440S_SHA256
             require(sha == JPL_DE440S_SHA256, 'MPH Earth kernel mismatch')
-    if record['status'] == 'private_complete':
+    if record['status'] == statuses[0]:
         require(record.get('calendar') is not None and record.get('solar_term') is not None
                 and isinstance(record.get('ganzhi'), dict) and all(record['ganzhi'].get(k) for k in ('year','month','day','hour')),
                 'Complete MPH record lacks reference context')
@@ -207,7 +211,7 @@ def render_human(record: dict, *, classical: bool = False) -> str:
         raise ValueError("Human View requires a v0.4.0 cast record")
     h = record["hexagram"]
     lines = h["lines_bottom_to_top"]
-    mph = record.get('mode') == _MPH_MODE or 'mph' in record
+    mph = record.get('mode') in (_MPH_MODE, _MPH_LEGACY_MODE) or 'mph' in record
     if mph:
         validate_mph_record(record)
     else:
@@ -230,7 +234,6 @@ def render_human(record: dict, *, classical: bool = False) -> str:
     if mph:
         rows[0] = 'Myriad Phenomena Hexagram / 萬象卦'
         rows[1] += ' (top line only)'
-        rows.insert(1, 'PRIVATE TECHNICAL EVALUATION / 私人技術驗證，非正式發布')
     moving = h["moving_lines"]
     primary_label = "Primary " if moving else "Primary"
     rows.append(f"{primary_label} {h['primary']['number']:02d}: {h['primary']['name']}")
@@ -260,7 +263,7 @@ def render_human(record: dict, *, classical: bool = False) -> str:
     if mph:
         rows.append("Reference time: live common five-domain anchor (not QRNG receive time)")
     rows.extend(_calendar_rows(record))
-    if mph and record["status"] == "private_context_partial":
+    if mph and record["status"] in ("partial", "private_context_partial"):
         rows.append("Reference context partially unavailable (see JSON).")
     if classical:
         rows.extend(_classical_rows(h))

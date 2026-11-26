@@ -363,10 +363,10 @@ def _mph_check_dependencies():
     ZoneInfo('America/New_York')
 
 
-def _mph_observe_and_cast(*, source, permitted, session, audit=False):
-    """Single private evaluation; caller owns the verified kernel session.
+def _mph_observe_and_cast(*, source, session, audit=False):
+    """Single MPH cast; caller owns the verified kernel session.
 
-    The returned redacted summary is separate from the private in-process cast.
+    The returned redacted diagnostic is separate from the in-process cast.
     Assembly success is not a claim of complete reference or presentation.
     """
     import sys
@@ -377,12 +377,12 @@ def _mph_observe_and_cast(*, source, permitted, session, audit=False):
     summary = dict(status='aborted', source=source, events=[], domains=[],
                    resolved_domains=0, five_domain_http_attempts=0, qrng_logical_attempts=0,
                    qrng_response_validated=False, top_line_validated=False, hexagram_assembled=False,
-                   ready_for_cast=False, ready_for_production=False, actual_source_use_approved=False,
+                   ready_for_production=False, actual_source_use_approved=False,
                    source_policy_review='DEFERRED_TO_P3_NOT_APPROVED')
     phase = 'input'
-    private = None
+    formed = None
     try:
-        _mph_require(permitted is True and source in s.QRNG_ENDPOINTS, 'private evaluation required')
+        _mph_require(source in s.QRNG_ENDPOINTS, 'invalid QRNG source')
         phase = 'dependency_preflight'
         _mph_check_dependencies()
         _mph_require(session.kernel is not None and session.ts is not None
@@ -451,45 +451,43 @@ def _mph_observe_and_cast(*, source, permitted, session, audit=False):
         phase = 'assembly'
         cast = cast_from_lines(lines + [value], audit=audit)
         cast['method'] = 'mph_rtrend_quantum_top_group'
-        private = dict(anchor=anchor, sample=sample, cast=cast, records=records)
+        formed = dict(anchor=anchor, sample=sample, cast=cast, records=records)
         summary.update(status='assembled', hexagram_assembled=True)
         summary['events'].append('assembly_pass')
     except Exception as exc:
         summary.update(failure_phase=phase, error_type=type(exc).__name__)
         summary['events'].append('abort')
-    return summary, private
+    return summary, formed
 
 
-_MPH_MODE = 'mph_private_live_evaluation'
+_MPH_MODE = 'live_mph_cast'
 _MPH_BOUNDARY = 'selected_endpoints_not_full_history_or_independent_provider_authentication'
 
 
-def _mph_project(private, summary, args, session):
+def _mph_project(formed, summary, args, session):
     """Project the already formed cast; never acquire again."""
     import hashlib
     import sources as s
 
-    context = _cast_context(sample=private['sample'], cast=private['cast'],
-                            cast_time=private['anchor'], ephemeris_path=args.ephemeris,
+    context = _cast_context(sample=formed['sample'], cast=formed['cast'],
+                            cast_time=formed['anchor'], ephemeris_path=args.ephemeris,
                             reference_file=args.reference, audit=args.audit,
                             ephemeris_session=session)
     context['mode'] = _MPH_MODE
     context['capture']['cast_time_source'] = 'live_common_five_domain_anchor_not_qrng_receive_time'
-    context['status'] = ('private_complete' if context['status'] == 'complete'
-                         else 'private_context_partial')
     if context.get('errors'):
         context['errors'] = [{'component': e['component'], 'error': 'local reference unavailable'}
                              for e in context['errors']]
     record = _present_cast_result(context, audit=args.audit)
     # Compact selected-endpoint provenance, not a source-byte replay artifact.
     keys = ('domain', 'source', 'status', 'anchor', 'endpoint_times', 'input_sha256', 'line')
-    evidence = [{k: r[k] for k in keys} for r in private['records']]
+    evidence = [{k: r[k] for k in keys} for r in formed['records']]
     digest = hashlib.sha256(json.dumps(evidence, sort_keys=True, separators=(',', ':'),
                                        allow_nan=False).encode()).hexdigest()
     summary['selected_evidence_sha256'] = digest
-    raw = private['sample']['raw_hex']
+    raw = formed['sample']['raw_hex']
     group = f'{int(raw, 16):024b}'[15:18]
-    record['mph'] = dict(source_kind='fresh_private_observation',
+    record['mph'] = dict(source_kind='fresh_observation',
                          upstream_contract_version=s.VERSION,
                          domains_bottom_to_top=[*_MPH_DOMAINS, 'Quantum'],
                          request_anchor_utc=summary['anchor_utc'],
@@ -500,62 +498,60 @@ def _mph_project(private, summary, args, session):
                          top_line_bits=group, events=list(summary['events']),
                          five_domain_http_attempts=4, qrng_logical_attempts=1,
                          network_count_semantics='logical_interface_invocations_not_packet_count',
-                         actual_source_use_approved=False, ready_for_cast=False,
+                         actual_source_use_approved=False,
                          ready_for_production=False, source_policy_review='DEFERRED_TO_P3_NOT_APPROVED',
                          selected_evidence_sha256=digest, domain_evidence=evidence,
                          validation_boundary=_MPH_BOUNDARY)
     if args.audit:
         record['audit']['mph'] = dict(domain_evidence=[{**e, **{k: r[k] for k in ('values', 'deltas', 'signs')}}
-                                                      for e, r in zip(evidence, private['records'])],
+                                                      for e, r in zip(evidence, formed['records'])],
                                      entropy=dict(top_line_bit_positions_zero_based=[15, 16, 17],
-                                                  top_line_bits=group, top_line_value=private['cast']['lines_bottom_to_top'][5]))
+                                                  top_line_bits=group, top_line_value=formed['cast']['lines_bottom_to_top'][5]))
     return record
 
 
-def _mph_minimal(private):
-    """Explicitly incomplete private record, not a canonical saved-view record."""
-    cast = private['cast']
+def _mph_minimal(formed):
+    """Assembly-only recovery record, not a canonical saved-view record."""
+    cast = formed['cast']
     return dict(schema_version='mph-assembly-only-v0.1', mode=_MPH_MODE,
-                status='private_presentation_partial', timestamp=_iso_utc(private['anchor']),
-                randomness={k: private['sample'][k] for k in ('source', 'raw_hex')},
+                status='presentation_partial', timestamp=_iso_utc(formed['anchor']),
+                randomness={k: formed['sample'][k] for k in ('source', 'raw_hex')},
                 hexagram={k: cast[k] for k in ('lines_bottom_to_top', 'moving_lines', 'primary', 'relating')},
                 ready_for_production=False)
 
 
 def _mph_run(args):
-    """Single private transaction; redacted summary on stdout by default.
+    """Single MPH transaction using the common JSON and Human View contract.
 
-    For explicit private views, put the diagnostic summary on stderr and leave
-    stdout for the requested view. Never automatically save, retry or redraw.
+    Diagnostics are opt-in on success and emitted on failure. Never
+    automatically save, retry or redraw.
     """
     from human_view import validate_mph_record
 
     summary = dict(mode=_MPH_MODE, status='aborted', source=args.source or 'trng.info',
                    hexagram_assembled=False, five_domain_http_attempts=0, qrng_logical_attempts=0,
-                   actual_source_use_approved=False, ready_for_cast=False, ready_for_production=False,
+                   actual_source_use_approved=False, ready_for_production=False,
                    source_policy_review='DEFERRED_TO_P3_NOT_APPROVED')
-    private = record = human = payload = None
+    formed = record = human = payload = None
     output_attempted = False
     phase = 'preflight'
     try:
         # Fail before loading the kernel or requesting any source.
-        _mph_require(args.allow_private_evaluation is True, 'private evaluation required')
         _mph_check_dependencies()
         with PinnedEphemeris(args.ephemeris) as session:
-            summary, private = _mph_observe_and_cast(source=summary['source'],
-                                                     permitted=args.allow_private_evaluation,
+            summary, formed = _mph_observe_and_cast(source=summary['source'],
                                                      session=session, audit=args.audit)
             summary['mode'] = _MPH_MODE
-            if private is not None:
+            if formed is not None:
                 phase = 'projection'
-                record = _mph_project(private, summary, args, session)
+                record = _mph_project(formed, summary, args, session)
                 validate_mph_record(record)
                 payload = json.dumps(record, ensure_ascii=True, indent=2, allow_nan=False) + '\n'
-                summary['reference_context'] = ('COMPLETE' if record['status'] == 'private_complete' else 'PARTIAL')
+                summary['reference_context'] = ('COMPLETE' if record['status'] == 'complete' else 'PARTIAL')
                 summary['events'].append('projection_pass')
             else:
                 summary['reference_context'] = 'NOT_RUN'
-        if private is not None:
+        if formed is not None:
             # Saved records describe assembly/context, not success of the output channel.
             summary['classical_text'] = 'NOT_REQUESTED'
             if args.text:
@@ -583,27 +579,28 @@ def _mph_run(args):
                 sys.stdout.write(payload)
             summary['presentation'] = ('NOT_REQUESTED' if args.view == 'summary' else 'PASS')
             if summary['reference_context'] != 'COMPLETE':
-                summary['status'] = 'LIVE_PRIVATE_CONTEXT_PARTIAL'
+                summary['status'] = 'LIVE_MPH_CONTEXT_PARTIAL'
             elif args.view == 'summary':
-                summary['status'] = 'LIVE_PRIVATE_SUMMARY_PASS'
+                summary['status'] = 'LIVE_MPH_SUMMARY_PASS'
             else:
-                summary['status'] = 'LIVE_PRIVATE_END_TO_END_PASS'
+                summary['status'] = 'LIVE_MPH_END_TO_END_PASS'
     except Exception as exc:
-        summary.update(status='LIVE_PRIVATE_PRESENTATION_PARTIAL' if private is not None else 'aborted',
+        summary.update(status='LIVE_MPH_PRESENTATION_PARTIAL' if formed is not None else 'aborted',
                        failure_phase=phase, error_type=type(exc).__name__, presentation='FAILED')
         if args.text and summary.get('classical_text') == 'PENDING':
             summary['classical_text'] = 'FAILED' if phase == 'human_view' else 'NOT_RUN'
-        if private is not None:
+        if formed is not None:
             summary['hexagram_assembled'] = True
-            # Explicit private view may recover the formed record, even if projection fails.
-            # Never expose private data through the default summary.
+            # Recover the formed record if projection fails, except in summary view.
             if args.view != 'summary' and not output_attempted:
-                recovery = payload or json.dumps(_mph_minimal(private), ensure_ascii=True, indent=2) + '\n'
+                recovery = payload or json.dumps(_mph_minimal(formed), ensure_ascii=True, indent=2) + '\n'
                 sys.stdout.write(recovery)
-    summary['disclosure'] = 'Redacted acceptance summary; no raw entropy, observed values, lines or hexagram'
-    stream = sys.stdout if args.view == 'summary' else sys.stderr
-    stream.write(json.dumps(summary, ensure_ascii=True, indent=2, allow_nan=False) + '\n')
-    return 0 if summary['status'] in ('LIVE_PRIVATE_SUMMARY_PASS', 'LIVE_PRIVATE_END_TO_END_PASS') else 1
+    summary['disclosure'] = 'Redacted diagnostic summary; no raw entropy, observed values, lines or hexagram'
+    ok = summary['status'] in ('LIVE_MPH_SUMMARY_PASS', 'LIVE_MPH_END_TO_END_PASS')
+    if args.view == 'summary' or args.audit or not ok:
+        stream = sys.stdout if args.view == 'summary' else sys.stderr
+        stream.write(json.dumps(summary, ensure_ascii=True, indent=2, allow_nan=False) + '\n')
+    return 0 if ok else 1
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -641,11 +638,11 @@ def main(argv: list[str] | None = None) -> int:
     lookup.add_argument("--reference", type=Path, default=ROOT / "data" / "calendar_reference.json")
 
     cast_parser = commands.add_parser(
-        "cast", help="Quantum or private mixed-observation casting with local calendar/JPL context"
+        "cast", help="Quantum or mixed-observation casting with local calendar/JPL context"
     )
     cast_parser.add_argument("--method", choices=("quantum", "mph"), default="quantum")
     cast_parser.add_argument("--allow-private-evaluation", action="store_true",
-                             help="Confirm permitted private MPH technical evaluation (not a license)")
+                             help=argparse.SUPPRESS)
     cast_input = cast_parser.add_mutually_exclusive_group()
     cast_input.add_argument(
         "--source", choices=tuple(QRNG_ENDPOINTS),
@@ -674,7 +671,7 @@ def main(argv: list[str] | None = None) -> int:
     )
 
     cast_parser.add_argument("--view", choices=("summary", "json", "human"),
-                             help="Default JSON for Quantum, redacted summary for MPH")
+                             help="Default JSON; summary is a redacted MPH diagnostic")
     cast_parser.add_argument("--json-out", type=Path,
                              help="Optionally save the same cast JSON to a new file")
     view = commands.add_parser("view", help="Render a saved cast without TRNG")
@@ -685,16 +682,14 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
     if args.command == "cast":
         if args.view is None:
-            args.view = "summary" if args.method == "mph" else "json"
+            args.view = "json"
         if args.method == "mph":
-            if not args.allow_private_evaluation:
-                parser.error("MPH requires --allow-private-evaluation")
             if args.reference_hex is not None or args.at is not None:
                 parser.error("MPH does not accept --hex or --at")
             if args.view == "summary" and (args.audit or args.json_out is not None):
-                parser.error("MPH audit or saving requires explicit --view json or human")
+                parser.error("MPH summary view cannot be combined with audit or saving")
         elif args.allow_private_evaluation or args.view == "summary":
-            parser.error("Private evaluation and summary view are MPH only")
+            parser.error("Summary view and the legacy MPH option are MPH only")
         if args.text and args.view != "human":
             parser.error("--text requires --view human")
         if args.json_out is not None and args.json_out.exists():
