@@ -159,3 +159,68 @@ def cast_from_hex(raw_hex: str, *, audit: bool = False) -> dict:
             "triples_bottom_to_top": groups,
         })
     return cast
+
+
+# ---------------------------------------------------------------------------
+# Physical candidate conversion (synthetic fixtures only; PH-P2)
+# ---------------------------------------------------------------------------
+
+_PHYSICAL_CANDIDATE_DOMAINS = frozenset(('D02', 'D03', 'D12', 'M01', 'D06', 'D26-NEST'))
+
+
+def _physical_utc(value):
+    from datetime import datetime, timezone
+
+    if not isinstance(value, datetime) or value.utcoffset() is None:
+        raise ValueError('physical candidate time requires an explicit timezone')
+    return value.astimezone(timezone.utc)
+
+
+def physical_candidate_from_trends(observations, *, domain_order, casting_time,
+                                   evidence_kind, audit=False):
+    """Exercise one candidate encoder on preselected synthetic supports only.
+
+    This is not the frozen Physical model. There is no default domain order,
+    cadence, horizon, freshness rule, source QC or live selection here.
+    Each input is a sequence of three (support_start, support_end, value)
+    tuples. Equal start/end denotes a point. Intervals must be completed.
+    """
+    if evidence_kind != 'synthetic':
+        raise ValueError('physical candidate requires synthetic fixtures')
+    anchor = _physical_utc(casting_time)
+    if (not isinstance(domain_order, (list, tuple)) or len(domain_order) != 6
+            or any(type(d) is not str for d in domain_order)
+            or set(domain_order) != _PHYSICAL_CANDIDATE_DOMAINS):
+        raise ValueError('explicit permutation of six physical domains required')
+    if not isinstance(observations, dict) or not set(observations) <= _PHYSICAL_CANDIDATE_DOMAINS:
+        raise ValueError('invalid physical candidate domain evidence')
+    order = list(domain_order)
+    result = dict(profile='physical-synthetic-rtrend-v0.1', evidence_kind='synthetic',
+                  casting_time_utc=anchor.isoformat(), domains_bottom_to_top=order,
+                  ready_for_cast=False, status='unresolved', reasons=[])
+    lines = []
+    for domain in order:
+        samples = observations.get(domain)
+        if not isinstance(samples, (list, tuple)) or len(samples) != 3:
+            result['reasons'].append(dict(domain=domain, code='missing_support'))
+            continue
+        supports, values = [], []
+        for sample in samples:
+            if not isinstance(sample, (list, tuple)) or len(sample) != 3:
+                raise ValueError('invalid synthetic support shape')
+            start, end, value = sample
+            supports.append((_physical_utc(start), _physical_utc(end)))
+            values.append(value)
+        if (any(start > end or end > anchor for start, end in supports)
+                or any(a[0] >= b[0] or a[1] >= b[1] or a[1] > b[0]
+                       for a, b in zip(supports, supports[1:]))):
+            result['reasons'].append(dict(domain=domain, code='invalid_temporal_support'))
+            continue
+        trend = line_from_trend(values)
+        if trend['line'] is None:
+            result['reasons'].append(dict(domain=domain, code=trend['reason']))
+        else:
+            lines.append(trend['line'])
+    if not result['reasons']:
+        result.update(status='candidate_resolved', cast=cast_from_lines(lines, audit=audit))
+    return result

@@ -686,6 +686,35 @@ def _mph_run(args):
 # Physical casting readiness gate
 # ---------------------------------------------------------------------------
 
+# Process-local guard for offline Physical candidate transactions. The live
+# Physical entrypoint remains disabled until the observation model is frozen.
+from threading import Lock as _PhysicalLock
+
+_PHYSICAL_FORMED_TIMES = set()
+_PHYSICAL_FORMED_LOCK = _PhysicalLock()
+
+
+def _physical_candidate_once(observations, *, domain_order, casting_time,
+                             evidence_kind, audit=False):
+    """Reject a second formation at the same casting instant in this process.
+
+    No observation-epoch deduplication, persistence, cooldown or retry.
+    An unresolved candidate does not reserve a formed casting time.
+    """
+    from iching import _physical_utc, physical_candidate_from_trends
+
+    instant = _physical_utc(casting_time)
+    with _PHYSICAL_FORMED_LOCK:
+        if instant in _PHYSICAL_FORMED_TIMES:
+            raise ValueError('physical casting time already formed in this process')
+        result = physical_candidate_from_trends(
+            observations, domain_order=domain_order, casting_time=instant,
+            evidence_kind=evidence_kind, audit=audit)
+        if result['status'] == 'candidate_resolved':
+            _PHYSICAL_FORMED_TIMES.add(instant)
+        return result
+
+
 def _physical_run(args: argparse.Namespace) -> int:
     """Fail closed until the natural observation and line contract is frozen."""
     _LOG.debug("Physical readiness gate blocked acquisition")
