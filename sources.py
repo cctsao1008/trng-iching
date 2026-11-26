@@ -786,7 +786,7 @@ def physical_source_url(source, start, end):
             endtime=(end-timedelta(seconds=1)).strftime(fmt)))
     if source == 'D26-NEST':
         # NEST documents 0 as best available resolution, not guaranteed 1 min.
-        params = {'formchk': 1, 'stations[]': 'OULU', 'output': 'ascii',
+        params = {'wget': 1, 'stations[]': 'OULU', 'output': 'ascii',
                   'tabchoice': 'ori', 'dtype': 'corr_for_efficiency',
                   'date_choice': 'bydate', 'tresolution': 0, 'yunits': 0}
         for prefix, t in (('start', start), ('end', end)):
@@ -817,38 +817,66 @@ def parse_physical_geomag(doc):
 
 
 def parse_physical_nest(text):
-    """Strict candidate single-station ASCII grammar; unknown formats reject."""
-    import html
-
-    if not isinstance(text, str):
-        raise ValueError('expected NEST text')
-    if text.lstrip().startswith('<'):
-        blocks = re.findall(r'<pre\b[^>]*>(.*?)</pre\s*>', text, re.I | re.S)
-        if len(blocks) != 1:
-            raise ValueError('expected one NEST ASCII block')
-        text = html.unescape(blocks[0])
-    rows, headers = [], []
-    station_header = False
-    for line in text.splitlines():
-        line = line.strip()
+    """Parse the observed NEST wget ASCII product, not arbitrary HTML."""
+    if not isinstance(text, str) or text.lstrip().startswith('<'):
+        raise ValueError('expected direct NEST ASCII text')
+    required = {
+        'STATION': 'OULU', 'NMDB TABLE': 'original',
+        'DATA TYPE': 'corr_for_efficiency(MCORR_E)',
+        'AVERAGING': 'No', 'ORIGINAL RES': '1 min',
+    }
+    fields, headers, rows = {}, [], []
+    column_seen = interval_start = False
+    for raw_line in text.splitlines():
+        line = raw_line.strip()
         if not line:
             continue
-        if line.startswith('#') or re.fullmatch(r'start_date_time\s*;\s*OULU', line, re.I):
+        if line.startswith('#'):
+            if column_seen:
+                raise ValueError('unexpected NEST header after data column')
             headers.append(line)
-            if re.fullmatch(r'#?\s*start_date_time\s*;\s*OULU', line, re.I):
-                station_header = True
+            if line == '# Timestamps always correspond to the beginning of the time interval':
+                interval_start = True
+            match = re.fullmatch(r'#\s*(STATION|START TIME|END TIME|NMDB TABLE|DATA TYPE|AVERAGING|ORIGINAL RES):\s*(.+)', line)
+            if match:
+                key, value = match.groups()
+                if key in fields:
+                    raise ValueError('duplicate NEST metadata: ' + key)
+                fields[key] = value
             continue
-        match = re.fullmatch(r'(\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}:\d{2})\s*;\s*([^;]*)', line)
+        if re.fullmatch(r'start_date_time\s+MCORR_E', line):
+            if column_seen or not interval_start or any(fields.get(k) != v for k, v in required.items()):
+                raise ValueError('NEST product metadata mismatch')
+            if not all(k in fields for k in ('START TIME', 'END TIME')):
+                raise ValueError('NEST query bounds missing')
+            column_seen = True
+            continue
+        if not column_seen:
+            raise ValueError('NEST data column not verified')
+        match = re.fullmatch(r'(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})\s*;\s*([^;]*)', line)
         if not match:
             raise ValueError('unrecognized NEST ASCII row')
         stamp, raw = match.groups()
-        value = None if raw.strip().lower() in ('', 'null', 'nan') else number(raw.strip())
-        if value is None and raw.strip().lower() not in ('', 'null', 'nan'):
+        missing = raw.strip().lower() in ('', 'null', 'nan')
+        value = None if missing else number(raw.strip())
+        if value is None and not missing:
             raise ValueError('unrecognized NEST numeric field')
         rows.append((utc_label(stamp), value))
-    if not station_header:
-        raise ValueError('NEST station header not verified')
-    return rows, {'station': 'OULU', 'headers': headers, 'unit_requested': 'counts/s'}
+    if not column_seen:
+        raise ValueError('NEST data column not verified')
+    bounds = []
+    for key in ('START TIME', 'END TIME'):
+        raw = fields[key]
+        if not re.fullmatch(r'\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2} UTC', raw):
+            raise ValueError('invalid NEST UTC query bound')
+        bounds.append(utc_label(raw[:-4]))
+    if bounds[0] >= bounds[1]:
+        raise ValueError('invalid NEST query interval')
+    return rows, dict(station='OULU', column='MCORR_E', table=fields['NMDB TABLE'],
+                      data_type=fields['DATA TYPE'], averaging=fields['AVERAGING'],
+                      reported_original_resolution_seconds=60,
+                      query_start_utc=iso(bounds[0]), query_end_utc=iso(bounds[1]),
+                      unit_requested='counts/s', headers=headers)
 
 
 def inspect_physical_rows(source, rows, start, end):
@@ -916,6 +944,8 @@ def acquire_physical_observation(source, *, start, end, research_acknowledged=Fa
         if not ('text/plain' in media or 'text/html' in media):
             raise TransportError('expected NEST ASCII response')
         rows, native = parse_physical_nest(body.decode('utf-8-sig'))
+        if (native['query_start_utc'], native['query_end_utc']) != (iso(start), iso(end)):
+            raise ValueError('NEST response query bounds mismatch')
     coverage = inspect_physical_rows(source, rows, start, end)
     evidence = dict(source=source, status='candidate_parsed', request_url=url,
                     start_utc=iso(start), end_exclusive_utc=iso(end),
