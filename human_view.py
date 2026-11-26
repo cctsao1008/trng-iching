@@ -224,8 +224,65 @@ def validate_mph_record(record: dict) -> None:
 # Shared ASCII hexagram rendering
 # ---------------------------------------------------------------------------
 
+# No-hexagram outcomes never enter the classical-text or line renderer.
+_OUTCOME_REASONS = {
+    'no_observation': 'No observations available',
+    'stale': 'Observations are too old',
+    'missing_endpoint': 'Required observations are missing',
+    'duplicate_epoch': 'Ambiguous observation timestamps',
+    'source_mismatch': 'Observation source does not match the required source',
+    'off_grid': 'Observation timestamps do not match the required grid',
+    'ineligible_endpoint': 'Required observations did not pass quality checks',
+    'invalid_value': 'Invalid observation values',
+    'nonfinite': 'Invalid observation values',
+    'zero_change': 'Observation changes do not determine a line',
+    'missing_expected_session': 'Required market observations are missing',
+    'duplicate_date': 'Ambiguous market observation dates',
+    'invalid_expected_row': 'Invalid market observation values',
+    'acquisition_or_adapter_failed': 'Observation acquisition or processing failed',
+    'execution_failed': 'Execution or validation failed',
+    'model_not_ready': 'Physical model is not ready; no observations acquired',
+}
+
+
+def render_no_hexagram(outcome: dict) -> str:
+    """Present an explicit outcome, without a fabricated hexagram or omen."""
+    if (not isinstance(outcome, dict)
+            or outcome.get('schema_version') != 'cast-outcome-v1'
+            or outcome.get('hexagram_formed') is not False
+            or outcome.get('status') not in ('unresolved', 'error')
+            or 'hexagram' in outcome
+            or not isinstance(outcome.get('reasons'), list)
+            or not outcome['reasons']):
+        raise ValueError('Invalid no-hexagram outcome')
+    methods = {'mph': 'Myriad Phenomena (MPH) / 萬象卦',
+               'physical': 'Physical / 天地卦',
+               'quantum': 'Quantum / 量子卦'}
+    if outcome.get('method') not in methods:
+        raise ValueError('Unknown outcome method')
+    unresolved = outcome['status'] == 'unresolved'
+    rows = ['Hexagram Casting',
+            'Method: ' + methods[outcome['method']],
+            'Status: Unresolved (無卦)' if unresolved else 'Status: Error (異常)',
+            '', 'Reason:']
+    for reason in outcome['reasons']:
+        code = reason['code']
+        domain = reason.get('domain')
+        label = _OUTCOME_REASONS.get(code, 'Observation or execution validation failed')
+        rows.append('  ' + (domain + ': ' if domain else '') + label + ' [' + code + ']')
+    rows.extend(['', 'No hexagram was formed. / 本次未能成卦。'])
+    if unresolved:
+        rows.extend(['Insufficient or indeterminate observations under the current model.',
+                     '無卦不代表吉凶。 / No implication of good or bad fortune.'])
+    else:
+        rows.append('Execution did not complete successfully. / 本次執行未成功完成。')
+    return '\n'.join(rows) + '\n'
+
+
 def render_human(record: dict, *, classical: bool = False) -> str:
     _LOG.debug("Human View validation started classical=%s", classical)
+    if isinstance(record, dict) and record.get('schema_version') == 'cast-outcome-v1':
+        return render_no_hexagram(record)
     if not isinstance(record, dict) or record.get("schema_version") != "0.4.0":
         raise ValueError("Human View requires a v0.4.0 cast record")
     h = record["hexagram"]

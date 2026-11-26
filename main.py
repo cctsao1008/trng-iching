@@ -15,7 +15,7 @@ from pathlib import Path
 
 from astronomy import PinnedEphemeris, UTC_PLUS_8, calculate_reference
 from iching import cast_from_hex
-from human_view import render_human
+from human_view import render_human, render_no_hexagram
 from lunisolar import calculate_four_pillars, lookup_hko_date, sync_hko_years
 from sources import QRNG_ENDPOINTS, acquire_trng_bytes
 
@@ -206,11 +206,19 @@ def _manual_reference_cast(args: argparse.Namespace) -> dict:
     )
 
 
+class _QuantumAcquisitionError(RuntimeError):
+    """A live quantum sample could not be acquired or converted into a cast."""
+
+
 def _live_cast(args: argparse.Namespace) -> dict:
     """Exactly one TRNG request, regardless of optional JPL/HKO availability."""
     _LOG.debug("Quantum acquisition started provider=%s", args.source or "trng.info")
-    sample = acquire_trng_bytes(args.source or "trng.info")
-    cast = cast_from_hex(sample["raw_hex"], audit=args.audit)
+    try:
+        sample = acquire_trng_bytes(args.source or "trng.info")
+        cast = cast_from_hex(sample["raw_hex"], audit=args.audit)
+    except Exception as exc:
+        _debug_failure("quantum_acquisition_or_conversion", exc)
+        raise _QuantumAcquisitionError(type(exc).__name__) from exc
     cast_time = _utc_timestamp(sample["receive_time_utc"])
     return _cast_context(
         sample=sample, cast=cast, cast_time=cast_time,
@@ -337,6 +345,16 @@ def _mph_check_dependencies():
     ZoneInfo('America/New_York')
 
 
+# Expected observation rejections are distinct from execution failures.
+# Unknown reasons fail closed as errors, not ordinary abstentions.
+_UNRESOLVED_REASONS = frozenset({
+    'no_observation', 'stale', 'missing_endpoint', 'duplicate_epoch',
+    'source_mismatch', 'off_grid', 'ineligible_endpoint', 'invalid_value',
+    'zero_change', 'nonfinite', 'missing_expected_session', 'duplicate_date',
+    'invalid_expected_row',
+})
+
+
 def _mph_observe_and_cast(*, source, session, audit=False):
     """Single MPH cast; caller owns the verified kernel session.
 
@@ -396,8 +414,18 @@ def _mph_observe_and_cast(*, source, session, audit=False):
         phase = 'five_domain_preflight'
         summary['events'].append(phase)
         _LOG.debug("MPH preflight resolved_domains=%s/5", summary['resolved_domains'])
-        _mph_require(summary['resolved_domains'] == 5 and summary['five_domain_http_attempts'] == 4
-                     and completed >= anchor, 'incomplete five-domain evaluation')
+        _mph_require(summary['five_domain_http_attempts'] == 4 and completed >= anchor,
+                     'invalid acquisition count or chronology')
+        if summary['resolved_domains'] != 5:
+            unresolved = [r for r in records if r['status'] != 'candidate_resolved']
+            if all(r['status'] == 'incomplete'
+                   and r['reason'] in _UNRESOLVED_REASONS
+                   and not r.get('error_type') for r in unresolved):
+                summary.update(status='unresolved', failure_phase=phase, error_type=None)
+                summary['events'].append('no_hexagram')
+                _LOG.debug("QRNG acquisition skipped; observations unresolved")
+                return summary, None
+            raise ValueError('incomplete five-domain evaluation')
         # Reject unresolved or inconsistent observations before consuming entropy.
         lines = [s.validate_selected_observation(r, domain, anchor, completed)
                  for r, domain in zip(records, _MPH_DOMAINS)]
@@ -515,6 +543,50 @@ def _mph_minimal(formed):
                 ready_for_production=False)
 
 
+# ---------------------------------------------------------------------------
+# No-hexagram outcome (not a formed v0.4.0 casting record)
+# ---------------------------------------------------------------------------
+
+def _no_hexagram(method, status, reasons):
+    return dict(schema_version='cast-outcome-v1', method=method, status=status,
+                hexagram_formed=False, reasons=reasons)
+
+
+def _emit_no_hexagram(args, outcome):
+    """Show the outcome without creating a cast record or reading classical text."""
+    try:
+        if args.view == 'human':
+            _write_human(render_no_hexagram(outcome))
+        else:
+            sys.stdout.write(json.dumps(outcome, ensure_ascii=True, indent=2) + '\n')
+        if args.json_out is not None:
+            # --json-out is reserved for formed casting records.
+            print("No cast record saved; no hexagram formed.", file=sys.stderr)
+    except Exception as exc:
+        _debug_failure("outcome_output", exc)
+        print("ERROR [OutcomeOutputFailed]: No hexagram was formed.", file=sys.stderr)
+        return 1
+    return 3 if outcome['status'] == 'unresolved' else 1
+
+
+def _mph_no_hexagram(summary):
+    reasons = [
+        dict(domain=d['domain'], code=d['reason'])
+        for d in summary.get('domains', [])
+        if d['status'] != 'candidate_resolved'
+    ]
+    if summary['status'] != 'unresolved':
+        reasons.append(dict(domain=None, code='execution_failed'))
+    outcome = _no_hexagram('mph',
+                          'unresolved' if summary['status'] == 'unresolved' else 'error',
+                          reasons)
+    outcome['anchor_utc'] = summary.get('anchor_utc')
+    outcome['qrng_logical_attempts'] = summary['qrng_logical_attempts']
+    outcome['failure_phase'] = summary.get('failure_phase')
+    outcome['error_type'] = summary.get('error_type')
+    return outcome
+
+
 def _mph_run(args):
     """Single MPH transaction using the common JSON and Human View contract.
 
@@ -597,6 +669,13 @@ def _mph_run(args):
     _LOG.debug("MPH finished status=%s qrng_attempts=%s assembled=%s",
                summary['status'], summary['qrng_logical_attempts'],
                summary['hexagram_assembled'])
+    if formed is None:
+        outcome = _mph_no_hexagram(summary)
+        if args.view == 'summary':
+            outcome['diagnostics'] = summary
+        elif args.audit or args.debug:
+            sys.stderr.write(json.dumps(summary, ensure_ascii=True, indent=2, allow_nan=False) + '\n')
+        return _emit_no_hexagram(args, outcome)
     if args.view == 'summary' or args.audit or not ok:
         stream = sys.stdout if args.view == 'summary' else sys.stderr
         stream.write(json.dumps(summary, ensure_ascii=True, indent=2, allow_nan=False) + '\n')
@@ -610,9 +689,9 @@ def _mph_run(args):
 def _physical_run(args: argparse.Namespace) -> int:
     """Fail closed until the natural observation and line contract is frozen."""
     _LOG.debug("Physical readiness gate blocked acquisition")
-    print("ERROR [PhysicalModelNotReady]: Physical Hexagram is under research; "
-          "no observations acquired and no hexagram formed.", file=sys.stderr)
-    return 1
+    return _emit_no_hexagram(
+        args, _no_hexagram('physical', 'error',
+                          [dict(domain=None, code='model_not_ready')]))
 
 
 # ---------------------------------------------------------------------------
@@ -771,6 +850,11 @@ def main(argv: list[str] | None = None) -> int:
                 result = _live_cast(args)
         else:
             raise ValueError(f"Unsupported command: {args.command}")
+    except _QuantumAcquisitionError as exc:
+        outcome = _no_hexagram('quantum', 'error',
+                               [dict(domain='Quantum', code='acquisition_or_adapter_failed')])
+        outcome['error_type'] = str(exc)
+        return _emit_no_hexagram(args, outcome)
     except Exception as exc:
         _debug_failure("command_execution", exc)
         print(f"ERROR [{type(exc).__name__}]: {exc}", file=sys.stderr)

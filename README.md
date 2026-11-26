@@ -241,6 +241,10 @@ Modern tools support the traditional practice without claiming to explain or val
 
 The scientific tools describe randomness and time; they do not establish the predictive validity of divination.
 
+## No-hexagram outcomes
+
+A question does not require a hexagram. Insufficient or indeterminate observations under the fixed MPH model yield `unresolved` (exit 3); execution, configuration or model-readiness failures yield `error` (exit 1). Human View explains that no hexagram was formed and why. JSON and MPH summary mode emit a separate `cast-outcome-v1` envelope with `hexagram_formed: false` and reason codes, never a fabricated v0.4.0 cast. No cast file is written by `--json-out` and no classical text is shown for these outcomes. Detailed MPH diagnostics remain available with `--debug` or `--audit`. Existing formed cast format and selection rules are unchanged. A live Quantum acquisition or conversion failure also reports `error`; invalid CLI arguments and post-assembly failures retain existing handling. A no-hexagram outcome does not imply good or bad fortune.
+
 ## Debugging
 
 Use `--debug` with any subcommand to enable redacted project diagnostics on stderr. For example:
@@ -254,7 +258,7 @@ Debug logs show execution stages, transport timing/status, active observation co
 
 ## ⚙️ System Architecture
 
-One application combines observation, deterministic line conversion, shared hexagram assembly, reference context and presentation. Quantum and MPH use the same engine. Physical has a reserved method entry, not an enabled casting model: `py .\main.py cast --method physical --view human` returns `PhysicalModelNotReady` (exit 1), without observation requests, QRNG calls, a formed hexagram, or a saved cast record. Physical rejects `--source`, `--hex`, and `--at`. Its natural observation adapters and shared assembly integration will follow the research gates in #6.
+One application combines observation, deterministic line conversion, shared hexagram assembly, reference context and presentation. Quantum and MPH use the same engine. Physical has a reserved method entry, not an enabled casting model: `py .\main.py cast --method physical --view human` reports `model_not_ready` (exit 1), without observation requests, QRNG calls, a formed hexagram, or a saved cast record. Physical rejects `--source`, `--hex`, and `--at`. Its natural observation adapters and shared assembly integration will follow the research gates in #6.
 
 ```mermaid
 ---
