@@ -235,35 +235,35 @@ Classical Text / 周易
 
 ```mermaid
 flowchart TD
-    N["自然物理現象"] --> PH["天地卦"]
-    Q["量子亂數"] --> QH["量子卦"]
-    F["五行資訊觀測<br/>+ 量子亂數"] --> MH["萬象卦"]
+    N["自然物理現象<br/>五行資訊觀測"] --> M["起卦框架<br/>天地卦 · 量子卦 · 萬象卦"]
+    Q["量子亂數"] --> M
+    M --> H["確定性卦象計算"]
 
-    PH --> H["確定性卦象計算"]
-    QH --> H
-    MH --> H
+    A["JPL 天文計算<br/>HKO 農曆與干支"] --> T["時間與曆象"]
 
-    A["JPL 天文計算"] --> T["時間與曆象"]
-    C["HKO 農曆與干支"] --> T
     H --> R["起卦資料 · JSON"]
     T --> R
-    R --> V["Human View · 選用經文"]
+
+    R --> V["Human View"]
     Z["本機《周易》經文"] -->|"--text"| V
+
     R -. 手動分享 .-> I["人或外部 AI 解卦"]
     V -. 手動分享 .-> I
-    S["外部研究文獻"] --> I
-    P["所問之事與現實處境"] --> I
-    I --> O["反思 · 多元觀點 · 自主選擇"]
+
+    S["外部研究文獻<br/>所問之事與現實處境"] --> I
+
+    I --> O["反思<br/>多元觀點 · 自主選擇"]
 
     classDef randomness fill:#e8f1fa,stroke:#4786c6,color:#173b60
     classDef science fill:#e5f3ed,stroke:#468e78,color:#194c3c
     classDef record fill:#f0f0f0,stroke:#888,color:#333
     classDef references fill:#faf1df,stroke:#b58b4b,color:#604414
     classDef reflection fill:#f0eaf8,stroke:#8c72b5,color:#49336e
-    class Q,QH randomness
-    class N,PH,F,MH,A,C,T science
-    class H,R,V record
-    class Z,S,P references
+
+    class Q randomness
+    class N,A,T science
+    class M,H,R,V record
+    class Z,S references
     class I,O reflection
 ```
 
