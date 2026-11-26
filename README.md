@@ -229,13 +229,20 @@ Modern tools support the traditional practice without claiming to explain or val
 
 The scientific tools describe randomness and time; they do not establish the predictive validity of divination.
 
-## ⚙️ System Architecture — Quantum Hexagram
+## ⚙️ System Architecture
 
-The implemented Quantum Hexagram brings together quantum randomness, astronomical and calendrical context, classical text, and human reflection, while keeping their responsibilities distinct. The following diagram describes the current implementation, not the experimental Physical or Myriad Phenomena frameworks.
+The overall architecture brings together three alternative casting frameworks, astronomical and calendrical context, classical text, and human reflection, while keeping their responsibilities distinct. Only the Quantum Hexagram is currently implemented; the Physical and Myriad Phenomena Hexagram paths represent research candidates, not available casting modes.
 
 ```mermaid
 flowchart TD
-    Q["Quantum randomness"] --> H["Deterministic hexagram"]
+    N["Natural phenomena"] --> PH["Physical Hexagram"]
+    Q["Quantum randomness"] --> QH["Quantum Hexagram"]
+    F["Five-phase observations<br/>+ Quantum randomness"] --> MH["Myriad Phenomena Hexagram"]
+
+    PH --> H["Deterministic hexagram"]
+    QH --> H
+    MH --> H
+
     A["JPL astronomy"] --> T["Time context"]
     C["HKO calendar and Ganzhi"] --> T
     H --> R["Casting record · JSON"]
@@ -253,9 +260,9 @@ flowchart TD
     classDef record fill:#f0f0f0,stroke:#888,color:#333
     classDef references fill:#faf1df,stroke:#b58b4b,color:#604414
     classDef reflection fill:#f0eaf8,stroke:#8c72b5,color:#49336e
-    class Q,H randomness
-    class A,C,T science
-    class R,V record
+    class Q,QH randomness
+    class N,PH,F,MH,A,C,T science
+    class H,R,V record
     class Z,S,P references
     class I,O reflection
 ```
