@@ -235,11 +235,11 @@ Classical Text / 周易
 
 ```mermaid
 flowchart TD
-    N["自然物理現象<br/>五行資訊觀測"] --> M["起卦框架<br/>天地卦 · 量子卦 · 萬象卦"]
+    N["自然物理與五行資訊"] --> M["天地卦 · 量子卦 · 萬象卦"]
     Q["量子亂數"] --> M
     M --> H["確定性卦象計算"]
 
-    A["JPL 天文計算<br/>HKO 農曆與干支"] --> T["時間與曆象"]
+    A["JPL 天文 · HKO 曆法"] --> T["時間與曆象"]
 
     H --> R["起卦資料 · JSON"]
     T --> R
@@ -250,9 +250,9 @@ flowchart TD
     R -. 手動分享 .-> I["人或外部 AI 解卦"]
     V -. 手動分享 .-> I
 
-    S["外部研究文獻<br/>所問之事與現實處境"] --> I
+    S["研究文獻與問題背景"] --> I
 
-    I --> O["反思<br/>多元觀點 · 自主選擇"]
+    I --> O["反思與自主選擇"]
 
     classDef randomness fill:#e8f1fa,stroke:#4786c6,color:#173b60
     classDef science fill:#e5f3ed,stroke:#468e78,color:#194c3c
