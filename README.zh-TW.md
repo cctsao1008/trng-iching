@@ -26,8 +26,20 @@
 </p>
 
 <p align="center">
-  <strong>透過天地萬象、量子隨機性與古老智慧，探索變化。</strong>
+  <strong>Exploring change through nature, quantum randomness, and ancient wisdom.</strong>
 </p>
+
+<p align="center">
+  透過天地萬象、量子隨機性與古老智慧，探索變化。
+</p>
+
+<table align="center">
+  <tr>
+    <td align="center" width="240"><strong>天地卦</strong><br>Physical</td>
+    <td align="center" width="240"><strong>量子卦</strong><br>Quantum</td>
+    <td align="center" width="240"><strong>五行量子卦</strong><br>Five Phases–Quantum</td>
+  </tr>
+</table>
 
 <p align="center">
   ⚛️ 量子 &nbsp;·&nbsp; 🔄 變化 &nbsp;·&nbsp; 🌏 天地 &nbsp;·&nbsp; 🪷 智慧
