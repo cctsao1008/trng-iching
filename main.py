@@ -20,6 +20,10 @@ from sources import QRNG_ENDPOINTS, acquire_trng_bytes
 ROOT = Path(__file__).resolve().parent
 
 
+# ---------------------------------------------------------------------------
+# Time conversion helpers
+# ---------------------------------------------------------------------------
+
 def _utc_timestamp(value: str) -> datetime:
     parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
     if parsed.tzinfo is None or parsed.utcoffset() is None:
@@ -32,6 +36,10 @@ def _iso_utc(value: datetime) -> str:
         timespec="microseconds"
     ).replace("+00:00", "Z")
 
+
+# ---------------------------------------------------------------------------
+# Shared reference context (calendar, astronomy, and four pillars)
+# ---------------------------------------------------------------------------
 
 def _cast_context(
     *, sample: dict, cast: dict, cast_time: datetime | None,
@@ -140,6 +148,10 @@ def _cast_context(
     return result
 
 
+# ---------------------------------------------------------------------------
+# Quantum casting and offline reference replay
+# ---------------------------------------------------------------------------
+
 def _manual_reference_cast(args: argparse.Namespace) -> dict:
     """Validate hex and supplied timestamp before optional context."""
     cast = cast_from_hex(args.reference_hex, audit=args.audit)
@@ -170,6 +182,10 @@ def _live_cast(args: argparse.Namespace) -> dict:
     )
 
 
+
+# ---------------------------------------------------------------------------
+# Shared JSON projection and terminal output
+# ---------------------------------------------------------------------------
 
 def _present_cast_result(result: dict, *, audit: bool) -> dict:
     """Project existing cast data into a concise v0.4.0 JSON interface.
@@ -250,6 +266,10 @@ def _write_human(value: str) -> None:
         sys.stdout.buffer.flush()
 
 
+# ---------------------------------------------------------------------------
+# MPH transaction: prerequisites, observation acquisition, and assembly
+# ---------------------------------------------------------------------------
+
 _MPH_DOMAINS = ('Metal', 'Wood', 'Water', 'Fire', 'Earth')
 _MPH_TIMESTAMP_SEMANTICS = 'client request and reception, not TRNG hardware generation'
 
@@ -266,89 +286,6 @@ def _mph_utc(value):
     _mph_require(isinstance(value, datetime) and value.utcoffset() == timedelta(0),
                  'MPH requires UTC timestamps')
     return value
-
-
-def _mph_validate_record(record, domain, anchor, completed):
-    """Recheck selected endpoints from the same in-process acquisition.
-
-    This is not an independent provider or publication-finality audit.
-    """
-    import json
-    from decimal import Decimal
-    import sources as s
-    from astronomy import validate_earth_endpoint
-
-    r = record
-    source, unit, cadence, cap, _ = s.PROFILES[domain]
-    _mph_require(r['domain'] == domain and r['contract'] == s.VERSION
-                 and r['source'] == source and r['unit'] == unit, 'domain identity')
-    _mph_require(r['status'] == 'candidate_resolved' and r['reason'] == 'ok'
-                 and type(r['line']) is int and r['line'] in (6, 7, 8, 9), 'domain state')
-    _mph_require(_mph_utc(r['anchor']) == anchor, 'domain anchor')
-    times = [_mph_utc(t) for t in r['endpoint_times']]
-    _mph_require(len(times) == 3 and times[0] < times[1] < times[2] <= anchor, 'endpoint order')
-    _mph_require(r['age_seconds'] == (anchor - times[-1]).total_seconds(), 'endpoint age')
-    if domain == 'Earth':
-        _mph_require(r['input_sha256'] == s.KERNEL and anchor <= _mph_utc(r['computed_at']) <= completed,
-                     'Earth computation provenance')
-    else:
-        m = r['transport']
-        _mph_require(m['source'] == s.HTTP[domain] and m['endpoint'] == s.endpoint(s.HTTP[domain], anchor)
-                     and m['status'] == 'transport_shape_pass' and m['http_status'] == 200
-                     and m['entity_sha256'] == r['input_sha256'], 'transport identity')
-        _mph_require(isinstance(r['input_sha256'], str) and len(r['input_sha256']) == 64
-                     and all(c in '0123456789abcdef' for c in r['input_sha256']), 'digest shape')
-        _mph_require(_mph_utc(m['anchor']) == anchor <= _mph_utc(m['requested_at'])
-                     <= _mph_utc(m['received_at']) == _mph_utc(r['received_at']) <= completed,
-                     'transport chronology')
-        _mph_require(m['ready_for_cast'] is False and type(m['qrng_requests']) is int
-                     and m['qrng_requests'] == 0, 'transport safety')
-    if domain == 'Wood':
-        n = r['native_adapter']
-        _mph_require(r['profile'] == s.PROFILE and n['profile'] == s.PROFILE
-                     and n['source'] == s.SOURCE and n['endpoints'] == r['endpoints']
-                     and n['line'] == r['line'], 'Wood profile')
-        replay = s.evaluate_wood(r['endpoints'], anchor, source=s.SOURCE,
-                                 received_at=_mph_utc(r['received_at']))
-        _mph_require(replay['endpoint_close_utc'] == r['endpoint_times'], 'Wood session replay')
-    else:
-        if domain in ('Metal', 'Fire'):
-            diag = r['duplicate_diagnostics']
-            _mph_require(diag['policy'] == 'required_endpoint_unique_v0.1'
-                         and diag['required_duplicate_groups'] == 0
-                         and all(_mph_utc(g['time']) not in times and g['required_endpoint'] is False
-                                 for g in diag['groups']), 'solar duplicate endpoints')
-        endpoints = r['endpoints']
-        _mph_require(len(endpoints) == 3 and [_mph_utc(e['time']) for e in endpoints] == times,
-                     'selected endpoint identity')
-        rows = []
-        for e in endpoints:
-            qc = e['native_qc']
-            value = s.number(e['value'])
-            if domain in ('Metal', 'Fire'):
-                _mph_require(qc['active'] is True and qc['source'] == 'SOLAR1'
-                             and set(qc['flags']) == set(s.FLAGS[domain])
-                             and all(type(v) is int and v == 0 for v in qc['flags'].values())
-                             and value is not None and value > 0, 'solar QC')
-                if domain == 'Fire':
-                    den, temp = s.number(qc['density']), s.number(qc['temperature'])
-                    _mph_require(den is not None and temp is not None and den > 0 and temp > 0
-                                 and value == den * temp * Decimal('1.380649e-8'), 'Fire derivation')
-            elif domain == 'Water':
-                f = qc['flags']
-                _mph_require(qc['q'] == 'p' and len(f) == 4 and f[0].isascii() and f[0].isdigit()
-                             and f[1:] == ['0', '0', '0'] and value is not None
-                             and value == value.to_integral_value(), 'Water QC')
-            else:
-                validate_earth_endpoint(e)
-            rows.append(dict(time=_mph_utc(e['time']), source=e['source'], value=e['value'],
-                             eligible=e['eligible'], qc=qc))
-        replay = s.normalize(domain, rows, anchor, r['input_sha256'], r['evidence_kind'], r.get('received_at'))
-        _mph_require(replay['endpoint_times'] == r['endpoint_times'], 'selected endpoint replay')
-    _mph_require(replay['status'] == 'candidate_resolved', 'endpoint replay incomplete')
-    for key in ('line', 'values', 'deltas', 'signs'):
-        _mph_require(json.dumps(replay[key]) == json.dumps(r[key]), 'endpoint replay mismatch: ' + key)
-    return r['line']
 
 
 def _mph_check_dependencies():
@@ -388,6 +325,7 @@ def _mph_observe_and_cast(*, source, session, audit=False):
         _mph_require(session.kernel is not None and session.ts is not None
                      and session.digest == JPL_DE440S_SHA256
                      and session.skyfield_version == EARTH_SKYFIELD_VERSION, 'verified open kernel required')
+        # Freeze a single anchor for every observation domain in this cast.
         anchor = _mph_utc(s.utcnow())
         summary['anchor_utc'] = anchor.isoformat()
         phase = 'five_domain_acquisition'
@@ -416,12 +354,14 @@ def _mph_observe_and_cast(*, source, session, audit=False):
         summary['events'].append(phase)
         _mph_require(summary['resolved_domains'] == 5 and summary['five_domain_http_attempts'] == 4
                      and completed >= anchor, 'incomplete five-domain evaluation')
-        lines = [_mph_validate_record(r, domain, anchor, completed)
+        # Reject unresolved or inconsistent observations before consuming entropy.
+        lines = [s.validate_selected_observation(r, domain, anchor, completed)
                  for r, domain in zip(records, _MPH_DOMAINS)]
         before = _mph_utc(s.utcnow())
         _mph_require(before >= completed, 'preflight chronology')
         summary['preflight_completed_at_utc'] = before.isoformat()
         summary['events'].append('five_domain_preflight_pass')
+        # Exactly one QRNG invocation is allowed after all five domains pass.
         phase = 'qrng_acquisition'
         summary['events'].append(phase)
         summary['qrng_logical_attempts'] = 1
@@ -443,11 +383,13 @@ def _mph_observe_and_cast(*, source, session, audit=False):
                        qrng_receive_time_utc=rec.isoformat())
         phase = 'top_line_validation'
         summary['events'].append(phase)
+        # Only the sixth three-bit group contributes to the MPH top line.
         group = f'{int(raw, 16):024b}'[15:18]
         value = 6 + group.count('1')
         _mph_require(value == decoded[5], 'quantum top-line parity')
         summary['top_line_validated'] = True
         summary['events'].append('top_line_validation_pass')
+        # Once formed, the hexagram survives later context or output failures.
         phase = 'assembly'
         cast = cast_from_lines(lines + [value], audit=audit)
         cast['method'] = 'mph_rtrend_quantum_top_group'
@@ -459,6 +401,10 @@ def _mph_observe_and_cast(*, source, session, audit=False):
         summary['events'].append('abort')
     return summary, formed
 
+
+# ---------------------------------------------------------------------------
+# MPH record projection and transaction completion
+# ---------------------------------------------------------------------------
 
 _MPH_MODE = 'live_mph_cast'
 _MPH_BOUNDARY = 'selected_endpoints_not_full_history_or_independent_provider_authentication'
@@ -473,6 +419,7 @@ def _mph_project(formed, summary, args, session):
                             cast_time=formed['anchor'], ephemeris_path=args.ephemeris,
                             reference_file=args.reference, audit=args.audit,
                             ephemeris_session=session)
+    # MPH context is anchored to observation time, not QRNG receipt time.
     context['mode'] = _MPH_MODE
     context['capture']['cast_time_source'] = 'live_common_five_domain_anchor_not_qrng_receive_time'
     if context.get('errors'):
@@ -595,6 +542,7 @@ def _mph_run(args):
             if args.view != 'summary' and not output_attempted:
                 recovery = payload or json.dumps(_mph_minimal(formed), ensure_ascii=True, indent=2) + '\n'
                 sys.stdout.write(recovery)
+    # Keep diagnostics separate from the normal JSON or Human View output.
     summary['disclosure'] = 'Redacted diagnostic summary; no raw entropy, observed values, lines or hexagram'
     ok = summary['status'] in ('LIVE_MPH_SUMMARY_PASS', 'LIVE_MPH_END_TO_END_PASS')
     if args.view == 'summary' or args.audit or not ok:
@@ -603,7 +551,12 @@ def _mph_run(args):
     return 0 if ok else 1
 
 
-def main(argv: list[str] | None = None) -> int:
+# ---------------------------------------------------------------------------
+# Command-line interface and dispatch
+# ---------------------------------------------------------------------------
+
+def _build_parser() -> argparse.ArgumentParser:
+    """Define the shared casting, reference and read-only view commands."""
     parser = argparse.ArgumentParser(description="TRNG I Ching deterministic research CLI")
     commands = parser.add_subparsers(dest="command", required=True)
 
@@ -679,7 +632,11 @@ def main(argv: list[str] | None = None) -> int:
     for command in (cast_parser, view):
         command.add_argument("--text", action="store_true", help="Show local classical text in Human View")
 
-    args = parser.parse_args(argv)
+    return parser
+
+
+def _validate_cast_args(parser: argparse.ArgumentParser, args: argparse.Namespace) -> None:
+    """Reject incompatible options before any acquisition or file write."""
     if args.command == "cast":
         if args.view is None:
             args.view = "json"
@@ -694,6 +651,13 @@ def main(argv: list[str] | None = None) -> int:
             parser.error("--text requires --view human")
         if args.json_out is not None and args.json_out.exists():
             parser.error("--json-out must be a new file; existing records are not overwritten")
+
+
+def main(argv: list[str] | None = None) -> int:
+    """Dispatch one command and return its process exit status."""
+    parser = _build_parser()
+    args = parser.parse_args(argv)
+    _validate_cast_args(parser, args)
     if args.command == "cast" and args.method == "mph":
         return _mph_run(args)
     try:

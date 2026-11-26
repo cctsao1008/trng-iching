@@ -8,6 +8,10 @@ from iching import cast_from_hex
 DATA = Path(__file__).resolve().parent / "data"
 
 
+# ---------------------------------------------------------------------------
+# Local classical text and calendar presentation
+# ---------------------------------------------------------------------------
+
 def _classical_rows(h):
     corpus = json.loads((DATA / "zhouyi.json").read_text(encoding="utf-8"))
     sources = json.loads((DATA / "sources.json").read_text(encoding="utf-8"))
@@ -98,6 +102,10 @@ def _calendar_rows(record: dict) -> list[str]:
     return rows
 
 
+# ---------------------------------------------------------------------------
+# Read-only MPH record integrity and legacy compatibility
+# ---------------------------------------------------------------------------
+
 _MPH_MODE = 'live_mph_cast'
 _MPH_LEGACY_MODE = 'mph_private_live_evaluation'
 _MPH_DOMAINS = ('Metal', 'Wood', 'Water', 'Fire', 'Earth', 'Quantum')
@@ -119,6 +127,7 @@ def validate_mph_record(record: dict) -> None:
         require(instant.utcoffset() == timedelta(0), 'MPH evidence must use UTC')
         return instant
 
+    # Old evaluation records keep their original schema and status vocabulary.
     legacy = record.get('mode') == _MPH_LEGACY_MODE
     statuses = ('private_complete', 'private_context_partial') if legacy else ('complete', 'partial')
     require(record.get('schema_version') == '0.4.0' and record.get('mode') in (_MPH_MODE, _MPH_LEGACY_MODE)
@@ -153,6 +162,7 @@ def validate_mph_record(record: dict) -> None:
             and m['timestamp_semantics'] == 'live_common_five_domain_anchor_not_qrng_receive_time'
             and anchor <= utc(m['preflight_completed_at_utc']) <= utc(m['qrng_request_time_utc']) <= utc(m['qrng_receive_time_utc']),
             'Invalid MPH anchor or chronology')
+    # Verify selected evidence consistency; the digest is not source authentication.
     evidence = m['domain_evidence']
     require(isinstance(evidence, list) and len(evidence) == 5, 'Invalid MPH domain evidence')
     digest = hashlib.sha256(json.dumps(evidence, sort_keys=True, separators=(',', ':'), allow_nan=False).encode()).hexdigest()
@@ -180,6 +190,7 @@ def validate_mph_record(record: dict) -> None:
         require(record.get('calendar') is not None and record.get('solar_term') is not None
                 and isinstance(record.get('ganzhi'), dict) and all(record['ganzhi'].get(k) for k in ('year','month','day','hour')),
                 'Complete MPH record lacks reference context')
+    # Optional audit fields must agree with the compact record and trend calculation.
     if 'audit' in record:
         audit = record['audit']
         require(audit['cast']['lines_bottom_to_top'] == lines and audit['cast']['moving_lines'] == h['moving_lines']
@@ -205,6 +216,10 @@ def validate_mph_record(record: dict) -> None:
         require(audit['mph']['entropy'] == dict(top_line_bit_positions_zero_based=[15,16,17],
                 top_line_bits=m['top_line_bits'], top_line_value=lines[-1]), 'MPH audit entropy mismatch')
 
+
+# ---------------------------------------------------------------------------
+# Shared ASCII hexagram rendering
+# ---------------------------------------------------------------------------
 
 def render_human(record: dict, *, classical: bool = False) -> str:
     if not isinstance(record, dict) or record.get("schema_version") != "0.4.0":

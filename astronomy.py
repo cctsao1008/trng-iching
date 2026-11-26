@@ -1,7 +1,7 @@
-"""JPL + Skyfield numerical reference probe for the S-1 design review.
+"""Pinned JPL ephemeris, astronomical references, and the MPH Earth model.
 
-Calculates solar-term and lunar-phase events in a UTC search window.
-This module does not assign Chinese lunar dates or claim official accuracy.
+The Earth model supplies observations; reference snapshots supply context.
+Calendar lookup and hexagram assembly remain outside this module.
 """
 
 from __future__ import annotations
@@ -11,6 +11,10 @@ import math
 from datetime import date, datetime, time, timedelta, timezone
 from pathlib import Path
 
+
+# ---------------------------------------------------------------------------
+# Ephemeris identity and frozen Earth model parameters
+# ---------------------------------------------------------------------------
 
 JPL_DE440S_URL = (
     "https://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/planets/de440s.bsp"
@@ -29,8 +33,13 @@ EARTH_MODEL = "candidate geometric rigid radial differential Sun+Moon"
 EARTH_SKYFIELD_VERSION = "1.55"
 
 
+# ---------------------------------------------------------------------------
+# Earth model calculation and evidence validation
+# ---------------------------------------------------------------------------
+
 def radial_differential_microgal(r, body, gm):
     """Geometric differential acceleration projected onto the geocentric radial."""
+    # Subtract acceleration at the geocentre, then project onto the local radial.
     s = tuple(x - y for x, y in zip(body, r))
     a, b, c = (math.sqrt(sum(x * x for x in v)) for v in (s, body, r))
     return gm * sum((x / a**3 - y / b**3) * z / c
@@ -57,6 +66,10 @@ def validate_earth_endpoint(endpoint):
             or float(endpoint["value"]) != sum(components.values())):
         raise ValueError("Earth model component sum mismatch")
 
+
+# ---------------------------------------------------------------------------
+# Time conversion and kernel integrity
+# ---------------------------------------------------------------------------
 
 def _iso_utc(value: datetime) -> str:
     if value.tzinfo is None or value.utcoffset() is None:
@@ -96,6 +109,10 @@ def _verified_ephemeris_digest(path: Path) -> str:
         )
     return digest
 
+
+# ---------------------------------------------------------------------------
+# Shared local ephemeris session
+# ---------------------------------------------------------------------------
 
 class PinnedEphemeris:
     """Single verified JPL kernel session for a minimal at-cast-time snapshot.
@@ -144,6 +161,7 @@ class PinnedEphemeris:
 
         from skyfield.api import wgs84
 
+        # Use the six-minute UTC grid and the fixed 60/30/0-minute history.
         t = datetime.fromtimestamp(int(anchor.timestamp()) // 360 * 360, timezone.utc)
         site = wgs84.latlon(EARTH_SITE[0], EARTH_SITE[1], elevation_m=EARTH_SITE[2])
         earth = self.kernel["earth"]
@@ -209,6 +227,10 @@ class PinnedEphemeris:
             },
         }
 
+
+# ---------------------------------------------------------------------------
+# Explicit calendar-event searches and reference commands
+# ---------------------------------------------------------------------------
 
 def find_calendar_events(
     *, start: datetime, end: datetime, ephemeris_path: Path

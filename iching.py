@@ -9,6 +9,10 @@ from __future__ import annotations
 import re
 from decimal import Decimal, InvalidOperation
 
+# ---------------------------------------------------------------------------
+# King Wen reference tables (bottom-to-top bit order)
+# ---------------------------------------------------------------------------
+
 # Trigrams in the conventional upper/lower 8x8 King Wen lookup order.
 # Each triple is encoded bottom-to-top, yin=0, yang=1.
 _TRIGRAMS = (
@@ -49,6 +53,10 @@ if len(_NAMES) != 64:
 
 _TRIGRAM_INDEX = {bits: i for i, (_, bits) in enumerate(_TRIGRAMS)}
 
+
+# ---------------------------------------------------------------------------
+# Pure trigram lookup and line conversion
+# ---------------------------------------------------------------------------
 
 def _hexagram(bits_bottom_to_top: str) -> dict:
     if len(bits_bottom_to_top) != 6 or any(c not in "01" for c in bits_bottom_to_top):
@@ -99,11 +107,16 @@ def line_from_trend(values) -> dict:
             return dict(line=None, reason="nonfinite")
     except (InvalidOperation, TypeError, ValueError):
         return dict(line=None, reason="invalid_value")
+    # Compare exact decimal values; a zero change deliberately has no mapped line.
     signs = ((b > a) - (b < a), (c > b) - (c < b))
     return dict(line=mapping.get(signs), reason="ok" if signs in mapping else "zero_change",
                 signs=signs, values=[str(a), str(b), str(c)],
                 deltas=[str(b - a), str(c - b)])
 
+
+# ---------------------------------------------------------------------------
+# Shared six-line assembly and legacy Quantum interface
+# ---------------------------------------------------------------------------
 
 def cast_from_lines(lines: list[int] | tuple[int, ...], *, audit: bool = False) -> dict:
     """Assemble six validated line values; callers own observation provenance."""
@@ -112,6 +125,7 @@ def cast_from_lines(lines: list[int] | tuple[int, ...], *, audit: bool = False) 
         raise ValueError("Cast requires six integer line values in 6..9")
     lines = list(lines)
     moving = [i for i, value in enumerate(lines, 1) if value in (6, 9)]
+    # Old yin/yang flip; young lines keep their original polarity.
     original_bits = "".join("1" if line in (7, 9) else "0" for line in lines)
     changed_bits = "".join("1" if line in (6, 7) else "0" for line in lines)
     primary = _hexagram(original_bits)
