@@ -106,6 +106,14 @@ A past casting record may preserve the lines and the time, but it cannot preserv
 
 Choose the source before casting. Once the hexagram is formed, accept it as it is.
 
+**Seek fidelity to the observed pattern, not a different hexagram.**
+
+The same complete eligible input and fixed model produce the same lines, primary hexagram and relating hexagram. Different inputs may also map to the same hexagram. For Quantum and MPH, the complete input includes the quantum bits used by the selected method; repeated physical observations alone do not imply identical MPH casts.
+
+All methods permit repeated observations and repeated hexagrams across independent casting processes. There is no cooldown, forced observation update, observation-epoch deduplication or automatic redraw. Required source quality, temporal support and freshness still apply. Within the same process, once a hexagram has formed, another must not form using the same casting time, even across methods. Unresolved attempts do not reserve a time; verification and rendering of existing or fixed reference inputs are not new live formations. The guard is process-local, not persistent.
+
+Research windows may overlap; overlap must be disclosed and is not evidence of independent validation. Development/evaluation separation and frozen calibration requirements remain specific to each research protocol.
+
 No casting record is stored unless the user explicitly requests it. There is no automatic archive, redraw, or selection of a preferred hexagram.
 
 ## 📖 The Classical Text
@@ -223,7 +231,7 @@ Choose one of the following live commands (Quantum by default; add `--method mph
 
 Add `--source trng.info` or `--source lfdr.de` to any of these live commands to choose the randomness source explicitly. If omitted, TRNG.info is used.
 
-Each live command attempts a new cast. Confirm that the result is complete before using it; do not redraw to bypass a failure. `--view summary` is an MPH-only diagnostic and cannot be combined with audit or file output.
+Each live command attempts one cast; its hexagram need not differ from previous results. Confirm that the result is complete before using it; do not redraw to bypass a failure. `--view summary` is an MPH-only diagnostic and cannot be combined with audit or file output.
 
 File output is optional: add `--json-out <new-file>` if desired. Existing files are not overwritten. If Human View rendering fails after a cast is formed, the existing JSON is exposed on stdout and the error is reported on stderr; no new cast is made. An explicitly saved record can be displayed with `py .\main.py view --input cast.json --text` without casting again.
 

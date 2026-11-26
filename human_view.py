@@ -241,6 +241,7 @@ _OUTCOME_REASONS = {
     'invalid_expected_row': 'Invalid market observation values',
     'acquisition_or_adapter_failed': 'Observation acquisition or processing failed',
     'execution_failed': 'Execution or validation failed',
+    'casting_time_already_formed': 'A hexagram already formed at this casting time in this process',
     'model_not_ready': 'Physical model is not ready; no observations acquired',
 }
 

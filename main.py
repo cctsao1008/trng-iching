@@ -215,11 +215,13 @@ def _live_cast(args: argparse.Namespace) -> dict:
     _LOG.debug("Quantum acquisition started provider=%s", args.source or "trng.info")
     try:
         sample = acquire_trng_bytes(args.source or "trng.info")
-        cast = cast_from_hex(sample["raw_hex"], audit=args.audit)
+        cast_time = _utc_timestamp(sample["receive_time_utc"])
+        cast = _form_once(cast_time, lambda: cast_from_hex(sample["raw_hex"], audit=args.audit))
+    except _CastingTimeAlreadyFormed:
+        raise
     except Exception as exc:
         _debug_failure("quantum_acquisition_or_conversion", exc)
         raise _QuantumAcquisitionError(type(exc).__name__) from exc
-    cast_time = _utc_timestamp(sample["receive_time_utc"])
     return _cast_context(
         sample=sample, cast=cast, cast_time=cast_time,
         ephemeris_path=args.ephemeris, reference_file=args.reference,
@@ -383,6 +385,8 @@ def _mph_observe_and_cast(*, source, session, audit=False):
         # Freeze a single anchor for every observation domain in this cast.
         anchor = _mph_utc(s.utcnow())
         summary['anchor_utc'] = anchor.isoformat()
+        phase = 'casting_time_guard'
+        _check_casting_time(anchor)
         _LOG.debug("MPH common anchor=%s", summary['anchor_utc'])
         phase = 'five_domain_acquisition'
         summary['events'].append(phase)
@@ -464,7 +468,7 @@ def _mph_observe_and_cast(*, source, session, audit=False):
         summary['events'].append('top_line_validation_pass')
         # Once formed, the hexagram survives later context or output failures.
         phase = 'assembly'
-        cast = cast_from_lines(lines + [value], audit=audit)
+        cast = _form_once(anchor, lambda: cast_from_lines(lines + [value], audit=audit))
         cast['method'] = 'mph_rtrend_quantum_top_group'
         formed = dict(anchor=anchor, sample=sample, cast=cast, records=records)
         summary.update(status='assembled', hexagram_assembled=True)
@@ -576,7 +580,10 @@ def _mph_no_hexagram(summary):
         if d['status'] != 'candidate_resolved'
     ]
     if summary['status'] != 'unresolved':
-        reasons.append(dict(domain=None, code='execution_failed'))
+        code = ('casting_time_already_formed'
+                if summary.get('error_type') == '_CastingTimeAlreadyFormed'
+                else 'execution_failed')
+        reasons.append(dict(domain=None, code=code))
     outcome = _no_hexagram('mph',
                           'unresolved' if summary['status'] == 'unresolved' else 'error',
                           reasons)
@@ -686,33 +693,61 @@ def _mph_run(args):
 # Physical casting readiness gate
 # ---------------------------------------------------------------------------
 
-# Process-local guard for offline Physical candidate transactions. The live
-# Physical entrypoint remains disabled until the observation model is frozen.
-from threading import Lock as _PhysicalLock
+# One process-local casting-time guard for Quantum, MPH and Physical.
+# Reference replay and rendering are not new live formations.
+from threading import Lock
 
-_PHYSICAL_FORMED_TIMES = set()
-_PHYSICAL_FORMED_LOCK = _PhysicalLock()
+
+class _CastingTimeAlreadyFormed(ValueError):
+    """Another live or candidate cast already formed at this process-local instant."""
+
+
+_FORMED_TIMES = set()
+_FORMED_LOCK = Lock()
+
+
+def _casting_instant(casting_time):
+    if not isinstance(casting_time, datetime) or casting_time.utcoffset() is None:
+        raise ValueError('casting time must be timezone-aware')
+    return casting_time.astimezone(timezone.utc)
+
+
+def _require_unformed(instant):
+    if instant in _FORMED_TIMES:
+        raise _CastingTimeAlreadyFormed('casting time already formed in this process')
+
+
+def _check_casting_time(casting_time):
+    """Early check when the anchor is known before acquisition; no reservation."""
+    instant = _casting_instant(casting_time)
+    with _FORMED_LOCK:
+        _require_unformed(instant)
+    return instant
+
+
+def _form_once(casting_time, assemble, *, is_formed=None):
+    """Serialize formation, not observation acquisition; remember successful instants only."""
+    instant = _casting_instant(casting_time)
+    with _FORMED_LOCK:
+        _require_unformed(instant)
+        result = assemble()
+        if is_formed is None or is_formed(result):
+            _FORMED_TIMES.add(instant)
+        return result
 
 
 def _physical_candidate_once(observations, *, domain_order, casting_time,
                              evidence_kind, audit=False):
-    """Reject a second formation at the same casting instant in this process.
+    """Offline candidate only; unresolved results do not reserve a casting instant."""
+    from iching import physical_candidate_from_trends
 
-    No observation-epoch deduplication, persistence, cooldown or retry.
-    An unresolved candidate does not reserve a formed casting time.
-    """
-    from iching import _physical_utc, physical_candidate_from_trends
-
-    instant = _physical_utc(casting_time)
-    with _PHYSICAL_FORMED_LOCK:
-        if instant in _PHYSICAL_FORMED_TIMES:
-            raise ValueError('physical casting time already formed in this process')
-        result = physical_candidate_from_trends(
+    instant = _casting_instant(casting_time)
+    return _form_once(
+        instant,
+        lambda: physical_candidate_from_trends(
             observations, domain_order=domain_order, casting_time=instant,
-            evidence_kind=evidence_kind, audit=audit)
-        if result['status'] == 'candidate_resolved':
-            _PHYSICAL_FORMED_TIMES.add(instant)
-        return result
+            evidence_kind=evidence_kind, audit=audit),
+        is_formed=lambda result: result['status'] == 'candidate_resolved')
 
 
 def _physical_run(args: argparse.Namespace) -> int:
@@ -879,6 +914,10 @@ def main(argv: list[str] | None = None) -> int:
                 result = _live_cast(args)
         else:
             raise ValueError(f"Unsupported command: {args.command}")
+    except _CastingTimeAlreadyFormed:
+        return _emit_no_hexagram(
+            args, _no_hexagram('quantum', 'error',
+                               [dict(domain=None, code='casting_time_already_formed')]))
     except _QuantumAcquisitionError as exc:
         outcome = _no_hexagram('quantum', 'error',
                                [dict(domain='Quantum', code='acquisition_or_adapter_failed')])
