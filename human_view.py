@@ -1,9 +1,12 @@
 """Read-only rendering of the v0.4.0 casting record."""
 import json
+import logging
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 from iching import cast_from_hex
+
+_LOG = logging.getLogger("trng_iching."+__name__)
 
 DATA = Path(__file__).resolve().parent / "data"
 
@@ -222,6 +225,7 @@ def validate_mph_record(record: dict) -> None:
 # ---------------------------------------------------------------------------
 
 def render_human(record: dict, *, classical: bool = False) -> str:
+    _LOG.debug("Human View validation started classical=%s", classical)
     if not isinstance(record, dict) or record.get("schema_version") != "0.4.0":
         raise ValueError("Human View requires a v0.4.0 cast record")
     h = record["hexagram"]

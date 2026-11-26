@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import logging
 import os
 import re
 import tempfile
@@ -16,6 +17,8 @@ from bisect import bisect_right
 from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 from urllib.request import Request, urlopen
+
+_LOG = logging.getLogger("trng_iching."+__name__)
 
 
 SOURCE_URL = "https://www.hko.gov.hk/tc/gts/time/calendar/text/files/T{year}c.txt"
@@ -149,6 +152,7 @@ def sync_hko_years(*, years: list[int], path: Path = REFERENCE_FILE) -> dict:
 
 def lookup_hko_date(*, day: date, path: Path = REFERENCE_FILE) -> dict:
     """Return the lunar date from the local official month-start index only."""
+    _LOG.debug("local HKO date lookup started")
     if not 1901 <= day.year <= 2100:
         raise ValueError("Official HKO tables are defined for 1901 through 2100")
     reference = _read_reference(path)
@@ -222,6 +226,7 @@ def calculate_four_pillars(
     """
     import math
 
+    _LOG.debug("four-pillars calculation started solar_context=%s", sun_longitude_degrees is not None)
     if cast_time_utc.tzinfo is None or cast_time_utc.utcoffset() is None:
         raise ValueError("Ganzhi requires an offset-aware cast timestamp")
     local = cast_time_utc.astimezone(_UTC_PLUS_8)

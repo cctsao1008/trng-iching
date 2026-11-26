@@ -241,6 +241,17 @@ Modern tools support the traditional practice without claiming to explain or val
 
 The scientific tools describe randomness and time; they do not establish the predictive validity of divination.
 
+## Debugging
+
+Use `--debug` with any subcommand to enable redacted project diagnostics on stderr. For example:
+
+```powershell
+py .\main.py cast --method mph --view human --debug
+py .\main.py cast --method mph --view human --debug 2> debug.log
+```
+
+Debug logs show execution stages, transport timing/status, active observation counts, exact required/missing timestamp labels and sanitized exception frame locations. They do not include raw entropy, observed values, line values, API URLs or exception text. Normal result output, saved records and selection rules are unchanged. Debug differs from `--audit` (cast provenance) and MPH `--view summary` (redacted result summary); it does not enable retries or Physical live casting.
+
 ## ⚙️ System Architecture
 
 One application combines observation, deterministic line conversion, shared hexagram assembly, reference context and presentation. Quantum and MPH use the same engine. Physical has a reserved method entry, not an enabled casting model: `py .\main.py cast --method physical --view human` returns `PhysicalModelNotReady` (exit 1), without observation requests, QRNG calls, a formed hexagram, or a saved cast record. Physical rejects `--source`, `--hex`, and `--at`. Its natural observation adapters and shared assembly integration will follow the research gates in #6.

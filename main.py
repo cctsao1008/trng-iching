@@ -7,6 +7,8 @@ from __future__ import annotations
 
 import argparse
 import json
+import logging
+import traceback
 import sys
 from datetime import date, datetime, timezone
 from pathlib import Path
@@ -18,6 +20,34 @@ from lunisolar import calculate_four_pillars, lookup_hko_date, sync_hko_years
 from sources import QRNG_ENDPOINTS, acquire_trng_bytes
 
 ROOT = Path(__file__).resolve().parent
+
+_LOG = logging.getLogger("trng_iching."+__name__)
+
+
+# ---------------------------------------------------------------------------
+# Opt-in project diagnostics (never enable third-party HTTP debug logging)
+# ---------------------------------------------------------------------------
+
+def _configure_debug(enabled: bool) -> None:
+    """Keep project diagnostics on stderr and independent of record output."""
+    logger = logging.getLogger("trng_iching")
+    logger.propagate = False
+    logger.handlers.clear()
+    logger.setLevel(logging.DEBUG if enabled else logging.CRITICAL + 1)
+    if enabled:
+        handler = logging.StreamHandler(sys.stderr)
+        handler.setFormatter(logging.Formatter("[%(levelname)s][%(name)s] %(message)s"))
+        logger.addHandler(handler)
+
+
+def _debug_failure(phase: str, exc: Exception) -> None:
+    """Log exception type and frame locations, never exception text or locals."""
+    if _LOG.isEnabledFor(logging.DEBUG):
+        frames = " -> ".join(
+            f"{frame.f_code.co_name}:{lineno}"
+            for frame, lineno in traceback.walk_tb(exc.__traceback__)
+        )
+        _LOG.debug("phase=%s error_type=%s stack=%s", phase, type(exc).__name__, frames)
 
 
 # ---------------------------------------------------------------------------
@@ -77,6 +107,7 @@ def _cast_context(
             "ganzhi": {"status": "not_requested"},
         },
     }
+    _LOG.debug("reference context requested=%s", cast_time is not None)
     if cast_time is None:
         return result
 
@@ -94,6 +125,7 @@ def _cast_context(
             "source": "Hong Kong Observatory",
         }
     except Exception as exc:
+        _debug_failure("calendar", exc)
         context["calendar"] = {"status": "unavailable"}
         errors.append({"component": "calendar", "error": f"{type(exc).__name__}: {exc}"})
 
@@ -121,6 +153,7 @@ def _cast_context(
             "source": "JPL DE440s / Skyfield",
         }
     except Exception as exc:
+        _debug_failure("astronomy", exc)
         context["astronomy"] = {"status": "unavailable"}
         errors.append({"component": "astronomy", "error": f"{type(exc).__name__}: {exc}"})
 
@@ -134,6 +167,7 @@ def _cast_context(
             for key in ("status", "convention", "year", "month", "day", "hour")
         }
     except Exception as exc:
+        _debug_failure("ganzhi", exc)
         context["ganzhi"] = {"status": "unavailable"}
         errors.append({"component": "ganzhi", "error": f"{type(exc).__name__}: {exc}"})
 
@@ -143,6 +177,7 @@ def _cast_context(
             for entry in context.values()
         ) else "partial"
     )
+    _LOG.debug("reference context status=%s", result["status"])
     if errors:
         result["errors"] = errors
     return result
@@ -154,6 +189,7 @@ def _cast_context(
 
 def _manual_reference_cast(args: argparse.Namespace) -> dict:
     """Validate hex and supplied timestamp before optional context."""
+    _LOG.debug("manual reference conversion; no QRNG request")
     cast = cast_from_hex(args.reference_hex, audit=args.audit)
     cast_time = _utc_timestamp(args.at) if args.at is not None else None
     sample = {
@@ -172,6 +208,7 @@ def _manual_reference_cast(args: argparse.Namespace) -> dict:
 
 def _live_cast(args: argparse.Namespace) -> dict:
     """Exactly one TRNG request, regardless of optional JPL/HKO availability."""
+    _LOG.debug("Quantum acquisition started provider=%s", args.source or "trng.info")
     sample = acquire_trng_bytes(args.source or "trng.info")
     cast = cast_from_hex(sample["raw_hex"], audit=args.audit)
     cast_time = _utc_timestamp(sample["receive_time_utc"])
@@ -328,10 +365,12 @@ def _mph_observe_and_cast(*, source, session, audit=False):
         # Freeze a single anchor for every observation domain in this cast.
         anchor = _mph_utc(s.utcnow())
         summary['anchor_utc'] = anchor.isoformat()
+        _LOG.debug("MPH common anchor=%s", summary['anchor_utc'])
         phase = 'five_domain_acquisition'
         summary['events'].append(phase)
         records = []
         for domain in _MPH_DOMAINS:
+            _LOG.debug("domain=%s acquisition started", domain)
             try:
                 if domain == 'Earth':
                     rows, digest = session.earth_observations(anchor)
@@ -341,9 +380,13 @@ def _mph_observe_and_cast(*, source, session, audit=False):
                     summary['five_domain_http_attempts'] += 1
                     r = s.observe_domain(domain, anchor)
             except Exception as exc:
+                _debug_failure(domain, exc)
                 r = dict(domain=domain, status='incomplete', reason='acquisition_or_adapter_failed',
                          error_type=type(exc).__name__)
             records.append(r)
+            _LOG.debug("domain=%s status=%s reason=%s http_status=%s",
+                       domain, r['status'], r['reason'],
+                       (r.get('transport') or {}).get('http_status'))
             summary['domains'].append(dict(domain=domain, status=r['status'], reason=r['reason'],
                                            http_status=(r.get('transport') or {}).get('http_status'),
                                            error_type=r.get('error_type')))
@@ -352,6 +395,7 @@ def _mph_observe_and_cast(*, source, session, audit=False):
         summary['resolved_domains'] = sum(r['status'] == 'candidate_resolved' for r in records)
         phase = 'five_domain_preflight'
         summary['events'].append(phase)
+        _LOG.debug("MPH preflight resolved_domains=%s/5", summary['resolved_domains'])
         _mph_require(summary['resolved_domains'] == 5 and summary['five_domain_http_attempts'] == 4
                      and completed >= anchor, 'incomplete five-domain evaluation')
         # Reject unresolved or inconsistent observations before consuming entropy.
@@ -365,6 +409,7 @@ def _mph_observe_and_cast(*, source, session, audit=False):
         phase = 'qrng_acquisition'
         summary['events'].append(phase)
         summary['qrng_logical_attempts'] = 1
+        _LOG.debug("MPH preflight passed; QRNG acquisition started provider=%s", source)
         sample = s.acquire_trng_bytes(source)
         after = _mph_utc(s.utcnow())
         phase = 'qrng_response_validation'
@@ -397,6 +442,9 @@ def _mph_observe_and_cast(*, source, session, audit=False):
         summary.update(status='assembled', hexagram_assembled=True)
         summary['events'].append('assembly_pass')
     except Exception as exc:
+        _debug_failure(phase, exc)
+        if summary['qrng_logical_attempts'] == 0:
+            _LOG.debug("QRNG acquisition skipped; preflight did not pass")
         summary.update(failure_phase=phase, error_type=type(exc).__name__)
         summary['events'].append('abort')
     return summary, formed
@@ -532,6 +580,7 @@ def _mph_run(args):
             else:
                 summary['status'] = 'LIVE_MPH_END_TO_END_PASS'
     except Exception as exc:
+        _debug_failure(phase, exc)
         summary.update(status='LIVE_MPH_PRESENTATION_PARTIAL' if formed is not None else 'aborted',
                        failure_phase=phase, error_type=type(exc).__name__, presentation='FAILED')
         if args.text and summary.get('classical_text') == 'PENDING':
@@ -545,6 +594,9 @@ def _mph_run(args):
     # Keep diagnostics separate from the normal JSON or Human View output.
     summary['disclosure'] = 'Redacted diagnostic summary; no raw entropy, observed values, lines or hexagram'
     ok = summary['status'] in ('LIVE_MPH_SUMMARY_PASS', 'LIVE_MPH_END_TO_END_PASS')
+    _LOG.debug("MPH finished status=%s qrng_attempts=%s assembled=%s",
+               summary['status'], summary['qrng_logical_attempts'],
+               summary['hexagram_assembled'])
     if args.view == 'summary' or args.audit or not ok:
         stream = sys.stdout if args.view == 'summary' else sys.stderr
         stream.write(json.dumps(summary, ensure_ascii=True, indent=2, allow_nan=False) + '\n')
@@ -557,6 +609,7 @@ def _mph_run(args):
 
 def _physical_run(args: argparse.Namespace) -> int:
     """Fail closed until the natural observation and line contract is frozen."""
+    _LOG.debug("Physical readiness gate blocked acquisition")
     print("ERROR [PhysicalModelNotReady]: Physical Hexagram is under research; "
           "no observations acquired and no hexagram formed.", file=sys.stderr)
     return 1
@@ -643,6 +696,9 @@ def _build_parser() -> argparse.ArgumentParser:
                              help="Optionally save the same cast JSON to a new file")
     view = commands.add_parser("view", help="Render a saved cast without TRNG")
     view.add_argument("--input", type=Path, required=True)
+    for command in (astronomy, sync, lookup, cast_parser, view):
+        command.add_argument("--debug", action="store_true",
+                             help="Emit redacted execution diagnostics to stderr")
     for command in (cast_parser, view):
         command.add_argument("--text", action="store_true", help="Show local classical text in Human View")
 
@@ -677,6 +733,8 @@ def main(argv: list[str] | None = None) -> int:
     """Dispatch one command and return its process exit status."""
     parser = _build_parser()
     args = parser.parse_args(argv)
+    _configure_debug(args.debug)
+    _LOG.debug("command=%s method=%s", args.command, getattr(args, "method", None))
     _validate_cast_args(parser, args)
     if args.command == "cast" and args.method == "physical":
         return _physical_run(args)
@@ -714,6 +772,7 @@ def main(argv: list[str] | None = None) -> int:
         else:
             raise ValueError(f"Unsupported command: {args.command}")
     except Exception as exc:
+        _debug_failure("command_execution", exc)
         print(f"ERROR [{type(exc).__name__}]: {exc}", file=sys.stderr)
         return 1
 
@@ -749,6 +808,7 @@ def main(argv: list[str] | None = None) -> int:
         else:
             sys.stdout.write(payload)
     except Exception as exc:
+        _debug_failure("output", exc)
         print(f"ERROR [{type(exc).__name__}]: {exc}", file=sys.stderr)
         return 1
     return 0

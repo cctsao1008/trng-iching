@@ -7,9 +7,12 @@ Calendar lookup and hexagram assembly remain outside this module.
 from __future__ import annotations
 
 import hashlib
+import logging
 import math
 from datetime import date, datetime, time, timedelta, timezone
 from pathlib import Path
+
+_LOG = logging.getLogger("trng_iching."+__name__)
 
 
 # ---------------------------------------------------------------------------
@@ -132,10 +135,12 @@ class PinnedEphemeris:
         import skyfield
         from skyfield.api import load, load_file
 
+        _LOG.debug("local pinned ephemeris verification started")
         self.digest = _verified_ephemeris_digest(self.path)
         self.ts = load.timescale(builtin=True)
         self.kernel = load_file(str(self.path))
         self.skyfield_version = skyfield.__version__
+        _LOG.debug("local ephemeris verified and opened")
         return self
 
     def __exit__(self, exc_type, exc_value, traceback):
@@ -161,6 +166,7 @@ class PinnedEphemeris:
 
         from skyfield.api import wgs84
 
+        _LOG.debug("Earth observation model started")
         # Use the six-minute UTC grid and the fixed 60/30/0-minute history.
         t = datetime.fromtimestamp(int(anchor.timestamp()) // 360 * 360, timezone.utc)
         site = wgs84.latlon(EARTH_SITE[0], EARTH_SITE[1], elevation_m=EARTH_SITE[2])
@@ -181,10 +187,12 @@ class PinnedEphemeris:
                                  kernel=self.digest, skyfield=self.skyfield_version,
                                  site=EARTH_SITE, gm=dict(EARTH_GM),
                                  components_microgal=components, model=EARTH_MODEL)))
+        _LOG.debug("Earth observation model completed rows=%s", len(rows))
         return rows, self.digest
 
     def snapshot(self, cast_time_utc: datetime) -> dict:
         """Geocentric apparent ecliptic longitudes at exactly one UTC instant."""
+        _LOG.debug("astronomical reference snapshot started")
         if self.kernel is None or self.ts is None:
             raise RuntimeError("PinnedEphemeris must be opened first")
         if cast_time_utc.tzinfo is None or cast_time_utc.utcoffset() is None:

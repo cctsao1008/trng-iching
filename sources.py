@@ -8,6 +8,7 @@ from __future__ import annotations
 import base64
 import hashlib
 import json
+import logging
 import os
 import re
 import subprocess
@@ -20,6 +21,8 @@ from urllib.request import Request, build_opener, HTTPRedirectHandler
 from zoneinfo import ZoneInfo
 
 from iching import line_from_trend
+
+_LOG = logging.getLogger("trng_iching."+__name__)
 
 # ---------------------------------------------------------------------------
 # Provider endpoints and transport limits
@@ -227,12 +230,16 @@ def acquire_observation(source, *, anchor=None, fetch=None, clock=utcnow):
     fetch=fetch or (windows_fetch if sys.platform=='win32' else urllib_fetch)
     requested=clock()
     start=time.monotonic()
+    _LOG.debug("source=%s transport=%s request started", source, transport)
     meta,body=fetch(url)  # exactly one logical invocation, no fallback
     received=clock()
     latency=time.monotonic()-start
     if requested<anchor or received<requested:
         raise TransportError('client clock moved backwards')
+    _LOG.debug("source=%s HTTP status=%s elapsed_seconds=%.6f response_bytes=%s",
+               source, meta.get('status'), latency, len(body))
     count=validate_payload(source,url,meta,body)
+    _LOG.debug("source=%s validated_rows=%s", source, count)
     record=dict(
         status='transport_shape_pass',
         source=source,
@@ -264,6 +271,7 @@ def acquire_trng_bytes(source: str = "trng.info") -> dict:
         raise ValueError(f"Unsupported randomness source: {source}")
     endpoint = QRNG_ENDPOINTS[source]
     requested_at = utcnow()
+    _LOG.debug("QRNG provider=%s request started", source)
     if sys.platform == "win32":
         meta, body = windows_fetch(endpoint, max_bytes=QRNG_MAX_BYTES)
         transport = "windows_powershell_system_proxy"
@@ -271,6 +279,9 @@ def acquire_trng_bytes(source: str = "trng.info") -> dict:
         meta, body = urllib_fetch(endpoint, max_bytes=QRNG_MAX_BYTES)
         transport = "python_urllib"
     received_at = utcnow()
+    _LOG.debug("QRNG provider=%s transport=%s HTTP status=%s elapsed_seconds=%.6f",
+               source, transport, meta.get('status'),
+               (received_at - requested_at).total_seconds())
     if received_at < requested_at:
         raise TransportError("client clock moved backwards")
     document = _decode_response(endpoint, meta, body, max_bytes=QRNG_MAX_BYTES)
@@ -284,6 +295,7 @@ def acquire_trng_bytes(source: str = "trng.info") -> dict:
         raise ValueError(f"QRNG response must contain a '{field}' hex string")
     if _HEX_3_BYTES.fullmatch(raw_hex) is None:
         raise ValueError("TRNG data must contain exactly 3 bytes (6 hex digits)")
+    _LOG.debug("QRNG provider=%s three-byte response validated", source)
     return {
         "source": source,
         "source_endpoint": endpoint,
@@ -437,6 +449,7 @@ def normalize(domain, rows, anchor, sha, evidence='retrospective_observation', r
     if receipt is not None and not aware(epoch(receipt)):
         raise ValueError('naive receipt')
     def fail(reason,**kw):
+        _LOG.debug("domain=%s endpoint validation failed reason=%s", domain, reason)
         return out|dict(reason=reason,**kw)
     solar = domain in ('Metal','Fire')
     indexed={}
@@ -448,6 +461,10 @@ def normalize(domain, rows, anchor, sha, evidence='retrospective_observation', r
             continue
         t=t.astimezone(timezone.utc)
         indexed.setdefault(t,[]).append(row)
+    if _LOG.isEnabledFor(logging.DEBUG):
+        _LOG.debug("domain=%s rows_at_or_before_anchor=%s distinct_epochs=%s earliest_observation_utc=%s",
+                   domain, sum(map(len, indexed.values())), len(indexed),
+                   min(indexed).isoformat() if indexed else None)
     if not indexed:
         return fail('no_observation')
     if not solar and any(len(group)>1 for group in indexed.values()):
@@ -457,6 +474,13 @@ def normalize(domain, rows, anchor, sha, evidence='retrospective_observation', r
     times=[t-timedelta(minutes=m) for m in (60,30,0)]
     age=(anchor-t).total_seconds()
     out.update(endpoint_times=[x.isoformat() for x in times],age_seconds=age)
+    if _LOG.isEnabledFor(logging.DEBUG):
+        _LOG.debug("domain=%s latest_observation_utc=%s selected_endpoint_utc=%s observation_age_seconds=%.3f",
+                   domain, max(indexed).isoformat(), t.isoformat(), age)
+        _LOG.debug("domain=%s required_endpoint_times=%s endpoint_record_counts=%s missing_endpoint_times=%s",
+                   domain, [x.isoformat() for x in times],
+                   [len(indexed.get(x, [])) for x in times],
+                   [x.isoformat() for x in times if x not in indexed])
     if solar:
         # Choose labels before inspecting values, QC or source identity.
         # Every active record remains represented; no winner selection.
@@ -489,6 +513,7 @@ def normalize(domain, rows, anchor, sha, evidence='retrospective_observation', r
         return fail('invalid_value')
     # A zero difference remains unresolved; do not invent a replacement line.
     result=line_from_trend(values)
+    _LOG.debug("domain=%s trend conversion reason=%s", domain, result['reason'])
     return out|result|dict(status='candidate_resolved' if result['line'] is not None else 'incomplete')
 
 # ---------------------------------------------------------------------------
@@ -536,6 +561,8 @@ def parse_solar(domain, doc):
             ),
             qc=qc,
         ))
+    _LOG.debug("domain=%s provider_rows=%s active_rows=%s excluded_inactive_rows=%s",
+               domain, len(doc), len(rows), len(doc)-len(rows))
     return rows
 
 

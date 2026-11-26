@@ -241,6 +241,17 @@ Classical Text / 周易
 
 科學工具描述亂數與時間，並不證實占卜具備預測能力。
 
+## 問題排查
+
+各子命令皆可加上 `--debug`，將去識別的程式診斷資訊輸出至 stderr。例如：
+
+```powershell
+py .\main.py cast --method mph --view human --debug
+py .\main.py cast --method mph --view human --debug 2> debug.log
+```
+
+Debug 記錄執行階段、傳輸耗時及狀態、有效觀測筆數、必要／缺失時間端點，以及不含例外訊息的堆疊位置；不包含原始亂數、觀測值、爻值、API URL 或例外文字。正常結果輸出、儲存紀錄及選擇規則不變。Debug 不同於 `--audit`（起卦稽核依據）及萬象卦 `--view summary`（去識別摘要），不會啟用重試或天地卦即時起卦。
+
 ## ⚙️ 系統架構
 
 同一套程式整合觀測、確定性成爻、共用成卦、曆象與呈現。量子卦與萬象卦共用核心引擎。天地卦已保留方法入口，但尚未啟用起卦模型：`py .\main.py cast --method physical --view human` 會回報 `PhysicalModelNotReady`（結束碼 1），不請求觀測資料或量子亂數，不形成卦象，也不儲存起卦紀錄。天地卦不接受 `--source`、`--hex` 或 `--at`。自然觀測 Adapter 與共用成卦整合將依 #6 研究條件推進。

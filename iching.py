@@ -6,8 +6,11 @@ is performed inside this module.
 
 from __future__ import annotations
 
+import logging
 import re
 from decimal import Decimal, InvalidOperation
+
+_LOG = logging.getLogger("trng_iching."+__name__)
 
 # ---------------------------------------------------------------------------
 # King Wen reference tables (bottom-to-top bit order)
@@ -123,6 +126,7 @@ def cast_from_lines(lines: list[int] | tuple[int, ...], *, audit: bool = False) 
     if (not isinstance(lines, (list, tuple)) or len(lines) != 6
             or any(type(n) is not int or n not in (6, 7, 8, 9) for n in lines)):
         raise ValueError("Cast requires six integer line values in 6..9")
+    _LOG.debug("six-line input validated; assembling primary and relating hexagrams")
     lines = list(lines)
     moving = [i for i, value in enumerate(lines, 1) if value in (6, 9)]
     # Old yin/yang flip; young lines keep their original polarity.
