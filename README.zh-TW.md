@@ -229,13 +229,20 @@ Classical Text / 周易
 
 科學工具描述亂數與時間，並不證實占卜具備預測能力。
 
-## ⚙️ 系統架構 — 量子卦
+## ⚙️ 系統架構
 
-目前已實作的量子卦結合量子亂數、天文曆象、古典經文與人類反思，同時保持各部分的責任獨立。下圖描述現有實作，不包含研究中的天地卦與萬象卦。
+整體架構結合三種可分別選用的起卦框架、天文曆象、古典經文與人類反思，同時保持各部分的責任獨立。目前僅量子卦已實作；天地卦及萬象卦的路徑為研究候選架構，尚未提供起卦模式。
 
 ```mermaid
 flowchart TD
-    Q["量子亂數"] --> H["確定性卦象計算"]
+    N["自然物理現象"] --> PH["天地卦"]
+    Q["量子亂數"] --> QH["量子卦"]
+    F["五行資訊觀測<br/>+ 量子亂數"] --> MH["萬象卦"]
+
+    PH --> H["確定性卦象計算"]
+    QH --> H
+    MH --> H
+
     A["JPL 天文計算"] --> T["時間與曆象"]
     C["HKO 農曆與干支"] --> T
     H --> R["起卦資料 · JSON"]
@@ -253,9 +260,9 @@ flowchart TD
     classDef record fill:#f0f0f0,stroke:#888,color:#333
     classDef references fill:#faf1df,stroke:#b58b4b,color:#604414
     classDef reflection fill:#f0eaf8,stroke:#8c72b5,color:#49336e
-    class Q,H randomness
-    class A,C,T science
-    class R,V record
+    class Q,QH randomness
+    class N,PH,F,MH,A,C,T science
+    class H,R,V record
     class Z,S,P references
     class I,O reflection
 ```
