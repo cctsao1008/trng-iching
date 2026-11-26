@@ -235,35 +235,35 @@ The overall architecture brings together three alternative casting frameworks, a
 
 ```mermaid
 flowchart TD
-    N["Natural phenomena"] --> PH["Physical Hexagram"]
-    Q["Quantum randomness"] --> QH["Quantum Hexagram"]
-    F["Five-phase observations<br/>+ Quantum randomness"] --> MH["Myriad Phenomena Hexagram"]
+    N["Natural phenomena<br/>Five-phase observations"] --> M["Casting framework<br/>Physical · Quantum · Myriad Phenomena"]
+    Q["Quantum randomness"] --> M
+    M --> H["Deterministic hexagram"]
 
-    PH --> H["Deterministic hexagram"]
-    QH --> H
-    MH --> H
+    A["JPL astronomy<br/>HKO calendar and Ganzhi"] --> T["Time context"]
 
-    A["JPL astronomy"] --> T["Time context"]
-    C["HKO calendar and Ganzhi"] --> T
     H --> R["Casting record · JSON"]
     T --> R
-    R --> V["Human View · optional classical text"]
+
+    R --> V["Human View"]
     Z["Local Zhouyi classical text"] -->|"--text"| V
+
     R -. Manually share .-> I["Human / external AI interpretation"]
     V -. Manually share .-> I
-    S["External reference scholarship"] --> I
-    P["Question and real-world circumstances"] --> I
-    I --> O["Reflection · alternative perspectives · personal choice"]
+
+    S["Reference scholarship<br/>Question and circumstances"] --> I
+
+    I --> O["Reflection<br/>Alternative perspectives · Personal choice"]
 
     classDef randomness fill:#e8f1fa,stroke:#4786c6,color:#173b60
     classDef science fill:#e5f3ed,stroke:#468e78,color:#194c3c
     classDef record fill:#f0f0f0,stroke:#888,color:#333
     classDef references fill:#faf1df,stroke:#b58b4b,color:#604414
     classDef reflection fill:#f0eaf8,stroke:#8c72b5,color:#49336e
-    class Q,QH randomness
-    class N,PH,F,MH,A,C,T science
-    class H,R,V record
-    class Z,S,P references
+
+    class Q randomness
+    class N,A,T science
+    class M,H,R,V record
+    class Z,S references
     class I,O reflection
 ```
 
