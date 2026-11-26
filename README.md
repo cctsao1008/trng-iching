@@ -66,9 +66,9 @@ It is a tool for **casting a hexagram (起卦)** and a space for exploring chang
 
 | Framework | Approach | Status |
 | --- | --- | --- |
-| **Physical Hexagram (天地卦)** | Explore the representation of natural physical states, changes, and relationships as six lines. | Research |
-| **Quantum Hexagram (量子卦)** | Generate six lines using quantum randomness and the traditional three-coin method. | Implemented |
-| **Myriad Phenomena Hexagram (萬象卦)** | Explore five symbolic information domains (Metal, Wood, Water, Fire, Earth) combined with a quantum line. | Research |
+| **Physical**<br>天地卦 | Natural physical states, changes and relationships. | Research |
+| **Quantum**<br>量子卦 | Quantum randomness and the traditional three-coin method. | Implemented |
+| **Myriad Phenomena**<br>萬象卦 | Five-phase observations combined with a quantum line. | Research |
 
 The physical and hybrid frameworks are experimental. Their mappings are not finalized, and neither is available as a casting mode. Research focuses on symbolic dynamics, information preservation, and the limits of representing change, without claiming predictive validity or a scientific equivalence between the Five Phases and physical phenomena. Follow the research in [Issue #3 — Physical World Sampling](https://github.com/cctsao1008/trng-iching/issues/3).
 
