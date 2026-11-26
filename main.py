@@ -552,6 +552,17 @@ def _mph_run(args):
 
 
 # ---------------------------------------------------------------------------
+# Physical casting readiness gate
+# ---------------------------------------------------------------------------
+
+def _physical_run(args: argparse.Namespace) -> int:
+    """Fail closed until the natural observation and line contract is frozen."""
+    print("ERROR [PhysicalModelNotReady]: Physical Hexagram is under research; "
+          "no observations acquired and no hexagram formed.", file=sys.stderr)
+    return 1
+
+
+# ---------------------------------------------------------------------------
 # Command-line interface and dispatch
 # ---------------------------------------------------------------------------
 
@@ -591,9 +602,12 @@ def _build_parser() -> argparse.ArgumentParser:
     lookup.add_argument("--reference", type=Path, default=ROOT / "data" / "calendar_reference.json")
 
     cast_parser = commands.add_parser(
-        "cast", help="Quantum or mixed-observation casting with local calendar/JPL context"
+        "cast", help="Casting methods and local calendar/JPL context"
     )
-    cast_parser.add_argument("--method", choices=("quantum", "mph"), default="quantum")
+    cast_parser.add_argument(
+        "--method", choices=("quantum", "mph", "physical"), default="quantum",
+        help="Physical is registered for research; live casting is not yet enabled",
+    )
     cast_parser.add_argument("--allow-private-evaluation", action="store_true",
                              help=argparse.SUPPRESS)
     cast_input = cast_parser.add_mutually_exclusive_group()
@@ -640,7 +654,13 @@ def _validate_cast_args(parser: argparse.ArgumentParser, args: argparse.Namespac
     if args.command == "cast":
         if args.view is None:
             args.view = "json"
-        if args.method == "mph":
+        if args.method == "physical":
+            # Physical observations cannot be replaced by quantum or manual input.
+            if args.source is not None or args.reference_hex is not None or args.at is not None:
+                parser.error("Physical does not accept --source, --hex or --at")
+            if args.allow_private_evaluation or args.view == "summary":
+                parser.error("Summary view and the legacy MPH option are MPH only")
+        elif args.method == "mph":
             if args.reference_hex is not None or args.at is not None:
                 parser.error("MPH does not accept --hex or --at")
             if args.view == "summary" and (args.audit or args.json_out is not None):
@@ -658,6 +678,8 @@ def main(argv: list[str] | None = None) -> int:
     parser = _build_parser()
     args = parser.parse_args(argv)
     _validate_cast_args(parser, args)
+    if args.command == "cast" and args.method == "physical":
+        return _physical_run(args)
     if args.command == "cast" and args.method == "mph":
         return _mph_run(args)
     try:

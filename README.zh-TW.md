@@ -66,11 +66,11 @@
 
 | 框架 | 方法 | 狀態 |
 | --- | --- | --- |
-| **天地卦**<br>Physical | 自然物理現象的狀態、變化與關係。 | 研究中 |
+| **天地卦**<br>Physical | 自然物理現象的狀態、變化與關係。 | 研究中；CLI 已註冊，尚未啟用起卦 |
 | **量子卦**<br>Quantum | 量子真亂數與傳統三銅錢法。 | 已實作 |
 | **萬象卦**<br>Myriad Phenomena | 五行資訊觀測結合量子爻。 | 已實作 |
 
-萬象是整體的觀測概念，天地物理現象與量子隨機性是其中的觀測維度。量子卦與萬象卦是同一套起卦程式中的可選方法；獨立的天地卦六爻模型仍在研究中。萬象卦採用固定的實驗性象徵映射，不宣稱具有預測能力，也不預設五行與物理現象存在科學上的等價關係。詳見[天地研究 #3](https://github.com/cctsao1008/trng-iching/issues/3)、[萬象研究 #4](https://github.com/cctsao1008/trng-iching/issues/4)與[程式整合 #5](https://github.com/cctsao1008/trng-iching/issues/5)。
+萬象是整體的觀測概念，天地物理現象與量子隨機性是其中的觀測維度。量子卦與萬象卦是同一套起卦程式中的可執行方法；天地卦已註冊為 `--method physical`，六爻觀測與映射契約定案前仍限於研究。萬象卦採用固定的實驗性象徵映射，不宣稱具有預測能力，也不預設五行與物理現象存在科學上的等價關係。詳見[天地研究 #3](https://github.com/cctsao1008/trng-iching/issues/3)、[萬象研究 #4](https://github.com/cctsao1008/trng-iching/issues/4)與[程式整合 #5](https://github.com/cctsao1008/trng-iching/issues/5)，以及[天地卦整合 #6](https://github.com/cctsao1008/trng-iching/issues/6)。
 
 ## ☯️ 陰陽與變化
 
@@ -243,7 +243,7 @@ Classical Text / 周易
 
 ## ⚙️ 系統架構
 
-同一套程式整合觀測、確定性成爻、共用成卦、曆象與呈現。量子卦與萬象卦共用核心引擎；獨立天地卦研究模型尚未成為可執行方法。
+同一套程式整合觀測、確定性成爻、共用成卦、曆象與呈現。量子卦與萬象卦共用核心引擎。天地卦已保留方法入口，但尚未啟用起卦模型：`py .\main.py cast --method physical --view human` 會回報 `PhysicalModelNotReady`（結束碼 1），不請求觀測資料或量子亂數，不形成卦象，也不儲存起卦紀錄。天地卦不接受 `--source`、`--hex` 或 `--at`。自然觀測 Adapter 與共用成卦整合將依 #6 研究條件推進。
 
 ```mermaid
 ---

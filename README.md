@@ -66,11 +66,11 @@ It is a tool for **casting a hexagram (起卦)** and a space for exploring chang
 
 | Framework | Approach | Status |
 | --- | --- | --- |
-| **Physical**<br>天地卦 | Natural physical states, changes and relationships. | Research |
+| **Physical**<br>天地卦 | Natural physical states, changes and relationships. | Research; CLI registered, casting disabled |
 | **Quantum**<br>量子卦 | Quantum randomness and the traditional three-coin method. | Implemented |
 | **Myriad Phenomena**<br>萬象卦 | Five-phase observations combined with a quantum line. | Implemented |
 
-Myriad phenomena (萬象) is the overarching observation concept. Physical observations and quantum randomness are constituent dimensions. Quantum and MPH are selectable methods in one casting application; the separate six-line Physical model remains research-only. The MPH mapping is an experimental symbolic model, not evidence of predictive validity or a scientific equivalence between the Five Phases and physical phenomena. See [Physical research #3](https://github.com/cctsao1008/trng-iching/issues/3), [MPH research #4](https://github.com/cctsao1008/trng-iching/issues/4), and [implementation #5](https://github.com/cctsao1008/trng-iching/issues/5).
+Myriad phenomena (萬象) is the overarching observation concept. Physical observations and quantum randomness are constituent dimensions. Quantum and MPH are executable methods in one casting application. Physical is registered as `--method physical`, but remains research-only until its six-line observation and mapping contract is frozen. The MPH mapping is an experimental symbolic model, not evidence of predictive validity or a scientific equivalence between the Five Phases and physical phenomena. See [Physical research #3](https://github.com/cctsao1008/trng-iching/issues/3), [MPH research #4](https://github.com/cctsao1008/trng-iching/issues/4), [implementation #5](https://github.com/cctsao1008/trng-iching/issues/5), and [Physical integration #6](https://github.com/cctsao1008/trng-iching/issues/6).
 
 ## ☯️ Yin, Yang and Change
 
@@ -243,7 +243,7 @@ The scientific tools describe randomness and time; they do not establish the pre
 
 ## ⚙️ System Architecture
 
-One application combines observation, deterministic line conversion, shared hexagram assembly, reference context and presentation. Quantum and MPH use the same engine; the separate Physical research model is not yet an executable method.
+One application combines observation, deterministic line conversion, shared hexagram assembly, reference context and presentation. Quantum and MPH use the same engine. Physical has a reserved method entry, not an enabled casting model: `py .\main.py cast --method physical --view human` returns `PhysicalModelNotReady` (exit 1), without observation requests, QRNG calls, a formed hexagram, or a saved cast record. Physical rejects `--source`, `--hex`, and `--at`. Its natural observation adapters and shared assembly integration will follow the research gates in #6.
 
 ```mermaid
 ---
