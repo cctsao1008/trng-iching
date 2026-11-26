@@ -234,6 +234,13 @@ Classical Text / 周易
 整體架構結合三種可分別選用的起卦框架、天文曆象、古典經文與人類反思，同時保持各部分的責任獨立。目前僅量子卦已實作；天地卦及萬象卦的路徑為研究候選架構，尚未提供起卦模式。
 
 ```mermaid
+---
+config:
+  htmlLabels: false
+  flowchart:
+    htmlLabels: false
+    wrappingWidth: 240
+---
 flowchart TD
     N["自然物理與五行資訊"] --> M["天地卦 · 量子卦 · 萬象卦"]
     Q["量子亂數"] --> M
