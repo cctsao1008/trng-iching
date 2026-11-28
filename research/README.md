@@ -252,6 +252,25 @@ The owner prioritizes Sima Qian's Shiji, chapter 27, Tian Guan Shu (史記・天
 
 No new statistical experiment, acquisition, cast, model adjustment or product development. This is a research-direction decision and initial passage review, not a completed chapter-by-chapter reading.
 
+## TC-01 — Tian Guan Shu: central palace, Taiyi and the Northern Dipper
+
+Primary reading source: owner-provided PDF print of [Chinese Text Project, Shiji, Tian Guan Shu](https://ctext.org/shiji/tian-guan-shu/zh), printed 2026-11-29 01:56 Taiwan time, 26 pages, numbered paragraphs 1–124, SHA256 `6537c80a68af3f059a2739c4b25dc20ed4a8e5319196c15302ad3c3d013bdfe4`. The Chinese text is primary; the page labels the English translation as AI/user-assisted, and it is not independent scholarly corroboration. The owner-supplied PDF resolves access to this reading text but not the edition-collation question. Do not redistribute the PDF; cite paragraph and page numbers and the original URL.
+
+### Reading checkpoint
+
+- §§1–2, p.1: central palace, Tianji, Taiyi and Zigong establish a celestial center and a surrounding star-office order analogous to the imperial court. Do not identify the ancient Tianji/Taiyi star with present-day Polaris without historical star identification and epoch evidence.
+- §3, p.1: Northern Dipper (北斗七星), 杓、衡、魁 and 昏、夜半、平旦; 斗為帝車 and 分陰陽、建四時、均五行、移節度、定諸紀. The text explicitly links observed stellar configuration, time, season, direction and symbolic order. These clauses do not supply a modern numerical rule for producing six lines. The Dipper's apparent orientation depends on observer location, time and epoch; do not map a modern clock time or month to an ancient direction without reconstructing the relevant convention.
+- §§4–6, pp.1–2: stellar appearance, color, proximity, presence and motion become traditional omen inputs; 文昌宮、三能、輔星、招搖、天鋒 illustrate symbolic attribution. Apparent color or motion alone does not establish changes in physical stellar properties or human affairs.
+- §8, p.2: 攝提 is described in relation to the Dipper handle and establishment of seasonal timing. §110, p.22: winter-solstice signs include day length and natural indicators, but 要決晷景 explicitly gives a decisive role to gnomon shadow. These provide complementary source-text examples of calendrical observation; modern astronomical calculation is a different measurement method.
+- §§111, 121–123, pp.22–26: the author's concluding framework distinguishes fixed reference star groups (經), moving five planets (緯), and transient atmospheric phenomena (客氣); regular retrograde motion and eclipses have known patterns. 凡天變，過度乃占 is an explicit contextual distinction between ordinary patterns and departures warranting omen interpretation, not a numerical anomaly threshold. §120 also presents retrospective omen/event associations; the author's claim of correspondence is historical testimony, not independently validated foreknowledge.
+- §§101, 104–110, pp.20–22: observation extends beyond celestial bodies to fields, settlement conditions, animals, crops, weather and seasonal signs. This broadens the meaning of observing phenomena, without establishing equivalence to our particular MPH market or solar-wind mappings.
+
+### Working interpretation
+
+Distinguish three observation classes: reference frame (relatively fixed star groups), periodic dynamics (Sun, Moon and five planets), and transient phenomena (clouds, wind, halos and unusual appearances). This is a modern organizational reading of the Chinese text, not a taxonomy asserted to be exhaustive or a new casting rule. Observe the reference, understand regularity, recognize departure, then study historical symbolic interpretation separately. Keep ancient physical/cosmological descriptions distinct from modern astronomy and claims about human affairs.
+
+TC-01 is an initial primary-text reading of the central palace and Northern Dipper, not a complete reconstruction of the five palaces or their historical stars. Next: read §§7–24 and §67 to recover the four directional palaces and lunar-mansion/region correspondences from the same PDF; retain ambiguities rather than silently assign modern stars. No new acquisition, code changes, statistical work or casting. Existing three methods remain unchanged.
+
 ## 1. Current research routing
 
 | Need | Open first | Next action / blocker |
