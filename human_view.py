@@ -286,7 +286,8 @@ def validate_physical_record(record):
 
     p = record['physical']
     if (record.get('mode') != 'live_physical_cast' or 'randomness' in record
-            or p.get('profile') != PHYSICAL_PROFILE or p.get('experimental') is not True
+            or p.get('profile') not in (PHYSICAL_PROFILE, 'physical-rtrend-label-mean-v0.1')
+            or p.get('experimental') is not True
             or p.get('domains_bottom_to_top') != list(PHYSICAL_ORDER)):
         raise ValueError('Invalid Physical profile')
     anchor = datetime.fromisoformat(p['request_anchor_utc'].replace('Z', '+00:00'))
@@ -302,6 +303,8 @@ def validate_physical_record(record):
     lines = []
     for item in evidence:
         source, unit, step = PHYSICAL_PRODUCTS[item['domain']]
+        if item['domain'] == 'D06' and p['profile'] == 'physical-rtrend-label-mean-v0.1':
+            source, unit, step = 'USGS:BOU:F:R0', 'nT', 1
         trend = line_from_trend(item['values'])
         if (item.get('source') != source or item.get('unit') != unit
                 or item.get('cadence_seconds') != step
