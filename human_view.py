@@ -119,7 +119,7 @@ def validate_mph_record(record: dict) -> None:
     """Check saved record consistency, not provider authenticity or finality."""
     import hashlib
     from iching import cast_from_lines, lines_from_hex, line_from_trend
-    from sources import PROFILES, VERSION, QRNG_ENDPOINTS
+    from sources import PROFILES, VERSION, QRNG_ENDPOINTS, SOURCE, wood_requests, replay_wood_composite
 
     def require(condition, message):
         if not condition:
@@ -145,7 +145,7 @@ def validate_mph_record(record: dict) -> None:
     raw = sample['raw_hex']
     require(lines_from_hex(raw)[5] == lines[5] and m['top_line_bits'] == f'{int(raw, 16):024b}'[15:18],
             'Inconsistent MPH top line')
-    require(m['source_kind'] == ('fresh_private_observation' if legacy else 'fresh_observation') and m['upstream_contract_version'] == VERSION
+    require(m['source_kind'] == ('fresh_private_observation' if legacy else 'fresh_observation') and m['upstream_contract_version'] in (VERSION, 'mph-data-contract-candidate-v0.2')
             and m['domains_bottom_to_top'] == list(_MPH_DOMAINS), 'Invalid MPH contract/order')
     require(all(m[k] is False for k in ('actual_source_use_approved', 'ready_for_production'))
             and m['source_policy_review'] == 'DEFERRED_TO_P3_NOT_APPROVED'
@@ -153,6 +153,11 @@ def validate_mph_record(record: dict) -> None:
     require(type(m['five_domain_http_attempts']) is int and m['five_domain_http_attempts'] == 4
             and type(m['qrng_logical_attempts']) is int and m['qrng_logical_attempts'] == 1,
             'Invalid MPH logical acquisition count')
+    new_wood = m['upstream_contract_version'] == VERSION
+    if new_wood:
+        require(type(m.get('component_http_attempts')) is int
+                and m['component_http_attempts'] == 3 + len(wood_requests(utc(m['request_anchor_utc']))[1]),
+                'Invalid component acquisition count')
     require(m['network_count_semantics'] == 'logical_interface_invocations_not_packet_count'
             and m['validation_boundary'] == 'selected_endpoints_not_full_history_or_independent_provider_authentication',
             'Invalid MPH evidence boundary')
@@ -171,7 +176,8 @@ def validate_mph_record(record: dict) -> None:
     digest = hashlib.sha256(json.dumps(evidence, sort_keys=True, separators=(',', ':'), allow_nan=False).encode()).hexdigest()
     require(digest == m['selected_evidence_sha256'], 'MPH selected evidence digest mismatch')
     for i, (domain, e) in enumerate(zip(_MPH_DOMAINS[:5], evidence)):
-        require(e['domain'] == domain and e['source'] == PROFILES[domain][0]
+        source = SOURCE if domain == 'Wood' and not new_wood else PROFILES[domain][0]
+        require(e['domain'] == domain and e['source'] == source
                 and e['status'] == 'candidate_resolved' and utc(e['anchor']) == anchor
                 and type(e['line']) is int and e['line'] == lines[i], 'MPH selected evidence mismatch')
         times = [utc(t) for t in e['endpoint_times']]
@@ -216,6 +222,22 @@ def validate_mph_record(record: dict) -> None:
             trend = line_from_trend(a['values'])
             require(trend['line'] == a['line'] and trend['deltas'] == a['deltas']
                     and list(trend['signs']) == list(a['signs']), 'MPH audit trend mismatch')
+        if new_wood:
+            components = audit['mph']['wood_components']
+            endpoints = audit['mph']['wood_endpoints']
+            schedule, specs = wood_requests(anchor)
+            require(len(components) == len(specs)
+                    and all(all(item.get(k) == v for k, v in spec.items())
+                            and anchor <= utc(item['requested_at']) <= utc(item['received_at'])
+                            <= utc(m['preflight_completed_at_utc'])
+                            for spec, item in zip(specs, components)), 'Wood component audit')
+            digest = hashlib.sha256(json.dumps(components, sort_keys=True, separators=(',', ':')).encode()).hexdigest()
+            require(digest == evidence[1]['input_sha256']
+                    and [e['time'] for e in endpoints] == evidence[1]['endpoint_times'],
+                    'Wood endpoint audit')
+            trend = replay_wood_composite(endpoints, anchor)
+            require(all(json.dumps(trend[k]) == json.dumps(ae[1][k])
+                        for k in ('line', 'values', 'deltas', 'signs')), 'Wood composite replay')
         require(audit['mph']['entropy'] == dict(top_line_bit_positions_zero_based=[15,16,17],
                 top_line_bits=m['top_line_bits'], top_line_value=lines[-1]), 'MPH audit entropy mismatch')
 
