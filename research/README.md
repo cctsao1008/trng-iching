@@ -240,6 +240,17 @@ Again both have three yin and three yang lines and are related by complementatio
 
 The four principles remain 觀象，以知萬物；察變，以明其勢；求真，以辨其理；思己，以正其行. Apply the text to a real question only with its context, actual evidence and the reader's own judgment. Do not invent a divinatory event, enforce a single interpretation, or turn the paired hexagrams into a predictive transition matrix. This chapter adds textual reflection rather than additional statistical research. The next natural reading topic is 屯/蒙 (beginnings and learning), if the owner chooses to continue. The current emblem and runtime files are unchanged.
 
+## Historical astronomy and omen studies — owner-selected Tian Guan Shu priority (2026-11-29)
+
+The owner prioritizes Sima Qian's Shiji, chapter 27, Tian Guan Shu (史記・天官書) over Yisi Zhan as the primary reference for historical observation and metaphysical research. Supersede the proposed routine paired-hexagram philosophical reading sequence as the active direction. Start with the source text, not new casting rules.
+
+- Received text: [Wikisource, chapter 27, revision 7904116](https://zh.wikisource.org/w/index.php?title=史記/卷027&oldid=7904116); [Shiji Jijie, chapter 27](https://ctext.org/wiki.pl?chapter=744666&if=en). Distinguish Sima Qian's text from later 集解、索隱、正義 annotations and textual variants.
+- Historical study: [史家的天官傳統─《史記》中的天官星占傳承](https://ndltd.ncl.edu.tw/cgi-bin/gs32/gsweb.cgi?o=dnclcdr&s=id%3D%22102NCHU5493010%22.&searchmode=basic).
+- Initial textual anchor: 太史公曰 passage distinguishes ordinary planetary retrograde motion and regular celestial phenomena from changes deemed beyond normal bounds (凡天變，過度乃占). This is historically situated observation and omen reasoning, not a calibrated modern anomaly detector. The same text also advances celestial-human correspondences and retrospectively pairs celestial events with political affairs; neither celestial calculation nor historical pairing alone establishes predictive validity.
+- Reading sequence: celestial organization (five palaces, stellar offices, lunar mansions and Dipper); Sun/Moon and five planets (appearance, motion, normal course, 贏縮); exceptional celestial and atmospheric phenomena; division of terrestrial regions and omen interpretation; historical cases and the author's concluding method. Compare with modern astronomical observables only after identifying the original term, historical reference frame and interpretation. Yisi Zhan and Kaiyuan Zhanjing remain secondary comparative references, not the active starting point.
+
+No new statistical experiment, acquisition, cast, model adjustment or product development. This is a research-direction decision and initial passage review, not a completed chapter-by-chapter reading.
+
 ## 1. Current research routing
 
 | Need | Open first | Next action / blocker |
