@@ -262,6 +262,8 @@ SENT confirms submission through the mail account, not recipient delivery or pro
 
 The owner directed proceeding with available public data without requiring provider replies or calibrated uncertainty as a prerequisite. This supersedes earlier readiness gating for experimental local research. Profile physical-rtrend-label-mean-v0.1 retains the six quantities and order, uses existing NOAA operational RTSW JSON instead of the retrospective daily L3 files, and uses three fixed UTC 30-minute native-label means with a fixed 30-minute lag before flooring. Require complete unique eligible labels and two nonzero changes per domain. No continuous-support reconstruction, calibrated difference bound, fallback or QRNG. Prior qualification remains historical; formal scientific and commercial/public redistribution approval are separate. Deleted temporary datasets need not be restored; any later reacquisition is a new snapshot. No BT-C access. Live owner smoke and regression pending.
 
+**Live profile v0.2:** D06 uses INTERMAGNET/BGS IAGA-2002 native BOUF minute observations (same USGS Boulder station and scalar quantity), after repeated USGS direct API timeout/404 and successful owner BGS HTTP 200 in 2.917453 s. Provisional values accepted, 99999/88888 placeholders excluded, all 90 labels required. UTC date-spanning requests cover both dates if needed. Earlier D06 one-second research adapter retained for historical use; live source and cadence explicitly versioned, other quantities and R-Trend unchanged. Full live smoke pending.
+
 ## Evidence references
 
 - [Prior G1–G8 review](https://github.com/cctsao1008/trng-iching/issues/6#issuecomment-7211017000)
