@@ -4,7 +4,7 @@ import logging
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
-from iching import cast_from_hex
+from iching import cast_from_hex, cast_from_lines, line_from_trend
 
 _LOG = logging.getLogger("trng_iching."+__name__)
 
@@ -280,6 +280,52 @@ def render_no_hexagram(outcome: dict) -> str:
     return '\n'.join(rows) + '\n'
 
 
+def validate_physical_record(record):
+    """Replay the reported block means and shared assembly; no network I/O."""
+    from sources import PHYSICAL_ORDER, PHYSICAL_PROFILE, PHYSICAL_PRODUCTS, physical_window
+
+    p = record['physical']
+    if (record.get('mode') != 'live_physical_cast' or 'randomness' in record
+            or p.get('profile') != PHYSICAL_PROFILE or p.get('experimental') is not True
+            or p.get('domains_bottom_to_top') != list(PHYSICAL_ORDER)):
+        raise ValueError('Invalid Physical profile')
+    anchor = datetime.fromisoformat(p['request_anchor_utc'].replace('Z', '+00:00'))
+    start, end = physical_window(anchor)
+    if (datetime.fromisoformat(record['timestamp']) != anchor
+            or datetime.fromisoformat(p['window_start_utc'].replace('Z', '+00:00')) != start
+            or datetime.fromisoformat(p['window_end_utc'].replace('Z', '+00:00')) != end
+            or p.get('block_seconds') != 1800 or p.get('fixed_lag_seconds') != 1800):
+        raise ValueError('Invalid Physical window')
+    evidence = p['domain_evidence']
+    if [item['domain'] for item in evidence] != list(PHYSICAL_ORDER):
+        raise ValueError('Invalid Physical domain order')
+    lines = []
+    for item in evidence:
+        source, unit, step = PHYSICAL_PRODUCTS[item['domain']]
+        trend = line_from_trend(item['values'])
+        if (item.get('source') != source or item.get('unit') != unit
+                or item.get('cadence_seconds') != step
+                or item.get('expected_labels') != 5400//step
+                or item.get('observed_labels') != 5400//step
+                or item.get('status') != 'candidate_resolved'
+                or trend['line'] is None or trend['line'] != item['line']
+                or trend['deltas'] != item['deltas'] or list(trend['signs']) != list(item['signs'])):
+            raise ValueError('Invalid Physical domain evidence')
+        lines.append(trend['line'])
+    expected = cast_from_lines(lines)
+    actual = record['hexagram']
+    if (actual['lines_bottom_to_top'] != lines
+            or actual['moving_lines'] != expected['moving_lines']
+            or any(actual[k] != dict(number=expected[k]['number'], name=expected[k]['display_name'])
+                   for k in ('primary', 'relating'))):
+        raise ValueError('Inconsistent Physical hexagram')
+
+
+_PHYSICAL_LABELS = ('Ocean water level (海洋水位)', 'Tidal gravity (日月差分引力)',
+                    'Geomagnetic field (地磁)', 'Cosmic rays (宇宙射線)',
+                    'Solar-wind thermal pressure (太陽風熱壓力)', 'Solar-wind magnetic field (太陽風磁場)')
+
+
 def render_human(record: dict, *, classical: bool = False) -> str:
     _LOG.debug("Human View validation started classical=%s", classical)
     if isinstance(record, dict) and record.get('schema_version') == 'cast-outcome-v1':
@@ -289,7 +335,10 @@ def render_human(record: dict, *, classical: bool = False) -> str:
     h = record["hexagram"]
     lines = h["lines_bottom_to_top"]
     mph = record.get('mode') in (_MPH_MODE, _MPH_LEGACY_MODE) or 'mph' in record
-    if mph:
+    physical = record.get('mode') == 'live_physical_cast' or 'physical' in record
+    if physical:
+        validate_physical_record(record)
+    elif mph:
         validate_mph_record(record)
     else:
         expected = cast_from_hex(record["randomness"]["raw_hex"])
@@ -304,11 +353,14 @@ def render_human(record: dict, *, classical: bool = False) -> str:
 
     rows = [
         "Hexagram Casting",
+        "Source: Six natural physical domains (experimental)" if physical else
         f"Source: {record['randomness']['source']} / {record['randomness']['raw_hex']}",
         f"Mode: {record['mode']} | Status: {record['status']}",
         "",
     ]
-    if mph:
+    if physical:
+        rows[0] = 'Physical Hexagram / 天地卦'
+    elif mph:
         rows[0] = 'Myriad Phenomena Hexagram / 萬象卦'
         rows[1] += ' (top line only)'
     moving = h["moving_lines"]
@@ -317,7 +369,7 @@ def render_human(record: dict, *, classical: bool = False) -> str:
     if moving:
         rows.append(f"Relating {h['relating']['number']:02d}: {h['relating']['name']}")
     rows.extend(["", "   PRIMARY            RELATING" if moving else "   HEXAGRAM"])
-    if mph:
+    if mph or physical:
         rows[-1] += "     DOMAIN"
     for i in range(5, -1, -1):
         n = lines[i]
@@ -327,7 +379,9 @@ def render_human(record: dict, *, classical: bool = False) -> str:
             rows.append(f"{i+1}  {primary_stroke}  {mark}       {stroke(n in (6, 7))}")
         else:
             rows.append(f"{i+1}  {primary_stroke}")
-        if mph:
+        if physical:
+            rows[-1] += f"    {_PHYSICAL_LABELS[i]}"
+        elif mph:
             rows[-1] += f"    {_MPH_DOMAINS[i]} ({_MPH_LABELS[i]})"
     rows.append("")
     if not moving:
@@ -337,7 +391,11 @@ def render_human(record: dict, *, classical: bool = False) -> str:
             change = "Old Yin -> Yang" if lines[i-1] == 6 else "Old Yang -> Yin"
             rows.append(f"* Line {i}: {change}")
     rows.append("")
-    if mph:
+    if physical:
+        p = record['physical']
+        rows.append(f"Observation labels (UTC): {p['window_start_utc']} to {p['window_end_utc']}")
+        rows.append("Reference time: Physical request anchor; experimental label-mean trends")
+    elif mph:
         rows.append("Reference time: live common five-domain anchor (not QRNG receive time)")
     rows.extend(_calendar_rows(record))
     if mph and record["status"] in ("partial", "private_context_partial"):
