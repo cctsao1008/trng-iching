@@ -242,6 +242,12 @@ The four principles remain 觀象，以知萬物；察變，以明其勢；求�
 
 ## Historical astronomy and omen studies — owner-selected Tian Guan Shu priority (2026-11-29)
 
+**Research direction — AI-assisted interdisciplinary synthesis (2026-11-29).** Owner-endorsed approach: use AI and modern tools to integrate classical Yi studies, historical astronomy and omenology, modern astronomy and physics, history and philology, Earth and life sciences, and information and systems science. Proceed through literature review, cross-reference, reconstruction, hypothesis development and synthesis as complementary modes. Seek agreements and contradictions, verify against independent evidence, and preserve provenance, alternative explanations and unresolved questions. AI-generated associations are hypotheses, not proof. The objective is original, revisable understanding, not accumulating summaries or repeating completed computations. Initial topics: 贏縮/見伏, 五星聚于東井 and 天人感應. See [research strategy and illustrated workflow](https://github.com/cctsao1008/trng-iching/issues/7#issuecomment-7243764560), including the owner's original statement. Existing three casting methods and personal CLI research scope remain unchanged.
+
+> 究天人之際，通古今之變，成一家之言。
+>
+> 以古典文獻為根，以現代科學為器，以 AI 為研究助手，以求真為目的。
+
 Active reading and research log: [Issue #7](https://github.com/cctsao1008/trng-iching/issues/7). TC-01B textual reading: [four palaces, mansions and terrestrial divisions](https://github.com/cctsao1008/trng-iching/issues/7#issuecomment-7243443543). Subsequent primary-text notes are recorded in that issue.
 
 **TC-01A–TC-06 initial thematic reading complete.** See [illustrated synthesis](https://github.com/cctsao1008/trng-iching/issues/7#issuecomment-7243588705). The owner PDF's 124 passages have been covered by thematic reading. Explicit planetary Five Phases correspondences are historical; current MPH proxies, six-line order and R-Trend are experimental. Distinguish trend reversal, reference-relative departure and anomaly; preserve the existing three methods. The prior planetary-motion replay remains the bounded numerical result, not a short-cadence replacement. Recommended next concrete question: reconstruct the historical meanings and reference conventions of 贏縮 and 見伏 before any further numerical or model decision. The §73 discrepancy, historical star identifications and celestial-human hypotheses remain unresolved.
