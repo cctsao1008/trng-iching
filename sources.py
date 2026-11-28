@@ -16,6 +16,7 @@ import sys
 import time
 from datetime import date, datetime, timedelta, timezone
 from decimal import Decimal, InvalidOperation
+from urllib.error import HTTPError, URLError
 from urllib.parse import urlencode
 from urllib.request import Request, build_opener, HTTPRedirectHandler
 from zoneinfo import ZoneInfo
@@ -55,7 +56,20 @@ WOOD = 'https://eodhd.com/api/eod/VTI.US?'
 
 
 class TransportError(RuntimeError):
-    pass
+    """Provider failure with safe machine-readable diagnostics."""
+
+    def __init__(self, message, *, code='invalid_response', http_status=None):
+        super().__init__(message)
+        self.code = code
+        self.http_status = http_status
+
+
+def transport_failure(status=None, kind=None):
+    if status and status != 200:
+        return TransportError('provider HTTP error', code='http_error', http_status=status)
+    if kind == 'Timeout':
+        return TransportError('provider request timed out', code='request_timeout')
+    return TransportError('provider connection failed', code='connection_failed')
 
 
 class NoRedirect(HTTPRedirectHandler):
@@ -155,11 +169,16 @@ def windows_fetch(url, *, max_bytes=MAX_BYTES, timeout=TIMEOUT, form=None):
         match = re.search(rb'TRNG_HTTP_STATUS=(\d{1,3}) TRNG_TRANSPORT_KIND=([A-Za-z]+)',
                           exc.stderr or b'')
         if match:
+            status, kind = int(match[1]), match[2].decode('ascii')
             _LOG.debug("Windows HTTP failed status=%s transport_kind=%s exit=%s",
-                       match[1].decode('ascii'), match[2].decode('ascii'), exc.returncode)
-        else:
-            _LOG.debug("Windows transport failed before diagnostic status exit=%s", exc.returncode)
-        raise
+                       status, kind, exc.returncode)
+            raise transport_failure(status, kind) from None
+        _LOG.debug("Windows transport failed before diagnostic status exit=%s", exc.returncode)
+        raise transport_failure() from None
+    except subprocess.TimeoutExpired:
+        raise transport_failure(kind='Timeout') from None
+    except OSError:
+        raise transport_failure() from None
     try:
         envelope = json.loads(r.stdout.decode('utf-8-sig'))
         body = base64.b64decode(envelope.pop('body_b64'), validate=True)
@@ -173,17 +192,26 @@ def urllib_fetch(url, *, max_bytes=MAX_BYTES, timeout=TIMEOUT, form=None):
     opener = build_opener(NoRedirect())
     req = Request(url, data=urlencode(form).encode('ascii') if form is not None else None,
                   headers={'Accept':'application/json, text/csv, */*','User-Agent':UA,'Accept-Encoding':'identity'})
-    with opener.open(req,timeout=timeout) as r:
-        return (
-            dict(
-                status=r.status,
-                url=r.geturl(),
-                content_type=r.headers.get('Content-Type', ''),
-                http_date=r.headers.get('Date'),
-                last_modified=r.headers.get('Last-Modified'),
-            ),
-            r.read(max_bytes + 1),
-        )
+    try:
+        with opener.open(req,timeout=timeout) as r:
+            return (
+                dict(
+                    status=r.status,
+                    url=r.geturl(),
+                    content_type=r.headers.get('Content-Type', ''),
+                    http_date=r.headers.get('Date'),
+                    last_modified=r.headers.get('Last-Modified'),
+                ),
+                r.read(max_bytes + 1),
+            )
+    except HTTPError as exc:
+        raise transport_failure(exc.code) from None
+    except TimeoutError:
+        raise transport_failure(kind='Timeout') from None
+    except URLError as exc:
+        raise transport_failure(kind='Timeout' if isinstance(exc.reason, TimeoutError) else None) from None
+    except OSError:
+        raise transport_failure() from None
 
 
 def _decode_response(url, meta, body, *, max_bytes=MAX_BYTES, parse_float=float):
@@ -563,9 +591,16 @@ def observe_wood_composite(anchor):
     cash, futures, evidence = {}, {}, []
     for spec in specs:
         requested = utcnow()
-        _LOG.debug('Wood source=%s request started', spec['source'])
-        meta, body = fetch(spec['url'], timeout=30, form=spec['form'])
+        _LOG.debug('Wood source=%s request started timeout_seconds=30', spec['source'])
+        started = time.monotonic()
+        try:
+            meta, body = fetch(spec['url'], timeout=30, form=spec['form'])
+        except TransportError as exc:
+            exc.provider = spec['source']
+            raise
         received = utcnow()
+        _LOG.debug('Wood source=%s HTTP status=%s elapsed_seconds=%.6f response_bytes=%s',
+                   spec['source'], meta.get('status'), time.monotonic()-started, len(body))
         if (meta.get('status') != 200 or meta.get('url') != spec['url']
                 or not isinstance(body, bytes) or not 0 < len(body) <= MAX_BYTES):
             raise TransportError('invalid Wood response')
@@ -589,12 +624,15 @@ def observe_wood_composite(anchor):
     for spec in schedule:
         value = cash.get(spec['day'])
         if value is None:
+            _LOG.debug('Wood missing TWSE cash date=%s', spec['day'])
             return out | dict(reason='missing_expected_session')
         e = dict(**spec, cash=str(value))
         if spec['kind'] == 'night':
             regular = futures.get((spec['day'], spec['contract'], '一般'))
             night = futures.get((spec['trade_date'], spec['contract'], '盤後'))
             if regular is None or night is None:
+                _LOG.debug('Wood missing TX contract=%s regular_date=%s night_trade_date=%s regular_present=%s night_present=%s',
+                           spec['contract'], spec['day'], spec['trade_date'], regular is not None, night is not None)
                 return out | dict(reason='missing_expected_session')
             e.update(regular=str(regular), night=str(night))
         endpoints.append(e)
