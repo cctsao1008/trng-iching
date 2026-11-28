@@ -262,6 +262,10 @@ _OUTCOME_REASONS = {
     'duplicate_date': 'Ambiguous market observation dates',
     'invalid_expected_row': 'Invalid market observation values',
     'acquisition_or_adapter_failed': 'Observation acquisition or processing failed',
+    'http_error': 'Provider returned an HTTP error',
+    'request_timeout': 'Provider request timed out',
+    'connection_failed': 'Provider connection failed',
+    'invalid_response': 'Provider response could not be validated',
     'execution_failed': 'Execution or validation failed',
     'casting_time_already_formed': 'A hexagram already formed at this casting time in this process',
     'model_not_ready': 'Physical model is not ready; no observations acquired',
@@ -292,6 +296,12 @@ def render_no_hexagram(outcome: dict) -> str:
         code = reason['code']
         domain = reason.get('domain')
         label = _OUTCOME_REASONS.get(code, 'Observation or execution validation failed')
+        provider = reason.get('provider')
+        if provider in ('TWSE', 'TAIFEX'):
+            label = provider + ': ' + label
+        status = reason.get('http_status')
+        if type(status) is int and 100 <= status <= 599:
+            label += ' (HTTP ' + str(status) + ')'
         rows.append('  ' + (domain + ': ' if domain else '') + label + ' [' + code + ']')
     rows.extend(['', 'No hexagram was formed. / 本次未能成卦。'])
     if unresolved:
