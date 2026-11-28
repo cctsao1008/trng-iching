@@ -62,6 +62,20 @@ It is a tool for **casting a hexagram (起卦)** and a space for exploring chang
 > Classical wisdom invites reflection.  
 > Interpretation belongs to the reader.
 
+<p align="center">
+  <strong>觀象，以知萬物。</strong><br>
+  <strong>察變，以明其勢。</strong><br>
+  <strong>求真，以辨其理。</strong><br>
+  <strong>思己，以正其行。</strong>
+</p>
+
+<p align="center">
+  <em>Observe patterns to understand the world.<br>
+  Discern change to understand its direction.<br>
+  Seek truth to distinguish underlying principles.<br>
+  Reflect within to guide one's conduct.</em>
+</p>
+
 ## Observation and Casting Methods
 
 | Framework | Approach | Status |
