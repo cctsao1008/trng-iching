@@ -121,9 +121,44 @@ Actual support can be smaller due to dependence, no-hexagram outcomes or source 
 
 Even IID continuous levels do not establish a first-order Markov process for sign sequences: P(next positive | last positive) = 1/3, but P(next positive | last two positive) = 1/4 (strict monotone order probabilities 1/6 and 1/24 respectively). Do not raise a fitted one-step transition matrix to powers as a validated temporal forecast. The intrinsic Hamming graph and the temporal four-state graph must be kept distinct.
 
-### Next research decision
+### Information persistence — exact overlap baselines (2026-11-29)
 
-The graph baseline and temporal bridge are now analytically resolved. A bounded next study can characterize overlap-conditioned information persistence and distinguish unchanged inputs, one-step shared increments, and disjoint windows under the actual source schedules. No additional historical data acquisition, cast archive, D3/D4 reconstruction, new runtime module or product work is required for this checkpoint. If empirical research becomes necessary, define the decision and source-alignment/missingness policy first.
+Let L_t be R-Trend of three consecutive levels and L_(t+k) the shifted triple. Enumerate all ordinal permutations of 3+k IID continuous levels for k=0,1,2,3 (6,24,120,720 cases, respectively). Equal permutation weights follow from the IID continuous assumption. Independent Python enumeration used the existing sign-to-line map. Joint count matrices in line order (6,7,8,9) are diagonal (2,1,1,2) for k=0; the 24-count matrix above for k=1; and for k=2:
+
+| From / To | 6 | 7 | 8 | 9 |
+|---|---:|---:|---:|---:|
+| 6 | 16 | 4 | 9 | 11 |
+| 7 | 9 | 1 | 6 | 4 |
+| 8 | 4 | 6 | 1 | 9 |
+| 9 | 11 | 9 | 4 | 16 |
+
+At k=3 the 720-count matrix is the outer product of (2,1,1,2) with itself times 20. The marginal H(L)=1.918295834 bits in all cases. I(L_t;L_(t+k))=H(L_(t+k))-H(L_(t+k)|L_t); this is statistical information about the next encoded line, not a proportion of the original physical information or a causal effect.
+
+| Shift k | Shared levels | Conditional entropy (bits) | Mutual information (bits) | Same-code probability |
+|---:|---:|---:|---:|---:|
+| 0 | 3 | 0 | 1.918295834 | 1 |
+| 1 | 2 | 0.906715377 | 1.011580457 | 1/12 |
+| 2 | 1 | 1.811558548 | 0.106737286 | 17/60 |
+| >=3 | 0 | 1.918295834 | 0 | 5/18 |
+
+Normalized mutual information I/H is 100%, 52.733%, 5.564%, 0%. Equality probability and mutual information are not equivalent; shared-increment reversal constraints can make repeated symbols rare despite dependence. A single shared level still induces dependence through its ordinal rank. Disjoint levels are independent only under the stipulated IID null; real physical and market processes may retain memory. A separate symmetric IID-increment null yields two independent fair sign bits per line and mutual information (2,1,0,0) for k=(0,1,2,>=3); do not confuse this with IID levels.
+
+For six mutually independent line processes under the IID-level null, joint mutual information is additive; Quantum with independent fresh samples contributes zero between casts, MPH contributes the sum of its five observation-line terms, Physical the sum of its six. For an ideal common shift k:
+
+| Shift | Quantum bits | MPH bits | Physical bits |
+|---:|---:|---:|---:|
+| 0 | 0 | 9.591479 | 11.509775 |
+| 1 | 0 | 5.057902 | 6.069483 |
+| 2 | 0 | 0.533686 | 0.640424 |
+| >=3 | 0 | 0 | 0 |
+
+No claim of independent actual domains, empirical entropy rate, or forecasting accuracy.
+
+**Actual schedule interpretation (static runtime inspection).** Physical v0.2 selects three 30-minute bins ending at floor_30min(anchor-30min). If shared block values are unchanged, compare the two selected window ends, not merely cast timestamps: difference 0/30/60/>=90 minutes corresponds to k=0/1/2/>=3. MPH Metal, Water, Fire and Earth use exact selected labels (t-60min,t-30min,t); their latest label may move by a native increment much shorter than 30 minutes. A 1- or 6-minute endpoint shift can therefore share no exact labels while the overall observation spans overlap substantially. The overlap permutation null is not a calibrated model of those time-separated observations. Exact 30-/60-minute selected-label shifts share two/one labels, respectively, assuming unchanged values. Wood advances by completed cash/night events, not fixed elapsed intervals. Classify each domain separately; only identical values/identities establish deterministic persistence, and revised source data invalidate the shared-value bridge. No-hexagram outcomes remain outside the four-state alphabet. Do not count repeated windows as independent natural-observation samples; repeated use of the CLI itself remains allowed under the existing guard.
+
+### Research disposition
+
+The structural graph and overlap-conditioned persistence checkpoints are complete. No new live acquisition, persistent cast archive, reconstruction of historical inputs, provider study or runtime change. Further empirical work should be driven by a concrete question and a suitable existing dataset (or separately agreed bounded acquisition), rather than accumulating casts or optimizing their frequencies. Continue using the three existing experimental methods without modifying their models.
 
 ## 1. Current research routing
 
