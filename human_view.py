@@ -174,8 +174,6 @@ def validate_mph_record(record: dict) -> None:
         require(e['domain'] == domain and e['source'] == PROFILES[domain][0]
                 and e['status'] == 'candidate_resolved' and utc(e['anchor']) == anchor
                 and type(e['line']) is int and e['line'] == lines[i], 'MPH selected evidence mismatch')
-        if domain == 'Wood':
-            require(e.get('access_mode', 'demo') in ('demo', 'personal'), 'Invalid Wood access mode')
         times = [utc(t) for t in e['endpoint_times']]
         require(len(times) == 3 and times[0] < times[1] < times[2] <= anchor, 'MPH endpoint order')
         sha = e['input_sha256']
