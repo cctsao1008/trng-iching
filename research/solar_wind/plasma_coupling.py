@@ -3,8 +3,8 @@ import sys, json, zipfile, gzip, io
 from pathlib import Path
 import numpy as np
 from scipy.io import netcdf_file
-from physical_september_audit_v01 import audit, start, DAYS, PIN, need, sha
-from physical_september_joint_v01 import corr
+from research.common.capture_audit import audit, start, DAYS, PIN, need, sha
+from research.common.joint_audit import corr
 L2='7175fa28e9bd8dd29257301779cee970bfd9742eaf4d1e45f86815ae5cc05194'
 MU=1.25663706212e-6
 MP=1.67262192369e-27

@@ -1,8 +1,8 @@
 """M01 componentwise gain margins from pinned stored models; no ephemeris or casts."""
 import json, sys
 import numpy as np
-from physical_m01_vectors_v01 import stored, GM
-from physical_september_joint_v01 import PINS
+from research.tidal_gravity.vector_export import stored, GM
+from research.common.joint_audit import PINS
 
 
 def ratio(n,d):

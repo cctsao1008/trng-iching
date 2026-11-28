@@ -159,7 +159,7 @@ def run(path):
 
 
 if __name__=='__main__':
-    p=argparse.ArgumentParser();p.add_argument('--selftest',action='store_true');p.add_argument('--kernel',type=Path,default=Path(__file__).resolve().parents[1]/'data/de440s.bsp');a=p.parse_args()
+    p=argparse.ArgumentParser();p.add_argument('--selftest',action='store_true');p.add_argument('--kernel',type=Path,default=Path(__file__).resolve().parents[2]/'data/de440s.bsp');a=p.parse_args()
     if a.selftest: print(f'{selftest()} synthetic cases PASS (no ephemeris execution)')
     else:
         if Path(OUT).exists(): raise FileExistsError(OUT)

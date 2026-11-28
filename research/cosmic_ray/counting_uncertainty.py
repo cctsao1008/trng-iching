@@ -2,7 +2,7 @@
 import json, re, sys
 from datetime import timedelta
 import numpy as np
-from physical_september_joint_v01 import DAYS, PINS, validate_zip, grid, stamp, need, corr
+from research.common.joint_audit import DAYS, PINS, validate_zip, grid, stamp, need, corr
 
 SCALES=(1,2,6,30,60)
 BETA=.0074

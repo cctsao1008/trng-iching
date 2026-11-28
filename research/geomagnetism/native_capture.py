@@ -3,10 +3,10 @@ import argparse, json, zipfile
 from pathlib import Path
 from urllib.parse import urlencode
 import numpy as np
-from physical_september_joint_v01 import DAYS, PINS, grid, stamp, need, sha
-from physical_september_supplement_v01 import fetch
-from swips_revision_probe_v01 import now
-from physical_d06_operator_v01 import load, operators
+from research.common.joint_audit import DAYS, PINS, grid, stamp, need, sha
+from research.common.supplement_capture import fetch
+from research.solar_wind.revision_probe import now
+from research.geomagnetism.observation_operator import load, operators
 
 OUT='PH_BT_d06_native_v01.zip'
 QUERIES={'F_R0':('F','R0'),'background_variation':('H,SQ,SV,DIST,G','variation')}

@@ -4,10 +4,10 @@ from pathlib import Path
 from urllib.parse import quote
 import numpy as np
 from scipy.io import netcdf_file
-from physical_september_audit_v01 import start, need, stats, plain
-from physical_september_joint_v01 import common, describe, PINS, IDS
-from physical_reference_sensitivity_v01 import getseries, blocks, STEPS
-from swips_revision_probe_v01 import parse, ROOT, BASE, sha
+from research.common.capture_audit import start, need, stats, plain
+from research.common.joint_audit import common, describe, PINS, IDS
+from research.physical_model.reference_sensitivity import getseries, blocks, STEPS
+from research.solar_wind.revision_probe import parse, ROOT, BASE, sha
 
 PIN='7175fa28e9bd8dd29257301779cee970bfd9742eaf4d1e45f86815ae5cc05194'
 PROBE='16f3cf6c3e58a0e45319df73723e58eb3301cf41f0c6fd34fddb9dffbc652e88'

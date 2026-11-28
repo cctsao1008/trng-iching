@@ -3,8 +3,8 @@ import argparse, hashlib, json, math, sys
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 import numpy as np
-from physical_september_joint_v01 import DAYS, PINS, validate_zip, grid, stamp, need
-from physical_m01_math_v01 import PIN, GM, scalar, production
+from research.common.joint_audit import DAYS, PINS, validate_zip, grid, stamp, need
+from research.tidal_gravity.formula_check import PIN, GM, scalar, production
 
 KERNEL='c1c7feeab882263fc493a9d5a5b2ddd71b54826cdf65d8d17a76126b260a49f2'
 SITE=(37.8063,-122.4659,0.)
@@ -101,6 +101,6 @@ if __name__=='__main__':
     if a.selftest:selftest(a.supplement)
     else:
         if Path(OUT).exists():raise FileExistsError(OUT)
-        result=run(Path(__file__).resolve().parents[1],a.supplement)
+        result=run(Path(__file__).resolve().parents[2],a.supplement)
         with open(OUT,'x',encoding='utf-8',newline='\n') as f:json.dump(result,f,sort_keys=True,indent=2,allow_nan=False);f.write('\n')
         print(result['status'],OUT,hashlib.sha256(Path(OUT).read_bytes()).hexdigest());raise SystemExit(0 if result['status']=='NUMERICAL_CHECKS_PASS' else 2)

@@ -5,7 +5,7 @@ import argparse, hashlib, json, zipfile, xml.etree.ElementTree as ET
 from pathlib import Path
 from urllib.parse import urlencode
 from datetime import datetime, timezone
-from physical_september_supplement_v01 import fetch
+from research.common.supplement_capture import fetch
 BASE='https://archive.data.noaa.gov/satellite-spaceweather'
 ROOT='SWFO/SOLAR-1/SWIPS/'
 PIN='5b1cbb91618b69941194d7732e1e2ef097b0b9a1e82160a7765ee00d11e27d4c'

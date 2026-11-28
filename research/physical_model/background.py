@@ -2,11 +2,11 @@
 import gzip, io, json, sys
 import numpy as np
 from scipy.io import netcdf_file
-from physical_september_audit_v01 import need, start
-from physical_september_joint_v01 import IDS, PINS, DAYS, validate_zip
-from physical_reference_sensitivity_v01 import getseries, blocks, STEPS, med
-from physical_time_support_v01 import load, SEP, minute_grid
-from swips_l2_l3_bridge_v01 import moments
+from research.common.capture_audit import need, start
+from research.common.joint_audit import IDS, PINS, DAYS, validate_zip
+from research.physical_model.reference_sensitivity import getseries, blocks, STEPS, med
+from research.physical_model.time_support import load, SEP, minute_grid
+from research.solar_wind.l2_l3_bridge import moments
 
 AXES=('sweep_mid_time','initial_packet_time')
 POL=('P0','P1')

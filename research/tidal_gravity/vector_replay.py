@@ -4,7 +4,7 @@ from pathlib import Path
 from decimal import Decimal, localcontext
 from datetime import datetime, timezone
 import numpy as np
-from physical_september_joint_v01 import DAYS, PINS, REPO, validate_zip, grid, stamp, need, sha
+from research.common.joint_audit import DAYS, PINS, REPO, validate_zip, grid, stamp, need, sha
 
 PIN='640425e5be4af42c797b21c2dc1d8ca943cf40108bb817c7022864695fab7ad9'
 KERNEL='c1c7feeab882263fc493a9d5a5b2ddd71b54826cdf65d8d17a76126b260a49f2'

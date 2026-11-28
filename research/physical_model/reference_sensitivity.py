@@ -4,7 +4,7 @@ Uses existing joint audit and exact pinned inputs. D26 provider restrictions app
 import json, sys, hashlib
 from pathlib import Path
 import numpy as np
-from physical_september_joint_v01 import run, validate_zip, audit, PINS, DAYS, grid, stamp, need
+from research.common.joint_audit import run, validate_zip, audit, PINS, DAYS, grid, stamp, need
 from itertools import combinations
 IDS=('D03','D06','D26','D12','M01')
 STEPS={'D03':60,'D06':1,'D26':60,'D12':360,'M01':360}
@@ -33,7 +33,7 @@ def getseries(paths):
     a=audit(paths[0]); s=validate_zip(paths[1],PINS[1],('D06','D12','M01')); n=validate_zip(paths[2],PINS[2],('D26',)); out={}
     import zipfile,gzip,io
     from scipy.io import netcdf_file
-    from physical_september_audit_v01 import start
+    from research.common.capture_audit import start
     with zipfile.ZipFile(paths[0]) as z:
         m=json.loads(z.read('manifest.json'))
         for day in DAYS:

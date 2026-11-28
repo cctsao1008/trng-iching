@@ -2,9 +2,9 @@
 import json, sys, zipfile
 from pathlib import Path
 import numpy as np
-from physical_september_joint_v01 import DAYS,PINS,validate_zip,grid,stamp,need,sha
-from physical_tide_background_v01 import decode,url
-from physical_tide_residual_v01 import TIDE
+from research.common.joint_audit import DAYS,PINS,validate_zip,grid,stamp,need,sha
+from research.ocean_tide.prediction_capture import decode,url
+from research.ocean_tide.residual import TIDE
 
 
 def centered(p):

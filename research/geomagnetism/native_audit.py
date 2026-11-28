@@ -2,8 +2,8 @@
 import json, sys, zipfile
 from pathlib import Path
 import numpy as np
-from physical_d06_native_v01 import DAYS, PINS, QUERIES, url, decode, examine, load, operators, need, sha, stamp
-from physical_september_joint_v01 import corr
+from research.geomagnetism.native_capture import DAYS, PINS, QUERIES, url, decode, examine, load, operators, need, sha, stamp
+from research.common.joint_audit import corr
 
 PIN='6b07bdab4bb45a75cdfbea79a7c9538a7fa05f7bd63d823e34fb906ca05864c7'
 

@@ -5,9 +5,9 @@ from pathlib import Path
 from urllib.parse import quote, urlencode
 import numpy as np
 from scipy.io import netcdf_file
-from physical_september_audit_v01 import need, plain, stats, start
-from physical_september_supplement_v01 import fetch, MAX
-from swips_revision_probe_v01 import BASE, ROOT, parse, sha, now
+from research.common.capture_audit import need, plain, stats, start
+from research.common.supplement_capture import fetch, MAX
+from research.solar_wind.revision_probe import BASE, ROOT, parse, sha, now
 
 DAY = '20261126'
 L3ZIP = '5e8c9a93fcea0addd85242f955a655c1739e95b2d5d455ff76173a41f410cbb0'
@@ -31,7 +31,7 @@ def original(path):
 
 
 def locate():
-    root = Path(__file__).resolve().parents[1] / 'temp'
+    root = Path(__file__).resolve().parents[2] / 'temp'
     files = [p for p in root.rglob('sw_archive_20261126_v03.zip') if sha(p.read_bytes()) == L3ZIP]
     need(bool(files), 'original sw_archive_20261126_v03.zip not found under temp; use --l3-archive')
     return sorted(files)[0]

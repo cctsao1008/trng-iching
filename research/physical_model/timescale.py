@@ -2,13 +2,13 @@
 import gzip, io, json, sys
 import numpy as np
 from scipy.io import netcdf_file
-from physical_september_joint_v01 import DAYS, PINS, need, corr
-from physical_september_audit_v01 import start
-from physical_reference_sensitivity_v01 import getseries, blocks, STEPS
-from physical_time_support_v01 import load, SEP, minute_grid
-from physical_tide_residual_v01 import TIDE
-from physical_tide_background_v01 import decode
-from swips_l2_l3_bridge_v01 import moments
+from research.common.joint_audit import DAYS, PINS, need, corr
+from research.common.capture_audit import start
+from research.physical_model.reference_sensitivity import getseries, blocks, STEPS
+from research.physical_model.time_support import load, SEP, minute_grid
+from research.ocean_tide.residual import TIDE
+from research.ocean_tide.prediction_capture import decode
+from research.solar_wind.l2_l3_bridge import moments
 
 LAGS=(6,12,30,60,120,180,360)
 MIN_PAIRS=20

@@ -1,0 +1,230 @@
+{
+  "schema_version": 1,
+  "baseline_commit": "ff3cd1c1c9a8bc8cda0ad4ad353b24b8246b5f69",
+  "scope": "Path/import/root-location refactor only; historical data filenames, output schemas and numerical algorithms retained",
+  "files": [
+    {
+      "old_path": "research/cosm_candidate_architecture_v01.md",
+      "new_path": "research/classical_mapping/candidate_architecture.md",
+      "old_blob": "3b9a1cf1595a70e220c00c646f55a43d99cac876",
+      "new_blob": "3b9a1cf1595a70e220c00c646f55a43d99cac876"
+    },
+    {
+      "old_path": "research/cosm_lunar_geometry_v01.py",
+      "new_path": "research/planetary_motion/lunar_geometry.py",
+      "old_blob": "498e843197ae1e22071a9d5d9bc6731f497dd920",
+      "new_blob": "498e843197ae1e22071a9d5d9bc6731f497dd920"
+    },
+    {
+      "old_path": "research/cosm_planetary_motion_v01.py",
+      "new_path": "research/planetary_motion/angular_motion.py",
+      "old_blob": "21976dcc50cb10f8a7e70fe5ba6027d191c0d56f",
+      "new_blob": "644547757ee55542eacd8dc12158f0ca54e529c2"
+    },
+    {
+      "old_path": "research/cosm_planetary_replay_v01.py",
+      "new_path": "research/planetary_motion/vector_replay.py",
+      "old_blob": "08b199435c14b925911ec1b72e1ccdb1f9575df9",
+      "new_blob": "08b199435c14b925911ec1b72e1ccdb1f9575df9"
+    },
+    {
+      "old_path": "research/cosm_sixth_channel_order_v01.md",
+      "new_path": "research/classical_mapping/sixth_channel_order.md",
+      "old_blob": "32c4411a47a898ff154fd57174bdd949daabeb8f",
+      "new_blob": "32c4411a47a898ff154fd57174bdd949daabeb8f"
+    },
+    {
+      "old_path": "research/physical_background_v01.py",
+      "new_path": "research/physical_model/background.py",
+      "old_blob": "c65925ce6e988d70819e7928da71e27f893b2537",
+      "new_blob": "410318cdc983ee4cd4f5a995f093b158864d166c"
+    },
+    {
+      "old_path": "research/physical_d06_native_audit_v01.py",
+      "new_path": "research/geomagnetism/native_audit.py",
+      "old_blob": "27a477254a49879e5c0f35a64938d1186a3f9b06",
+      "new_blob": "5b0f52d116b3b5862e5d32155d7f97916bef53bb"
+    },
+    {
+      "old_path": "research/physical_d06_native_v01.py",
+      "new_path": "research/geomagnetism/native_capture.py",
+      "old_blob": "a6b888cc9c917cc4a0e9ebd44820f307e5be90c0",
+      "new_blob": "4dd47054e0dfcd89a52885b20fcade164179a91e"
+    },
+    {
+      "old_path": "research/physical_d06_operator_v01.py",
+      "new_path": "research/geomagnetism/observation_operator.py",
+      "old_blob": "e25e4adcad879915c70dc41c9ecb0cd3d7945119",
+      "new_blob": "e433a807864b2594e1d241e52ff51f7f7477b851"
+    },
+    {
+      "old_path": "research/physical_d12_support_v02.py",
+      "new_path": "research/ocean_tide/station_support.py",
+      "old_blob": "d738d7f6b46b366f5a2eb8d14173380281b3027a",
+      "new_blob": "51c689229ee6a9d99f15a7fd5d0f61fdd63c2ba9"
+    },
+    {
+      "old_path": "research/physical_d12_uncertainty_v01.py",
+      "new_path": "research/ocean_tide/uncertainty.py",
+      "old_blob": "d31a906398a8bbaa6cab3154cf6763dff12af671",
+      "new_blob": "905816a94bf770a80115dbdefa3b703193ee595d"
+    },
+    {
+      "old_path": "research/physical_d26_counting_v01.py",
+      "new_path": "research/cosmic_ray/counting_uncertainty.py",
+      "old_blob": "992407a6388169504e17345c71634528010830d3",
+      "new_blob": "22afb550ee6f91bfa6cea56e4d42e4f609980848"
+    },
+    {
+      "old_path": "research/physical_m01_elastic_v01.py",
+      "new_path": "research/tidal_gravity/elastic_response.py",
+      "old_blob": "c6f22175de1bae3f1686f678e452ba5d7b7e088e",
+      "new_blob": "c6f22175de1bae3f1686f678e452ba5d7b7e088e"
+    },
+    {
+      "old_path": "research/physical_m01_margin_v01.py",
+      "new_path": "research/tidal_gravity/component_margin.py",
+      "old_blob": "1c41b05bd0c4f2afa344140e4bf3208140ec4f4e",
+      "new_blob": "c97a60186d595fbdc06535b4f040eaac2dea1e1a"
+    },
+    {
+      "old_path": "research/physical_m01_math_v01.py",
+      "new_path": "research/tidal_gravity/formula_check.py",
+      "old_blob": "0a18f1640f61899b0bda72346c2e7029a4567311",
+      "new_blob": "0a18f1640f61899b0bda72346c2e7029a4567311"
+    },
+    {
+      "old_path": "research/physical_m01_moshier_v01.py",
+      "new_path": "research/tidal_gravity/ephemeris_comparison.py",
+      "old_blob": "39d509c8881e8496851fd764483ae126d16606a6",
+      "new_blob": "39d509c8881e8496851fd764483ae126d16606a6"
+    },
+    {
+      "old_path": "research/physical_m01_projection_v01.py",
+      "new_path": "research/tidal_gravity/projection.py",
+      "old_blob": "811a0864426e02a687256bdffad33890fde2f7cc",
+      "new_blob": "811a0864426e02a687256bdffad33890fde2f7cc"
+    },
+    {
+      "old_path": "research/physical_m01_vector_replay_v01.py",
+      "new_path": "research/tidal_gravity/vector_replay.py",
+      "old_blob": "be9a451a3912a9f550663f506467b0507a0da0a3",
+      "new_blob": "14448553a1917b5eaec15df79d0d4f3efe6a0bc7"
+    },
+    {
+      "old_path": "research/physical_m01_vectors_v01.py",
+      "new_path": "research/tidal_gravity/vector_export.py",
+      "old_blob": "d022c01cc168aa9a134ffc2fe1d31bf73776d96d",
+      "new_blob": "4cfc5207d812a873cfbf3dffdd27b4ebdf170523"
+    },
+    {
+      "old_path": "research/physical_model_compare_v01.py",
+      "new_path": "research/physical_model/compare_models.py",
+      "old_blob": "be268b338e2df937854bf5579738f24380820d2c",
+      "new_blob": "4278315dc7ef9fa79cefcfd9003ff8f21a8cfdf8"
+    },
+    {
+      "old_path": "research/physical_qualification_v01.md",
+      "new_path": "research/physical_model/qualification.md",
+      "old_blob": "e3ecaea79907896b4d451ece8aa989e51878dfc5",
+      "new_blob": "e3ecaea79907896b4d451ece8aa989e51878dfc5"
+    },
+    {
+      "old_path": "research/physical_reference_sensitivity_v01.py",
+      "new_path": "research/physical_model/reference_sensitivity.py",
+      "old_blob": "de184e9b5707f255a73320f1903f3ddbbfffc927",
+      "new_blob": "573d5357061aea3f43b0b1ecd19e9daf996948f1"
+    },
+    {
+      "old_path": "research/physical_september_audit_v01.py",
+      "new_path": "research/common/capture_audit.py",
+      "old_blob": "e2e446fc2c1dbcf4734e15cd7697ab48ebd8a2c5",
+      "new_blob": "e2e446fc2c1dbcf4734e15cd7697ab48ebd8a2c5"
+    },
+    {
+      "old_path": "research/physical_september_joint_v01.py",
+      "new_path": "research/common/joint_audit.py",
+      "old_blob": "6db52594aba3a4e16140c7d6f6e78c63a18cf32b",
+      "new_blob": "3229f17915d199d4f648af7cbc82c187ec4c1a70"
+    },
+    {
+      "old_path": "research/physical_september_supplement_v01.py",
+      "new_path": "research/common/supplement_capture.py",
+      "old_blob": "8db09c4c543d047e884687da0ad52a53abb71d97",
+      "new_blob": "8db09c4c543d047e884687da0ad52a53abb71d97"
+    },
+    {
+      "old_path": "research/physical_solar_coupling_v01.py",
+      "new_path": "research/solar_wind/plasma_coupling.py",
+      "old_blob": "1fa2e6c49da1f471f4d6af81f139ed0a5b54c8aa",
+      "new_blob": "6aaac92dc40bf8e3e4428768987ada6228974cb5"
+    },
+    {
+      "old_path": "research/physical_solar_provider_questions_v01.md",
+      "new_path": "research/solar_wind/provider_questions.md",
+      "old_blob": "d1d2d9bc63e62de49ac102e48a858a00e789bc0d",
+      "new_blob": "d1d2d9bc63e62de49ac102e48a858a00e789bc0d"
+    },
+    {
+      "old_path": "research/physical_solar_support_v01.py",
+      "new_path": "research/solar_wind/sweep_support.py",
+      "old_blob": "85570e3569215e6eb95c46d866f6a80e3c57a247",
+      "new_blob": "4586c104145218ecc3c0f2577f33841327237305"
+    },
+    {
+      "old_path": "research/physical_tide_background_v01.py",
+      "new_path": "research/ocean_tide/prediction_capture.py",
+      "old_blob": "6ca18b6ef5fedbfd7f7ebb799ca7786589ba6629",
+      "new_blob": "fb7da6f5821ca64442e77bf9c04e6e8bac0a8258"
+    },
+    {
+      "old_path": "research/physical_tide_residual_v01.py",
+      "new_path": "research/ocean_tide/residual.py",
+      "old_blob": "76251cc54e70223c0a1d322f565c60e3f5d8ad64",
+      "new_blob": "da61c9ef27fa2f1215c35cbcbbf8da4df55d10b3"
+    },
+    {
+      "old_path": "research/physical_time_support_v01.py",
+      "new_path": "research/physical_model/time_support.py",
+      "old_blob": "dae2b53033adffe84bf76ea22799d7d3fa4ff28d",
+      "new_blob": "36f1f07182e073a3ca679aca468b5ed696acbd15"
+    },
+    {
+      "old_path": "research/physical_timescale_v01.py",
+      "new_path": "research/physical_model/timescale.py",
+      "old_blob": "b91380c1982832493ff63a103b7b50a23b71b0eb",
+      "new_blob": "3f507f640a998c86bde66a69d97d98918b901ceb"
+    },
+    {
+      "old_path": "research/physical_uncertainty_v01.py",
+      "new_path": "research/physical_model/uncertainty.py",
+      "old_blob": "0a0a40ce067c5d48b5cddf834ac4b235bdfcf434",
+      "new_blob": "5f83b308e7c84c8e0db1adaa4e4c71190516a333"
+    },
+    {
+      "old_path": "research/swips_l2_audit_v01.py",
+      "new_path": "research/solar_wind/l2_audit.py",
+      "old_blob": "07514699145dcc222acfb8f53caa86e10d7faec6",
+      "new_blob": "0c7aef52b446ceaa024d39032051dac6e220c15b"
+    },
+    {
+      "old_path": "research/swips_l2_l3_bridge_v01.py",
+      "new_path": "research/solar_wind/l2_l3_bridge.py",
+      "old_blob": "8c3c2c6311456c3b4f67bceda8545e31f833241f",
+      "new_blob": "9a4bbe0e86cbfe93bcabc8389a25e03b0d90023d"
+    },
+    {
+      "old_path": "research/swips_revision_probe_v01.py",
+      "new_path": "research/solar_wind/revision_probe.py",
+      "old_blob": "cbe518ac0b9ba191d5a0a1d3caf7d67e7bd230de",
+      "new_blob": "549dcadd0f7264decd50d8b053733ee9ffa6b819"
+    }
+  ],
+  "verification": {
+    "coverage": 36,
+    "local_exact_staged_blobs_compiled": 11,
+    "byte_identical_real_data_replays": 7,
+    "byte_identical_synthetic_runs": 4,
+    "scope_limit": "Not full checkout regression; other modules checked by reversible import/path rewrite and remote tree checks. No live acquisition or real planetary DE440s execution."
+  }
+}

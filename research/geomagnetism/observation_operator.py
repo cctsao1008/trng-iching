@@ -1,7 +1,7 @@
 """Fixed D06 operator sensitivity; no new observations or source substitution."""
 import json, sys
 import numpy as np
-from physical_september_joint_v01 import DAYS, PINS, validate_zip, grid, stamp, need
+from research.common.joint_audit import DAYS, PINS, validate_zip, grid, stamp, need
 
 # INTERMAGNET Technical Reference Manual 5.3.2 Appendix F1, 1-second column.
 # t0 through t45; symmetric, normalized to remove printed-coefficient rounding.

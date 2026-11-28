@@ -3,11 +3,11 @@ import gzip, io, json, sys, zipfile
 from pathlib import Path
 import numpy as np
 from scipy.io import netcdf_file
-from physical_september_audit_v01 import start, need, stats
-from physical_september_joint_v01 import IDS, PINS, common
-from physical_reference_sensitivity_v01 import getseries, blocks, STEPS
-from swips_l2_l3_bridge_v01 import moments
-from swips_revision_probe_v01 import sha
+from research.common.capture_audit import start, need, stats
+from research.common.joint_audit import IDS, PINS, common
+from research.physical_model.reference_sensitivity import getseries, blocks, STEPS
+from research.solar_wind.l2_l3_bridge import moments
+from research.solar_wind.revision_probe import sha
 SEP='7175fa28e9bd8dd29257301779cee970bfd9742eaf4d1e45f86815ae5cc05194'
 NOV='f39d6fa386fd7b58e6ba770b457ab8551fd9c7723967ad0b45ef4fe33817c7ee'
 AXES=('sweep_mid_time','initial_packet_time','sweep_start_time')

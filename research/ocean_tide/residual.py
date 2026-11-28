@@ -2,13 +2,13 @@
 import json,sys,io,gzip
 import numpy as np
 from scipy.io import netcdf_file
-from physical_september_joint_v01 import DAYS, PINS, IDS, corr, need
-from physical_september_audit_v01 import start
-from physical_reference_sensitivity_v01 import getseries, blocks, STEPS
-from physical_time_support_v01 import load, SEP, minute_grid
-from swips_l2_l3_bridge_v01 import moments
-from physical_tide_background_v01 import decode, analyze, url
-from swips_revision_probe_v01 import sha
+from research.common.joint_audit import DAYS, PINS, IDS, corr, need
+from research.common.capture_audit import start
+from research.physical_model.reference_sensitivity import getseries, blocks, STEPS
+from research.physical_model.time_support import load, SEP, minute_grid
+from research.solar_wind.l2_l3_bridge import moments
+from research.ocean_tide.prediction_capture import decode, analyze, url
+from research.solar_wind.revision_probe import sha
 TIDE='dd1bef739c2b17d8ce92516f0d6f124a71af2a2cc26de78d832eb5c023b278d3'
 
 def compare(w,p,g):

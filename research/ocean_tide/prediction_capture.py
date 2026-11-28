@@ -3,11 +3,11 @@ import argparse, json, zipfile
 from pathlib import Path
 from urllib.parse import urlencode
 import numpy as np
-from physical_september_joint_v01 import DAYS, PINS, validate_zip, grid, corr, need
-from physical_september_supplement_v01 import fetch
-from physical_background_v01 import compare
-from physical_reference_sensitivity_v01 import blocks
-from swips_revision_probe_v01 import sha, now
+from research.common.joint_audit import DAYS, PINS, validate_zip, grid, corr, need
+from research.common.supplement_capture import fetch
+from research.physical_model.background import compare
+from research.physical_model.reference_sensitivity import blocks
+from research.solar_wind.revision_probe import sha, now
 
 BASE='https://api.tidesandcurrents.noaa.gov/api/prod/datagetter'
 OUT='PH_BT_tide_background_v01.zip'

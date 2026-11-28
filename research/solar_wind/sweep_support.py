@@ -3,7 +3,7 @@ import json,sys,zipfile,gzip,io
 from pathlib import Path
 import numpy as np
 from scipy.io import netcdf_file
-from physical_september_audit_v01 import audit,DAYS,PIN,sha,need,start
+from research.common.capture_audit import audit,DAYS,PIN,sha,need,start
 L2='7175fa28e9bd8dd29257301779cee970bfd9742eaf4d1e45f86815ae5cc05194'
 K=1.380649e-8; C=1e-9/(2*1.25663706212e-6)
 
