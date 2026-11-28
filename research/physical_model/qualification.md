@@ -61,6 +61,40 @@ G2 and G6 refer to pinned retrospective artifacts and prior replay, not live pro
 4. When gates have evidence, preregister estimand, w/b/h, QC, reference, uncertainty, abstention, support/as-of, independent evaluation metrics and stop criteria. Keep BT-C sealed until a scientifically justified candidate and evaluation protocol are frozen. If evidence is unavailable, record blocked rather than invent a parameter.
 5. Preserve existing prospective cohort dates and #3/#4 protocols. No live enable, cast or QRNG fallback.
 
+## Current P3 convergence checkpoint — 2026-11-28
+
+Owner approved concentrating development on Physical Hexagram ([priority decision](https://github.com/cctsao1008/trng-iching/issues/6#issuecomment-7239962627)). The preceding review remains historical evidence. This checkpoint narrows the working design, not the production freeze. Preserve Quantum/MPH and all independent protocols. No additional candidate sources or routine ephemeris refinement.
+
+### Provisional six-line contract for review
+
+Retain the phenomenological order already proposed in [P3A](https://github.com/cctsao1008/trng-iching/issues/6#issuecomment-7199240093), bottom to top: local water response, modeled tidal forcing, ground magnetic field, ground particle detector, upstream plasma, upstream magnetic field. This is a symbolic grouping (not a causal chain, distance ranking, Five Phases equivalence or claim of independence).
+
+| Line | Observable | Fixed candidate identity / unit | Native input to qualify |
+|---|---|---|---|
+| 1 | Ocean water level | NOAA 9414290 MLLW, mm | six-minute observed level; qualify preliminary product and support |
+| 2 | Tidal gravity | JPL DE440s / Skyfield 1.55, fixed WGS84 (37.8063,-122.4659,0), microGal | six-minute geometric direct radial forcing; modeled, outward positive |
+| 3 | Geomagnetic field | USGS BOU native F R0, nT | 1-second source, not derived XYZ nor adjusted F |
+| 4 | Cosmic rays | NMDB OULU original MCORR_E, counts/s | one-minute corrected interval rate, not raw Poisson counts |
+| 5 | Solar-wind proton thermal pressure | NOAA SOLAR-1 SWiPS native L3 n*kB*T, nPa | native minute product; L2 uncorrected only historical sensitivity, not replacement |
+| 6 | Solar-wind magnetic field | NOAA SOLAR-1 MAG native L3 Bt, nT | native minute scalar magnitude, not norm of vector mean |
+
+Working encoder: retain owner-approved leading hypothesis A (R-Trend, [P3E-D](https://github.com/cctsao1008/trng-iching/issues/6#issuecomment-7207254201)). For three ordered values x0,x1,x2 in the same unit and operator, d1=x1-x0, d2=x2-x1. (--)=8,(-+)=6,(++)=7,(+-)=9. Primary polarity denotes earlier change, relating polarity later change; no forecast. Fixed additive baselines cancel, so no need to solve arbitrary state thresholds for this candidate. Time-varying background subtraction is a different observable and is not silently adopted. Both changes must be resolved using justified difference uncertainty; exact zero or unresolved is not a line. Conservative absolute bounds u0,u1,u2 imply |d1|>u0+u1 and |d2|>u1+u2 for resolved signs; use correlated error cancellation only with evidence. Do not set unknown bounds to zero. Existing exact-Decimal sign implementation is a reusable mathematical component, not a scientific uncertainty gate.
+
+Provisional engineering evaluation support: three successive disjoint 30-minute UTC blocks, common fixed end E and 90-minute total window. This width is a compatible multiple of existing native grids and an already examined diagnostic scale, not an empirically optimized or approved final cadence. Define block statistic as mean over the declared support, with equal weights only for a verified regular equally supported series (modeled point-sample mean explicitly labeled). Interval start/center/end, completion and boundary treatment must be established per product before a live operator exists. All required samples/coverage and QC must pass, no gap compression, no adaptive window search. Request anchor T distinct from data cutoff E and decision time; E determined once by an eventually fixed, justified latency policy, never by success of a cast. Final publication lag, support and uncertainty remain open; no numerical defaults invented. Independent capture may repeat same observation supports; existing process-local formed-time guard remains. Do not assemble a hexagram when any domain is unresolved.
+
+### Concrete implementation boundary and outstanding work
+
+Static review of current sources.py (e36ba43925d2b95c42aacc8e209bdfd2aba210f0): D06/NEST research adapters exist, but return candidate_parsed with native_resolution_verified=false, source_qc_validated=false, historical_as_of_verified=false, publication_time_utc=None and ready_for_cast=false. D06 parser checks station/channel; R0 and support need stronger metadata validation for eventual live use. Existing MPH adapters implement a different three-endpoint contract and cannot silently be treated as qualified block operators. main.py gate remains model_not_ready. No code changes required at this checkpoint.
+
+Rechecked actual stored compare-model and timescale JSON identities against the registry above; these are inspected BT-A/B diagnostics, not new evaluations. Existing September strict native SWiPS L3 unavailable and verified-only water is sensitivity rather than current preliminary policy. Therefore those data cannot demonstrate six-channel live readiness, regardless of nominal R-Trend or J-S resolution. Prior J-S reference results do not select R-Trend cadence. Preserve source IDs and no fallback.
+
+Next actionable gates, in order:
+1. Source eligibility and permission: resolve SOLAR-1 MAG flag semantics/minute QC and SWiPS L3 availability/correction/time support; resolve NMDB intended-use permissions and count/exposure uncertainty; resolve USGS R0 and NOAA water support/calibration/publication. Reuse existing provider questions; no request sent or approval inferred.
+2. Pin actual product support, lag and bounded uncertainty policy for the six selected observables. Review #3 D3/D4 partial outcome and #4 MTS according to their independent protocols; explicitly disposition unavailable evidence rather than rerun or refit. Owner review of proposed order/encoder/support is required before formal freeze.
+3. Freeze the accepted contract and preregister independent evaluation, with no tuning on BT-C. Only after all applicable scientific/source gates pass, proceed to P4 actual integration, then P5 regression and three-method acceptance. No new scripts, capture, cast, or holdout inspection in this checkpoint.
+
+Status: provisional semantic contract specified; P3 OPEN, 0/6 qualified, P4/P5 not started; independent holdout sealed. This supersedes routine refinement priority, not earlier evidence or acceptance gates.
+
 ## Evidence references
 
 - [Prior G1–G8 review](https://github.com/cctsao1008/trng-iching/issues/6#issuecomment-7211017000)
