@@ -50,6 +50,8 @@ Concrete example from the existing verified lunar geometry result (SHA256 `9261f
 
 **P3 engineering boundary and outreach preparation (2026-11-28).** [Gate review, synthetic bound check and three provider drafts](physical_model/qualification.md#p3-engineering-gate-review-and-provider-outreach-preparation--2026-11-28); [two solar drafts](solar_wind/provider_questions.md#p3-outreach-ready-drafts--2026-11-28-unsent). Existing P2 synthetic interface and R-Trend preserved. 3375/3375 synthetic corner-oracle cases agree; no actual-source bounds or Python integration tested. Five provider requests prepared, unsent; owner review and external evidence remain critical path. No BT-C access or readiness change.
 
+**P3 remaining decision boundary (2026-11-28).** [Model-versus-observation scope, M01 official source/rights evidence and outreach decision](physical_model/qualification.md#p3-remaining-decision-boundary--2026-11-28). M01 replay complete within numerical scope; official kernel MD5 published but local bytes not rechecked. Owner scope/outreach authorization and actual product evidence are next; stop routine research commits. No mail sent or qualification change.
+
 ## 1. Current research routing
 
 | Need | Open first | Next action / blocker |
