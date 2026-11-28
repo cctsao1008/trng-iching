@@ -62,6 +62,13 @@
 > 經典引領反思。  
 > 解讀權屬於讀者。
 
+<p align="center">
+  <strong>觀象，以知萬物。</strong><br>
+  <strong>察變，以明其勢。</strong><br>
+  <strong>求真，以辨其理。</strong><br>
+  <strong>思己，以正其行。</strong>
+</p>
+
 ## 觀測與起卦方法
 
 | 框架 | 方法 | 狀態 |
