@@ -960,3 +960,98 @@ def acquire_physical_observation(source, *, start, end, research_acknowledged=Fa
                     actual_source_use_approved=False, ready_for_cast=False)
     _LOG.debug("physical source=%s candidate parsed rows=%s", source, len(rows))
     return evidence, rows
+
+# Experimental Physical profile: fixed native-label means, not calibrated support.
+PHYSICAL_PROFILE = 'physical-rtrend-label-mean-v0.1'
+PHYSICAL_ORDER = ('D12', 'M01', 'D06', 'D26-NEST', 'D02', 'D03')
+PHYSICAL_PRODUCTS = {
+    'D12': ('9414290:MLLW', 'mm', 360),
+    'M01': ('M01:SF:DE440s', 'microGal', 360),
+    'D06': ('USGS:BOU:F:R0', 'nT', 1),
+    'D26-NEST': ('NMDB:OULU:original:MCORR_E', 'counts/s', 60),
+    'D02': ('D02:SOLAR1', 'nPa', 60),
+    'D03': ('D03:SOLAR1', 'nT', 60),
+}
+
+
+def physical_window(anchor):
+    """Three fixed 30-minute UTC bins, with a fixed 30-minute availability lag."""
+    if not aware(anchor):
+        raise ValueError('Physical anchor requires a timezone')
+    end = grid_floor(anchor - timedelta(minutes=30), 1800)
+    return end - timedelta(minutes=90), end
+
+
+def physical_block_trend(domain, rows, start, end):
+    """Average complete unique eligible native labels; never fill gaps."""
+    start, end = _physical_bounds(start, end)
+    if end - start != timedelta(minutes=90) or grid_floor(start, 1800) != start:
+        raise ValueError('invalid Physical block window')
+    source, unit, step = PHYSICAL_PRODUCTS[domain]
+    result = dict(domain=domain, source=source, unit=unit,
+                  cadence_seconds=step, line=None, status='unresolved')
+    expected = 5400 // step
+    indexed = {}
+    for row in rows:
+        stamp = row['time']
+        if not aware(stamp):
+            raise ValueError('naive observation label')
+        if not start <= stamp < end:
+            continue
+        if grid_floor(stamp, step) != stamp:
+            return dict(result, reason='off_grid')
+        if stamp in indexed:
+            return dict(result, reason='duplicate_epoch')
+        indexed[stamp] = row
+    result.update(expected_labels=expected, observed_labels=len(indexed))
+    if len(indexed) != expected:
+        return dict(result, reason='missing_endpoint')
+    values = []
+    count = 1800 // step
+    for i in range(3):
+        block = []
+        for j in range(count):
+            row = indexed.get(start + timedelta(seconds=(i*count+j)*step))
+            if row is None:
+                return dict(result, reason='missing_endpoint')
+            if row.get('source') != source:
+                return dict(result, reason='source_mismatch')
+            v = number(row.get('value'))
+            if row.get('eligible') is not True or v is None:
+                return dict(result, reason='ineligible_endpoint')
+            block.append(v)
+        values.append(sum(block, Decimal(0))/Decimal(count))
+    trend = line_from_trend(values)
+    result.update(trend)
+    result['status'] = 'candidate_resolved' if trend['line'] is not None else 'unresolved'
+    return result
+
+
+def observe_physical_domain(domain, *, start, end, session, anchor):
+    """One selected source per domain, with no fallback or automatic retry."""
+    source = PHYSICAL_PRODUCTS[domain][0]
+    if domain == 'M01':
+        stamps = [start + timedelta(seconds=360*i) for i in range(15)]
+        rows, sha = session.earth_samples(stamps)
+        evidence = dict(input_sha256=sha, evidence_kind='modeled_point_samples',
+                        received_at=None)
+    elif domain in ('D06', 'D26-NEST'):
+        meta, native = acquire_physical_observation(domain, start=start, end=end,
+                                                     research_acknowledged=True)
+        rows = [dict(time=t, source=source, value=v, eligible=v is not None and v > 0)
+                for t, v in native]
+        evidence = dict(input_sha256=meta['entity_sha256'],
+                        evidence_kind='native_observation_labels',
+                        received_at=meta['received_at'])
+    else:
+        adapter = {'D12': 'Water', 'D02': 'Fire', 'D03': 'Metal'}[domain]
+        meta, body = acquire_observation(HTTP[adapter], anchor=end if domain == 'D12' else anchor)
+        doc = _decode_response(meta['endpoint'],
+                               dict(status=meta['http_status'], url=meta['endpoint'],
+                                    content_type=meta['content_type']), body,
+                               parse_float=Decimal)
+        rows = parse_water(doc) if domain == 'D12' else parse_solar(adapter, doc)
+        evidence = dict(input_sha256=meta['entity_sha256'],
+                        evidence_kind='native_observation_labels',
+                        received_at=meta['received_at'])
+    return physical_block_trend(domain, rows, start, end) | evidence
