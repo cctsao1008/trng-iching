@@ -168,6 +168,73 @@ Use one bounded request per product/team, referencing the actual candidate ident
 
 M01 needs no repeat of the completed exploratory vector diagnostics; define relevant model-difference error scope at contract review. Stop desk research on the listed provider questions unless new authoritative evidence is received. No email sent. Next: owner review of phase-aware candidate and use scope, provider answers, then freeze/evaluation only if gates pass. Formal qualification remains 0/6, P3 OPEN, BT-C sealed, P4/P5 not started. No production code changed.
 
+## P3 engineering gate review and provider outreach preparation — 2026-11-28
+
+Decision: identify the minimum new engineering boundary, validate its mathematical condition without provider data, and prepare the outstanding evidence requests. No model freeze or production implementation.
+
+### Engineering boundary and bounded synthetic check
+
+Inspected iching.py blob 7440256aaac7a1c760f66c900d4ad0cdd3bec06a and sources.py blob e36ba43925d2b95c42aacc8e209bdfd2aba210f0. Existing line_from_trend compares Decimal values and rejects exact ties; it does not implement a calibrated error gate. physical_candidate_from_trends explicitly accepts synthetic fixtures only, checks ordered non-overlapping completed supports but does not require common contiguous support across domains, source qualification or calibrated bounds; it deliberately returns ready_for_cast=false. Preserve that P2 interface and do not relabel it as P3 validation. The future P4 path must validate identity, QC, support, availability and difference-specific bounds before calling the existing line_from_trend and cast_from_lines. No changes to shared R-Trend or Quantum/MPH.
+
+Bounded algebra check executed in a transient JavaScript isolate: all triples x_i in {-2,-1,0,1,2} and nonnegative block error bounds u_i in {0,1,2}, using exact small integers. Compare sign gate d1=x1-x0, U1=u0+u1 and d2=x2-x1, U2=u1+u2 against an independent enumeration of all eight corner assignments of (e0,e1,e2) in [-u0,u0] x [-u1,u1] x [-u2,u2]. The oracle requires a single strict nonzero sign pair at every corner. Because each difference is affine, extrema occur at corners, including zero boundary cases. Shared middle error is kept consistent across differences. Result: 3375/3375 agreement, 0 mismatches, 410 resolved and 2965 unresolved; line counts 6=183, 7=22, 8=22, 9=183. Counts are synthetic diagnostics, not cast-frequency estimates or tuning criteria. This verifies the conservative rectangular-bound rule only; no statistical coverage assumption, actual-source error estimate, or executed Python implementation is claimed. Stop this algebra check; P2 assembly was already accepted and does not need repetition.
+
+P4 interface acceptance (draft): unknown/missing/nonfinite/negative bounds, exact equality, failed source QC, incomplete/overlapping/misaligned support, stale or unavailable-by-anchor evidence, or identity/version mismatch must not reach six-line assembly. Distinguish malformed configuration/execution errors from legitimate unresolved observations. When the provider supplies justified difference-specific bounds directly, use those rather than forcing a sum of absolute bounds. Do not insert guessed defaults. Exact arithmetic and numeric representation must be reviewed during actual integration. M01 still requires an error scope appropriate to the modeled direct radial quantity, not a full gravimeter uncertainty model. No new ephemeris studies in this checkpoint.
+
+### Ready-to-review external inquiries (UNSENT)
+
+The following concise drafts and the two exact-version solar drafts in [provider questions](../solar_wind/provider_questions.md) are the next actionable evidence requests. No messages sent, no account accessed, no affiliation or commercial commitment asserted. Recipient contacts were checked against official public pages where retrievable. Personal project only; no employer data, raw observation attachments or sealed dates included.
+
+**D12 — NOAA CO-OPS**
+
+To: Tide.Predictions@noaa.gov (official [Stakeholder Services](https://tidesandcurrents.noaa.gov/contact.html), general oceanographic product/data inquiries)
+
+Subject: Station 9414290 preliminary water level — measurement support and short-term accuracy
+
+Dear CO-OPS Stakeholder Services,
+
+I am developing an independent research project that represents changes in natural observations as symbolic patterns, not as a forecast. I would appreciate clarification on the preliminary six-minute MLLW water-level product for station 9414290.
+
+1. Which primary sensor and deployment produced this API product in September 2026 and currently? Does its timestamp denote the center of the measurement interval, and what are the exact interval boundaries?
+2. What outlier-count eligibility rule and sigma interpretation apply to preliminary records? In previously inspected records, sigma was consistently 0.062 m; is this expected for the relevant product?
+3. Is there a documented short-term differential accuracy or uncertainty for differences between adjacent 30-minute averages of native measurements? How should datum shifts, calibration changes and preliminary quality flags be handled?
+4. What are the normal publication delay, revision behavior, and recommended way to identify records available at a given time?
+
+A reference to existing documentation or the appropriate technical contact would be very helpful. Thank you for your time.
+
+**D06 — USGS Geomagnetism**
+
+To: klewis@usgs.gov (program group leader, [official program contact](https://www.usgs.gov/programs/geomagnetism/connect); request routing to product expert)
+
+Subject: Boulder BOU F R0 one-second data — native support and quality
+
+Dear USGS Geomagnetism team,
+
+I am working on an independent research project representing short-term changes in natural observations. Could you direct me to the documentation or technical contact for BOU native scalar F, R0 internet variation data at one-second cadence?
+
+Specifically, I would like to confirm the native scalar measurement origin, exact time support and timestamp convention, invalid values and QC rules, calibration discontinuities, and any documented uncertainty applicable to differences of adjacent 30-minute averages. Is there a documented operational publication/revision policy for this product? I understand that R0 is not definitive or adjusted data and do not intend to apply definitive-product accuracy to it.
+
+Thank you for your assistance.
+
+**D26 — Oulu neutron monitor**
+
+To: Ilya.Usoskin@oulu.fi ([Oulu station data contact](https://cosmicrays.oulu.fi/), [terms](https://cosmicrays.oulu.fi/readme.html))
+
+Subject: OULU MCORR_E one-minute data — support, uncertainty and intended use
+
+Dear Dr. Usoskin,
+
+I am developing an independent research-stage application that converts natural physical changes into symbolic patterns for reflection. It does not claim to forecast physical events or personal outcomes.
+
+For the OULU original MCORR_E one-minute NMDB product, could you clarify the exact interval label and effective exposure, the relationship between raw counts and corrected rates, applicable QC and pressure/efficiency corrections, and any uncertainty guidance for differences of adjacent 30-minute averages? Is the publication and revision behavior documented?
+
+I also want to ensure the intended use respects Oulu and NMDB terms. Would a public noncommercial application displaying derived symbolic outputs and proper attribution, without redistributing raw records, be permitted? If a commercial version were considered in the future, what permission process would apply? No commercial permission is assumed.
+
+Thank you for your guidance.
+
+### Stop and handoff
+
+External product-specific evidence remains the critical path. Owner review of intended-use scope, time/support and encoder candidate still required. The drafts are prepared for review, not sent; no additional search for the same questions unless new evidence appears. No new independent data, no BT-C access, no production code, no readiness change. P3 OPEN / 0 of 6 qualified / P4 and P5 not started.
+
 ## Evidence references
 
 - [Prior G1–G8 review](https://github.com/cctsao1008/trng-iching/issues/6#issuecomment-7211017000)

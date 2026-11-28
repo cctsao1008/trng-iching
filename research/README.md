@@ -48,6 +48,8 @@ Concrete example from the existing verified lunar geometry result (SHA256 `9261f
 
 **P3 native measurement-support check (2026-11-28).** [Phase-aware support and minimum provider questions](physical_model/qualification.md#p3-measurement-support-closure-boundary--2026-11-28): CO-OPS December 2025 sensor spec distinguishes centered radar/acoustic support; ideal radar full-cover phase is +180s, not unshifted UTC half-hour, and acoustic has gaps. Bounded synthetic geometry only; common phase, actual station channel and source-specific uncertainty remain unapproved. Provider-ready questions recorded, unsent; no routine recapture or new independent evidence.
 
+**P3 engineering boundary and outreach preparation (2026-11-28).** [Gate review, synthetic bound check and three provider drafts](physical_model/qualification.md#p3-engineering-gate-review-and-provider-outreach-preparation--2026-11-28); [two solar drafts](solar_wind/provider_questions.md#p3-outreach-ready-drafts--2026-11-28-unsent). Existing P2 synthetic interface and R-Trend preserved. 3375/3375 synthetic corner-oracle cases agree; no actual-source bounds or Python integration tested. Five provider requests prepared, unsent; owner review and external evidence remain critical path. No BT-C access or readiness change.
+
 ## 1. Current research routing
 
 | Need | Open first | Next action / blocker |

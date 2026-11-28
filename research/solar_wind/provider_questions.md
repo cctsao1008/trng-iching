@@ -48,3 +48,43 @@ Acceptance evidence: authoritative flag policy, moment semantics, applicable cal
 - No messages sent. No raw data attached or redistributed. No changes to production, no new issue or model freeze. Formal qualification remains 0/6.
 
 Evidence: [qualification review v0.1](physical_qualification_v01.md), [sweep support script](physical_solar_support_v01.py), [Issue #6 sweep support results](https://github.com/cctsao1008/trng-iching/issues/6#issuecomment-7234606790).
+
+## P3 outreach-ready drafts — 2026-11-28 (UNSENT)
+
+Use the exact archived product identifiers above in the respective message. The following text is a draft for owner review; no external contact made. D03 address was recorded from official metadata in the earlier review; the current metadata page retrieval failed, so recheck before sending if necessary. D02 contact was reverified in [official L2 metadata](https://www.ncei.noaa.gov/access/metadata/landing-page/bin/iso?id=gov.noaa.ncei.swx%3Aswips-l2-swfo).
+
+### MAG
+
+To: swx.mag@noaa.gov
+
+Subject: SOLAR-1 operational MAG L3 — flag interpretation and minute scalar QC
+
+Dear NCEI STP Magnetometer team,
+
+I am developing an independent research project representing changes in natural physical observations as symbolic patterns, not forecasting. In the operational MAG L3 daily products below, all 171,865 inspected second records had flag value 0x80000001, while b_gse_sphr_min had no independent minute flag.
+
+- oe_mag-l3_solar1_s20260907T000000Z_e20260907T235959Z_p20260908T021448Z_pub
+- oe_mag-l3_solar1_s20260914T000000Z_e20260914T235959Z_p20260916T022311Z_pub
+
+Could you clarify the meaning of bits 0 and 31 in these versions, the eligible flags and QC propagation for native minute scalar magnitude, the exact minute measurement support and label convention, and documented calibration/differential uncertainty for adjacent 30-minute averages? How should operational release times and revisions be distinguished from the daily archive creation time?
+
+I would appreciate links to relevant documentation or guidance from the product team. Thank you.
+
+### SWiPS
+
+To: swx.particles@noaa.gov
+
+Subject: SOLAR-1 SWiPS operational L3 — moment QC, support and availability
+
+Dear NCEI STP Particles team,
+
+I am developing an independent research project representing short-term changes in natural physical observations. I would like to use native operational L3 proton density and temperature to calculate proton thermal pressure per eligible record. In the two inspected September dates, native L3 was unavailable in our retained capture; the following L2 products were examined separately:
+
+- oe_swips-l2_solar1_s20260907T000000Z_e20260907T235959Z_p20260908T021650Z_pub
+- oe_swips-l2_solar1_s20260914T000000Z_e20260914T235959Z_p20260916T022512Z_pub
+
+Could you clarify the authoritative L2/L3 flag policy (including L2 value 8), backfill and corrected/uncorrected moment semantics, sweep and minute-grid support and timestamp convention, and availability/revision policy for native operational L3? Is calibrated uncertainty or covariance available for density and temperature, especially for short-term changes in derived thermal pressure? I do not intend to substitute L2 for L3 or infer QC from observed temperature differences.
+
+Thank you for any relevant product documentation or guidance.
+
+The earlier M01 replay follow-up above is historical and superseded by the completed exploratory replay described in the Research Index; do not repeat it merely to prepare these requests.
