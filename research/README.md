@@ -1,6 +1,6 @@
 # Research index
 
-Single entry point for [Issue #6](https://github.com/cctsao1008/trng-iching/issues/6). Read this before opening individual scripts or searching the entire issue history. Inventory: 36 retained tools/documents organized into nine semantic packages/directories, excluding this index, migration manifest and archive. Snapshot: 2026-11-28. Historical baseline commit `ff3cd1c1c9a8bc8cda0ad4ad353b24b8246b5f69`.
+Single entry point for [Issue #6](https://github.com/cctsao1008/trng-iching/issues/6). Read this before opening individual scripts or searching the entire issue history. Inventory: 37 retained tools/documents organized into nine semantic packages/directories, excluding this index, migration manifest and archive. Snapshot: 2026-11-28. Historical baseline commit `ff3cd1c1c9a8bc8cda0ad4ad353b24b8246b5f69`.
 
 ## Directory structure and historical aliases
 
@@ -26,7 +26,7 @@ See [migration.json](migration.json) for every old path, new path, and both Git 
 | Current physical-model gates | [qualification baseline](physical_model/qualification.md) and the domain updates below | 0/6 qualified; no freeze. Baseline is historical, not a substitute for newer evidence. |
 | Planetary replay (historical B02–B05) | [planetary replay](planetary_motion/vector_replay.py), [#7238939530](https://github.com/cctsao1008/trng-iching/issues/6#issuecomment-7238939530) | Owner B01 execution succeeded; existing JSON not yet received for independent replay. Upload it; no rerun. |
 | Classical mapping and sixth channel | [sixth-channel review](classical_mapping/sixth_channel_order.md), [#7239016918](https://github.com/cctsao1008/trng-iching/issues/6#issuecomment-7239016918) | Lunar and M01 comparisons complete at diagnostic level; no calibrated planetary uncertainty, sixth channel or line order selected. |
-| M01 | [elastic diagnostic](tidal_gravity/elastic_response.py), [#7239165876](https://github.com/cctsao1008/trng-iching/issues/6#issuecomment-7239165876) | Keep rigid direct forcing distinct from gravity response. External ephemeris, independent frame/EOP and calibrated joint uncertainty remain open. |
+| Tidal gravity | [Earth orientation](tidal_gravity/earth_orientation.py), [#7239529486](https://github.com/cctsao1008/trng-iching/issues/6#issuecomment-7239529486) | Alternate frame implementation replay complete conditional on owner TT/UT1. Independent observed IERS EOP, SOFA-compatible check, external ephemeris and calibrated joint uncertainty remain open. Keep rigid forcing distinct from measured response. |
 | D12 | [support review](ocean_tide/station_support.py), [#7223004237](https://github.com/cctsao1008/trng-iching/issues/6#issuecomment-7223004237) | Station calibration, reference/model uncertainty and estimand selection. |
 | D06 | [native audit](geomagnetism/native_audit.py), [#7223335599](https://github.com/cctsao1008/trng-iching/issues/6#issuecomment-7223335599) | Provider R0 calibration, decomposition residual, seasonal background and as-of. |
 | D26 | [counting diagnostic](cosmic_ray/counting_uncertainty.py), [#7224018446](https://github.com/cctsao1008/trng-iching/issues/6#issuecomment-7224018446) | Exposure/calibration/rights; completed correction replay in archive. Do not repeat speculative capture. |
@@ -58,6 +58,7 @@ Role labels: **DOC** = research reference; **REPLAY** = completed diagnostic ret
 | [tidal_gravity/ephemeris_comparison.py](tidal_gravity/ephemeris_comparison.py) | REPLAY | Optional Moshier cross-model check; separate licensing review before integration | [#7239092340](https://github.com/cctsao1008/trng-iching/issues/6#issuecomment-7239092340) |
 | [tidal_gravity/projection.py](tidal_gravity/projection.py) | REPLAY | Radial/ellipsoidal normal and conditional GM gains | [#7239134571](https://github.com/cctsao1008/trng-iching/issues/6#issuecomment-7239134571) |
 | [tidal_gravity/elastic_response.py](tidal_gravity/elastic_response.py) | REPLAY | Legendre expansion and simplified solid Earth response; distinct estimand | [#7239165876](https://github.com/cctsao1008/trng-iching/issues/6#issuecomment-7239165876) |
+| [tidal_gravity/earth_orientation.py](tidal_gravity/earth_orientation.py) | REPLAY | Alternate terrestrial-frame reconstruction with owner TT/UT1; not independent observed IERS EOP | [#7239529486](https://github.com/cctsao1008/trng-iching/issues/6#issuecomment-7239529486) |
 
 ### Ocean tide
 
@@ -122,6 +123,7 @@ All observational captures and generated results remain under `temp/PH_BT_v01/` 
 | `physical_m01_moshier_result_v01.json` | `46bbd83845f701cf9973852b0495b6d743ac409123713d15d58e9b20b3e0e139` | [#7239092340](https://github.com/cctsao1008/trng-iching/issues/6#issuecomment-7239092340) |
 | `physical_m01_projection_result_v01.json` | `193ed28c5f2672b8d9331bc31b9a157ab6face117d3f788252e62291de093f63` | [#7239134571](https://github.com/cctsao1008/trng-iching/issues/6#issuecomment-7239134571) |
 | `physical_m01_elastic_result_v01.json` | `0872be398d6e723ae71a01391a37ef04235fe42a6ee56a11d66fbcac05977ce1` | [#7239165876](https://github.com/cctsao1008/trng-iching/issues/6#issuecomment-7239165876) |
+| `earth_orientation_result.json` | `63b654ef42e3d54d12b6452fc91b1b4e9db932e636566bd629698a5b12ac4dd4` | [#7239529486](https://github.com/cctsao1008/trng-iching/issues/6#issuecomment-7239529486) |
 
 ## 4. Dependency routing
 
