@@ -89,9 +89,41 @@ Let consecutive R-Trend triples be (a,b,c) and (b,c,d). The second sign of the f
 
 Divide entries by 24 for joint probabilities, or by row totals for one-step conditional probabilities. Same-code probability = 2/24 = 1/12. Conditional one-step entropy = 0.906715 bits, not a proven entropy rate or Markov model. This algebraic constraint applies only where the next actual selected triple shifts by exactly one observation and preserves both shared values. Repeated identical windows are deterministic; non-overlapping or revised windows are different cases. Current MPH domains may advance on different grids, Wood on completed market events, and Physical uses fixed half-hour block means. Do not force cross-domain synchronization. Within the applicable shared-window case, a reversal line (6 or 9) must transition to a different line. None of this establishes predictive power about external events.
 
+### Hexagram transition graph — exact structural checkpoint
+
+Represent a primary hexagram as a bottom-to-top six-bit vector P and its relating hexagram as R. Each four-state line maps bijectively to the pair (P_i,R_i): 6=(0,1), 7=(1,1), 8=(0,0), 9=(1,0). Exhaustive independent Python enumeration of the four-state product (4^6 = 4096) gives all 64 x 64 ordered pairs exactly once. Hamming distance d(P,R) equals moving-line count. The single-line-change graph is the six-dimensional hypercube Q6: 64 vertices, degree 6, 192 undirected edges. Its distance shells per vertex have sizes (1,6,15,20,15,6,1). Allowing multiple simultaneous changes gives 4096 ordered pairs including 64 self-loops; this is an intra-cast graph, not an observed temporal graph. King Wen numbers are labels rather than coordinates or metric distances.
+
+For independent lines, the intra-cast Hamming-distance generating polynomial is the product of ((1-p_i)+p_i z), with p_i the moving probability. Under the earlier ideal nulls the three polynomials are ((3+z)/4)^6 (Quantum), ((1+2z)/3)^5 (3+z)/4 (MPH), ((1+2z)/3)^6 (Physical). The exact coefficient distributions from rational polynomial convolution are:
+
+| Moving count | Quantum % | MPH % | Physical % |
+|---:|---:|---:|---:|
+| 0 | 17.79785 | 0.30864 | 0.13717 |
+| 1 | 35.59570 | 3.18930 | 1.64609 |
+| 2 | 29.66309 | 13.37449 | 8.23045 |
+| 3 | 13.18359 | 28.80658 | 21.94787 |
+| 4 | 3.29590 | 32.92181 | 32.92181 |
+| 5 | 0.43945 | 18.10700 | 26.33745 |
+| 6 | 0.02441 | 3.29218 | 8.77915 |
+
+These are IID-level R-Trend and fair-bit null distributions, not measured frequencies or an objective for model tuning.
+
+**Temporal bridge identity.** For R-Trend on (a,b,c), P_i = 1[b>a], R_i = 1[c>b]. If the next resolved triple is exactly (b,c,d) with the same shared values, then P_i(t+1) = R_i(t). Thus when all six physical lines advance by exactly one shared-increment step, the previous relating hexagram equals the next primary hexagram. This is an algebraic identity independent of probability assumptions, not prediction of the next measurement or of external events. It requires nonzero increments and identical overlapping values; it is not valid for arbitrary casts. A repeated identical window instead has P(t+1)=P(t), R(t+1)=R(t). With revisions, missingness, different sampling grids or larger shifts, the bridge is not assured.
+
+For each line shifted by one observation, exactly two four-state successors are structurally possible (8 of 16 directed edges); an unconstrained quantum line allows four. If all deterministic domains shift exactly once and all combinatorial possibilities are allowed, a current four-state six-line vector permits the following maximum successor counts:
+
+| Framework | Next four-state vectors | Directed edges over 4096 states | Next primary hexagrams |
+|---|---:|---:|---:|
+| Quantum, independent new entropy | 4096 | 16777216 | 64 |
+| MPH, all five observed triples shifted once | 128 | 524288 | 2 |
+| Physical, all six triples shifted once | 64 | 262144 | 1 |
+
+Actual support can be smaller due to dependence, no-hexagram outcomes or source constraints. For partial shifts apply the bridge only to shifted lines; unchanged deterministic triples retain their original line; no forced synchronization. In Physical v0.2, a 30-minute forward block-window shift with unchanged shared block means meets this condition. In MPH v0.3 the market events, exact 30-minute endpoint spacing and native labels make such a simultaneous shift non-guaranteed. Quantum top line is not subject to the R-Trend bridge.
+
+Even IID continuous levels do not establish a first-order Markov process for sign sequences: P(next positive | last positive) = 1/3, but P(next positive | last two positive) = 1/4 (strict monotone order probabilities 1/6 and 1/24 respectively). Do not raise a fitted one-step transition matrix to powers as a validated temporal forecast. The intrinsic Hamming graph and the temporal four-state graph must be kept distinct.
+
 ### Next research decision
 
-Study hexagram transition graphs by distinguishing intrinsic primary-to-relating transformations from successive casts in time. Exact analytical constraints are a useful starting point without collecting a persistent cast archive. If empirical research is later warranted, predefine the observable, window overlap, null and missingness before acquiring any data. No new live acquisition or runtime modification in this checkpoint.
+The graph baseline and temporal bridge are now analytically resolved. A bounded next study can characterize overlap-conditioned information persistence and distinguish unchanged inputs, one-step shared increments, and disjoint windows under the actual source schedules. No additional historical data acquisition, cast archive, D3/D4 reconstruction, new runtime module or product work is required for this checkpoint. If empirical research becomes necessary, define the decision and source-alignment/missingness policy first.
 
 ## 1. Current research routing
 
