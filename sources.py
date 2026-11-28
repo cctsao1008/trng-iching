@@ -987,12 +987,12 @@ def acquire_physical_observation(source, *, start, end, research_acknowledged=Fa
     return evidence, rows
 
 # Experimental Physical profile: fixed native-label means, not calibrated support.
-PHYSICAL_PROFILE = 'physical-rtrend-label-mean-v0.1'
+PHYSICAL_PROFILE = 'physical-rtrend-label-mean-v0.2'
 PHYSICAL_ORDER = ('D12', 'M01', 'D06', 'D26-NEST', 'D02', 'D03')
 PHYSICAL_PRODUCTS = {
     'D12': ('9414290:MLLW', 'mm', 360),
     'M01': ('M01:SF:DE440s', 'microGal', 360),
-    'D06': ('USGS:BOU:F:R0', 'nT', 1),
+    'D06': ('INTERMAGNET:BOU:BOUF', 'nT', 60),
     'D26-NEST': ('NMDB:OULU:original:MCORR_E', 'counts/s', 60),
     'D02': ('D02:SOLAR1', 'nPa', 60),
     'D03': ('D03:SOLAR1', 'nT', 60),
@@ -1052,6 +1052,70 @@ def physical_block_trend(domain, rows, start, end):
     return result
 
 
+def parse_physical_iaga(text):
+    """Read the native BOUF minute column in INTERMAGNET IAGA-2002 text."""
+    headers = {}
+    columns = None
+    rows = []
+    for raw in text.splitlines():
+        line = raw.strip().rstrip('|').strip()
+        if not line or line.startswith('#'):
+            continue
+        fields = line.split()
+        if columns is None:
+            if fields[0] == 'DATE':
+                columns = fields
+                if columns[:3] != ['DATE', 'TIME', 'DOY'] or columns.count('BOUF') != 1:
+                    raise ValueError('missing native BOUF column')
+                if (headers.get('Format') != 'IAGA-2002'
+                        or headers.get('IAGA Code') != 'BOU'
+                        or headers.get('Data Interval Type') != '1-minute'):
+                    raise ValueError('unexpected INTERMAGNET product')
+                continue
+            for key in ('Format', 'IAGA Code', 'Data Interval Type', 'Data Type',
+                        'Source of Data', 'Publication Date'):
+                if line.startswith(key + ' '):
+                    headers[key] = line[len(key):].strip()
+                    break
+            continue
+        if len(fields) != len(columns):
+            raise ValueError('invalid IAGA data row')
+        stamp = utc_label(fields[0] + 'T' + fields[1])
+        value = number(fields[columns.index('BOUF')])
+        if value is None or value <= 0 or value in (Decimal('99999'), Decimal('88888')):
+            value = None
+        rows.append((stamp, value))
+    if columns is None or not rows:
+        raise ValueError('missing IAGA data')
+    return rows, headers
+
+
+def acquire_physical_intermagnet(start, end):
+    """One BGS request covering the UTC dates of the fixed window."""
+    start, end = _physical_bounds(start, end)
+    days = ((end - timedelta(minutes=1)).date() - start.date()).days + 1
+    url = 'https://imag-data.bgs.ac.uk/GIN_V1/GINServices?' + urlencode(dict(
+        Request='GetData', format='iaga2002', observatoryIagaCode='BOU',
+        samplesPerDay=1440, dataStartDate=start.date().isoformat(),
+        dataDuration=days, publicationState='best-avail', orientation='Native'))
+    fetch = windows_fetch if sys.platform == 'win32' else urllib_fetch
+    requested = utcnow()
+    if end > requested:
+        raise ValueError('physical interval must be completed before request')
+    _LOG.debug('physical source=D06 INTERMAGNET request started days=%s', days)
+    meta, body = fetch(url, timeout=60)
+    received = utcnow()
+    if received < requested or meta.get('status') != 200 or meta.get('url') != url:
+        raise TransportError('INTERMAGNET response identity or chronology mismatch')
+    if not isinstance(body, bytes) or not 0 < len(body) <= MAX_BYTES:
+        raise TransportError('empty or oversized INTERMAGNET response')
+    native, headers = parse_physical_iaga(body.decode('utf-8-sig'))
+    _LOG.debug('physical source=D06 INTERMAGNET parsed rows=%s', len(native))
+    return native, dict(input_sha256=hashlib.sha256(body).hexdigest(),
+                        evidence_kind='native_observation_labels',
+                        received_at=iso(received), native_metadata=headers)
+
+
 def observe_physical_domain(domain, *, start, end, session, anchor):
     """One selected source per domain, with no fallback or automatic retry."""
     source = PHYSICAL_PRODUCTS[domain][0]
@@ -1060,7 +1124,11 @@ def observe_physical_domain(domain, *, start, end, session, anchor):
         rows, sha = session.earth_samples(stamps)
         evidence = dict(input_sha256=sha, evidence_kind='modeled_point_samples',
                         received_at=None)
-    elif domain in ('D06', 'D26-NEST'):
+    elif domain == 'D06':
+        native, evidence = acquire_physical_intermagnet(start, end)
+        rows = [dict(time=t, source=source, value=v, eligible=v is not None)
+                for t, v in native]
+    elif domain == 'D26-NEST':
         meta, native = acquire_physical_observation(domain, start=start, end=end,
                                                      research_acknowledged=True)
         rows = [dict(time=t, source=source, value=v, eligible=v is not None and v > 0)
