@@ -512,6 +512,8 @@ def _mph_project(formed, summary, args, session):
     # Compact selected-endpoint provenance, not a source-byte replay artifact.
     keys = ('domain', 'source', 'status', 'anchor', 'endpoint_times', 'input_sha256', 'line')
     evidence = [{k: r[k] for k in keys} for r in formed['records']]
+    wood = next(r for r in formed['records'] if r['domain'] == 'Wood')
+    component_http_attempts = 3 + len(wood['component_requests'])
     digest = hashlib.sha256(json.dumps(evidence, sort_keys=True, separators=(',', ':'),
                                        allow_nan=False).encode()).hexdigest()
     summary['selected_evidence_sha256'] = digest
@@ -527,13 +529,15 @@ def _mph_project(formed, summary, args, session):
                          qrng_receive_time_utc=summary['qrng_receive_time_utc'],
                          top_line_bits=group, events=list(summary['events']),
                          five_domain_http_attempts=4, qrng_logical_attempts=1,
+                         component_http_attempts=component_http_attempts,
                          network_count_semantics='logical_interface_invocations_not_packet_count',
                          actual_source_use_approved=False,
                          ready_for_production=False, source_policy_review='DEFERRED_TO_P3_NOT_APPROVED',
                          selected_evidence_sha256=digest, domain_evidence=evidence,
                          validation_boundary=_MPH_BOUNDARY)
     if args.audit:
-        record['audit']['mph'] = dict(domain_evidence=[{**e, **{k: r[k] for k in ('values', 'deltas', 'signs')}}
+        record['audit']['mph'] = dict(wood_components=wood['component_requests'], wood_endpoints=wood['endpoints'],
+                                     domain_evidence=[{**e, **{k: r[k] for k in ('values', 'deltas', 'signs')}}
                                                       for e, r in zip(evidence, formed['records'])],
                                      entropy=dict(top_line_bit_positions_zero_based=[15, 16, 17],
                                                   top_line_bits=group, top_line_value=formed['cast']['lines_bottom_to_top'][5]))
