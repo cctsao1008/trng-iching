@@ -155,10 +155,17 @@ class PinnedEphemeris:
         The caller applies the observation data contract and R-Trend. The
         session may also supply the common astronomical reference snapshot.
         """
-        if self.kernel is None or self.ts is None:
-            raise RuntimeError("PinnedEphemeris must be opened first")
         if anchor.tzinfo is None or anchor.utcoffset() is None:
             raise ValueError("Earth anchor must be timezone-aware")
+        t = datetime.fromtimestamp(int(anchor.timestamp()) // 360 * 360, timezone.utc)
+        return self.earth_samples([t - timedelta(minutes=m) for m in (60, 30, 0)])
+
+    def earth_samples(self, stamps):
+        """Evaluate the existing geometric model at explicit sample labels."""
+        if self.kernel is None or self.ts is None:
+            raise RuntimeError("PinnedEphemeris must be opened first")
+        if any(t.tzinfo is None or t.utcoffset() is None for t in stamps):
+            raise ValueError("Earth samples require timezone-aware labels")
         if self.skyfield_version != EARTH_SKYFIELD_VERSION:
             raise ValueError("Skyfield version mismatch")
         if self.digest != JPL_DE440S_SHA256:
@@ -167,13 +174,10 @@ class PinnedEphemeris:
         from skyfield.api import wgs84
 
         _LOG.debug("Earth observation model started")
-        # Use the six-minute UTC grid and the fixed 60/30/0-minute history.
-        t = datetime.fromtimestamp(int(anchor.timestamp()) // 360 * 360, timezone.utc)
         site = wgs84.latlon(EARTH_SITE[0], EARTH_SITE[1], elevation_m=EARTH_SITE[2])
         earth = self.kernel["earth"]
         rows = []
-        for minutes in (60, 30, 0):
-            stamp = t - timedelta(minutes=minutes)
+        for stamp in stamps:
             tm = self.ts.from_datetime(stamp)
             r = site.at(tm).position.m
             components = {
