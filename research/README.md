@@ -52,6 +52,8 @@ Concrete example from the existing verified lunar geometry result (SHA256 `9261f
 
 **P3 remaining decision boundary (2026-11-28).** [Model-versus-observation scope, M01 official source/rights evidence and outreach decision](physical_model/qualification.md#p3-remaining-decision-boundary--2026-11-28). M01 replay complete within numerical scope; official kernel MD5 published but local bytes not rechecked. Owner scope/outreach authorization and actual product evidence are next; stop routine research commits. No mail sent or qualification change.
 
+**P3 provider outreach (2026-11-28).** [Five inquiries SENT; response pending](physical_model/qualification.md#p3-provider-outreach-sent--2026-11-28). Initial independent noncommercial research scope adopted; derived-only public use still subject to terms. Prior UNSENT entries are historical. No provider approval, qualification change, BT-C access or production change; wait for substantive evidence rather than repeat research.
+
 ## 1. Current research routing
 
 | Need | Open first | Next action / blocker |

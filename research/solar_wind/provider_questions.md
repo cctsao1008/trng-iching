@@ -88,3 +88,7 @@ Could you clarify the authoritative L2/L3 flag policy (including L2 value 8), ba
 Thank you for any relevant product documentation or guidance.
 
 The earlier M01 replay follow-up above is historical and superseded by the completed exploratory replay described in the Research Index; do not repeat it merely to prepare these requests.
+
+## Outreach status — 2026-11-28
+
+Both MAG and SWiPS inquiries above were sent individually; mail submission returned SENT for each. Official MAG contact corroborated via indexed NOAA metadata. Messages included explicit TRNG I Ching noncommercial symbolic-research context; no attachments. Replies pending; historical UNSENT labels refer to draft preparation only. See [current outreach record](../physical_model/qualification.md#p3-provider-outreach-sent--2026-11-28). No provider response, permission or QC change inferred.

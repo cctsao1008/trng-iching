@@ -242,6 +242,22 @@ External product-specific evidence remains the critical path. Owner review of in
 - For the five observed products, the last outreach-ready drafts already specify missing evidence; no further desk review or new retrospective captures are justified without new evidence. Recommended initial intended-use scope for owner decision: independent noncommercial research and derived-only public reflection output, no raw-data redistribution; future monetization separate. This is a proposal, not owner approval or provider permission. Do not silently relax scientific uncertainty, replace a source or authorize public release.
 - Next action is owner authorization of intended-use scope and whether to send the five prepared requests. No external mail sent. No need for local owner reruns. P3 remains OPEN / 0 of 6 qualified, BT-C sealed, P4/P5 not started. Report blocked rather than generating additional routine research commits while awaiting evidence.
 
+## P3 provider outreach sent — 2026-11-28
+
+Owner authorized proceeding after the noncommercial scope/outreach proposal. Initial scope: independent noncommercial research; any public derived-only application remains subject to applicable terms and provider evidence. No commercial authorization assumed.
+
+All five prepared inquiries were sent individually from the owner's connected mail account on 2026-11-28; each send returned a SENT result. Contacts rechecked against official sources before sending, including MAG L3 metadata via indexed official content. Messages retained the prepared technical questions and added explicit identification of TRNG I Ching as I Ching-inspired symbolic research for personal reflection without predictive-validity claims. No attachments, employer information, raw data, or BT-C material sent. Earlier UNSENT sections are retained as historical drafts, superseded by this status.
+
+| Domain | Provider | Inquiry | Status |
+|---|---|---|---|
+| D12 | NOAA CO-OPS | Station 9414290 preliminary water level — measurement support and short-term accuracy | SENT / response pending |
+| D06 | USGS Geomagnetism | Boulder BOU F R0 one-second data — native support and quality | SENT / response pending |
+| D26 | University of Oulu | OULU MCORR_E one-minute data — support, uncertainty and intended use | SENT / response pending |
+| D03 | NOAA NCEI MAG | SOLAR-1 operational MAG L3 — flag interpretation and minute scalar QC | SENT / response pending |
+| D02 | NOAA NCEI SWiPS | SOLAR-1 SWiPS operational L3 — moment QC, support and availability | SENT / response pending |
+
+SENT confirms submission through the mail account, not recipient delivery or provider approval. Keep private mailbox identifiers and correspondence out of Git. For each substantive response, record product/version scope, official reference, supported gate change and unresolved items; do not publish private correspondence without permission. No duplicate requests or routine re-captures while awaiting evidence. M01 numerical replay remains completed within its existing scope; remaining model/contract evidence is separate. P3 OPEN / 0 of 6 qualified / BT-C sealed / no live enable or model freeze. P4/P5 not started.
+
 ## Evidence references
 
 - [Prior G1–G8 review](https://github.com/cctsao1008/trng-iching/issues/6#issuecomment-7211017000)
