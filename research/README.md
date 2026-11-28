@@ -29,6 +29,17 @@ The goal is a meaningful, reproducible observation-to-symbol research framework,
 - **External blockers stay blocked:** provider QC/calibration/rights/as-of and missing artifacts. Do not manufacture proxy data, repeat captures, or start parallel refinements merely to fill a task list. Proceed to formal validation only after choosing an estimand and defining its acceptance criteria; retain BT-C sealed.
 - **Completion rule:** one bounded check per concrete decision; reuse an existing tool/result whenever sufficient. A new experiment must state which decision it can change and what result ends the experiment. Stop if it cannot materially affect the decision. Prefer updating this index and Issue #6 over creating new documents or scripts.
 
+### Next decision: planetary motion semantics and cadence
+
+One bounded analysis after receipt of the existing owner planetary JSON. No new acquisition, script or ephemeris refinement is required for this step.
+
+1. Use `planetary_motion/vector_replay.py` with the pinned owner SHA256. Stop on identity/replay failure; report rather than silently repin.
+2. Use the already exported vectors at the existing 6/30/60/360-minute intervals and fixed triples. For the five targets, compare apparent versus geometric signed interval rates and second differences at matched endpoints, and compute the joint intersection of resolved rate/change signs across all five under the existing hypothetical endpoint-error scenarios. Report any sign disagreement and the corresponding physical quantity; do not rank by hexagram yield. Apparent geocentric motion is the primary observational candidate because it describes motion as seen from Earth; geometric motion is a control, not a silent replacement.
+3. Distinguish the meaning of a moving line before choosing a mapping: existing R-Trend denotes reversal of successive increments; state-transition on signed angular rate denotes a change from direct to retrograde motion or vice versa; rate/change (J-S) denotes opposition of rate and its change, i.e. slowing in the current direction, not necessarily a reversal. Zero/unresolved signs remain unresolved. The latter two are research alternatives, not changes to existing MPH.
+4. Stop after comparing cadence suitability, the meaning of the observable and uncertainty sensitivity. If rates are resolved but rate changes are not, report that limitation rather than forcing a moving-line assignment or selecting the longest interval automatically. No calibrated uncertainty or generalization is established by the inspected dates; no new model is frozen.
+
+Concrete example from the existing verified lunar geometry result (SHA256 `9261f9af7c79dc64e0f55d86ca8479a1c8d7ad8b725673bfd6f2922b72df73eb`): using 30-minute point-sample means and half illumination as reference, both inspected days have all 48 negative residual states. On Sep 14 all 47 adjacent increments are positive, so J-S reports 47 oppositions but state-transition reports zero crossings. On Sep 7 all 47 increments are negative and both opposition and crossing counts are zero. This difference is semantics, not a numerical error, and does not establish a preferable encoder. Apply the same distinction to planetary motion before assigning any line codes. No individual cast or personal question is needed as research evidence.
+
 ## 1. Current research routing
 
 | Need | Open first | Next action / blocker |
