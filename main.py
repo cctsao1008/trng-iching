@@ -17,7 +17,7 @@ from astronomy import PinnedEphemeris, UTC_PLUS_8, calculate_reference
 from iching import cast_from_hex
 from human_view import render_human, render_no_hexagram
 from lunisolar import calculate_four_pillars, lookup_hko_date, sync_hko_years
-from sources import QRNG_ENDPOINTS, acquire_trng_bytes
+from sources import QRNG_ENDPOINTS, TransportError, acquire_trng_bytes
 
 ROOT = Path(__file__).resolve().parent
 
@@ -48,6 +48,18 @@ def _debug_failure(phase: str, exc: Exception) -> None:
             for frame, lineno in traceback.walk_tb(exc.__traceback__)
         )
         _LOG.debug("phase=%s error_type=%s stack=%s", phase, type(exc).__name__, frames)
+
+
+def _failure_reason(exc):
+    """Public diagnostic fields only; never expose provider response text."""
+    if not isinstance(exc, TransportError):
+        return dict(code='acquisition_or_adapter_failed')
+    reason = dict(code=exc.code)
+    if exc.http_status is not None:
+        reason['http_status'] = exc.http_status
+    if getattr(exc, 'provider', None) in ('TWSE', 'TAIFEX'):
+        reason['provider'] = exc.provider
+    return reason
 
 
 # ---------------------------------------------------------------------------
@@ -347,7 +359,7 @@ def _mph_check_dependencies():
     import skyfield
     _mph_require(version('exchange-calendars') == xc.__version__ == '4.13.1', 'calendar version mismatch')
     _mph_require(version('skyfield') == skyfield.__version__ == '1.55', 'Skyfield version mismatch')
-    ZoneInfo('America/New_York')
+    ZoneInfo('Asia/Taipei')
 
 
 # Expected observation rejections are distinct from execution failures.
@@ -406,15 +418,17 @@ def _mph_observe_and_cast(*, source, session, audit=False):
                     r = s.observe_domain(domain, anchor)
             except Exception as exc:
                 _debug_failure(domain, exc)
-                r = dict(domain=domain, status='incomplete', reason='acquisition_or_adapter_failed',
-                         error_type=type(exc).__name__)
+                detail = _failure_reason(exc)
+                r = dict(domain=domain, status='incomplete', reason=detail['code'],
+                         error_type=type(exc).__name__, failure_detail=detail)
             records.append(r)
             _LOG.debug("domain=%s status=%s reason=%s http_status=%s",
                        domain, r['status'], r['reason'],
                        (r.get('transport') or {}).get('http_status'))
             summary['domains'].append(dict(domain=domain, status=r['status'], reason=r['reason'],
-                                           http_status=(r.get('transport') or {}).get('http_status'),
-                                           error_type=r.get('error_type')))
+                                           http_status=(r.get('failure_detail') or r.get('transport') or {}).get('http_status'),
+                                           error_type=r.get('error_type'),
+                                           **({'failure_detail': r['failure_detail']} if 'failure_detail' in r else {})))
         completed = _mph_utc(s.utcnow())
         summary['five_domain_completed_at_utc'] = completed.isoformat()
         summary['resolved_domains'] = sum(r['status'] == 'candidate_resolved' for r in records)
@@ -481,6 +495,8 @@ def _mph_observe_and_cast(*, source, session, audit=False):
         if summary['qrng_logical_attempts'] == 0:
             _LOG.debug("QRNG acquisition skipped; preflight did not pass")
         summary.update(failure_phase=phase, error_type=type(exc).__name__)
+        if phase == 'qrng_acquisition':
+            summary['qrng_failure'] = _failure_reason(exc)
         summary['events'].append('abort')
     return summary, formed
 
@@ -582,11 +598,13 @@ def _emit_no_hexagram(args, outcome):
 
 def _mph_no_hexagram(summary):
     reasons = [
-        dict(domain=d['domain'], code=d['reason'])
+        dict(domain=d['domain'], **d.get('failure_detail', {'code': d['reason']}))
         for d in summary.get('domains', [])
         if d['status'] != 'candidate_resolved'
     ]
-    if summary['status'] != 'unresolved':
+    if summary.get('qrng_failure'):
+        reasons.append(dict(domain='Quantum', **summary['qrng_failure']))
+    if summary['status'] != 'unresolved' and not reasons:
         code = ('casting_time_already_formed'
                 if summary.get('error_type') == '_CastingTimeAlreadyFormed'
                 else 'execution_failed')
@@ -781,7 +799,7 @@ def _physical_run(args: argparse.Namespace) -> int:
                         reasons.append(dict(domain=domain, code=item['reason']))
                 except Exception as exc:
                     _debug_failure('physical_' + domain, exc)
-                    reasons.append(dict(domain=domain, code='acquisition_or_adapter_failed'))
+                    reasons.append(dict(domain=domain, **_failure_reason(exc)))
             if reasons:
                 outcome = _no_hexagram('physical', 'unresolved', reasons)
                 outcome.update(anchor_utc=_iso_utc(anchor),
@@ -992,7 +1010,7 @@ def main(argv: list[str] | None = None) -> int:
                                [dict(domain=None, code='casting_time_already_formed')]))
     except _QuantumAcquisitionError as exc:
         outcome = _no_hexagram('quantum', 'error',
-                               [dict(domain='Quantum', code='acquisition_or_adapter_failed')])
+                               [dict(domain='Quantum', **_failure_reason(exc.__cause__))])
         outcome['error_type'] = str(exc)
         return _emit_no_hexagram(args, outcome)
     except Exception as exc:
