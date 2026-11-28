@@ -66,11 +66,11 @@ It is a tool for **casting a hexagram (起卦)** and a space for exploring chang
 
 | Framework | Approach | Status |
 | --- | --- | --- |
-| **Physical**<br>天地卦 | Natural physical states, changes and relationships. | Research; CLI registered, casting disabled |
+| **Physical**<br>天地卦 | Natural physical states, changes and relationships. | Experimental live casting; no QRNG |
 | **Quantum**<br>量子卦 | Quantum randomness and the traditional three-coin method. | Implemented |
 | **Myriad Phenomena**<br>萬象卦 | Five-phase observations combined with a quantum line. | Implemented |
 
-Myriad phenomena (萬象) is the overarching observation concept. Physical observations and quantum randomness are constituent dimensions. Quantum and MPH are executable methods in one casting application. Physical is registered as `--method physical`, but remains research-only until its six-line observation and mapping contract is frozen. The MPH mapping is an experimental symbolic model, not evidence of predictive validity or a scientific equivalence between the Five Phases and physical phenomena. See [Physical research #3](https://github.com/cctsao1008/trng-iching/issues/3), [MPH research #4](https://github.com/cctsao1008/trng-iching/issues/4), [implementation #5](https://github.com/cctsao1008/trng-iching/issues/5), and [Physical integration #6](https://github.com/cctsao1008/trng-iching/issues/6).
+Myriad phenomena (萬象) is the overarching observation concept. Physical observations and quantum randomness are constituent dimensions. All three methods are executable in one casting application. Physical uses an experimental native-label trend profile. The MPH mapping is an experimental symbolic model, not evidence of predictive validity or a scientific equivalence between the Five Phases and physical phenomena. See [Physical research #3](https://github.com/cctsao1008/trng-iching/issues/3), [MPH research #4](https://github.com/cctsao1008/trng-iching/issues/4), [implementation #5](https://github.com/cctsao1008/trng-iching/issues/5), and [Physical integration #6](https://github.com/cctsao1008/trng-iching/issues/6).
 
 ## ☯️ Yin, Yang and Change
 
@@ -262,11 +262,11 @@ py .\main.py cast --method mph --view human --debug
 py .\main.py cast --method mph --view human --debug 2> debug.log
 ```
 
-Debug logs show execution stages, transport timing/status, active observation counts, exact required/missing timestamp labels and sanitized exception frame locations. They do not include raw entropy, observed values, line values, API URLs or exception text. Normal result output, saved records and selection rules are unchanged. Debug differs from `--audit` (cast provenance) and MPH `--view summary` (redacted result summary); it does not enable retries or Physical live casting.
+Debug logs show execution stages, transport timing/status, active observation counts, exact required/missing timestamp labels and sanitized exception frame locations. They do not include raw entropy, observed values, line values, API URLs or exception text. Normal result output, saved records and selection rules are unchanged. Debug differs from `--audit` (cast provenance) and MPH `--view summary` (redacted result summary); it does not enable retries or change observation eligibility.
 
 ## ⚙️ System Architecture
 
-One application combines observation, deterministic line conversion, shared hexagram assembly, reference context and presentation. Quantum and MPH use the same engine. Physical has a reserved method entry, not an enabled casting model: `py .\main.py cast --method physical --view human` reports `model_not_ready` (exit 1), without observation requests, QRNG calls, a formed hexagram, or a saved cast record. Physical rejects `--source`, `--hex`, and `--at`. Its natural observation adapters and shared assembly integration will follow the research gates in #6.
+One application combines observation, deterministic line conversion, shared hexagram assembly, reference context and presentation. Quantum and MPH use the same engine. Physical uses six natural sources without QRNG: `py .\main.py cast --method physical --view human --text`. Three fixed UTC 30-minute native-label bins end at the half-hour boundary at least 30 minutes before the request. Complete eligible labels and two nonzero changes per domain are required; incomplete observations return no hexagram (exit 3). The bottom-to-top order is water level, modeled tidal gravity, ground magnetic field, neutron rate, solar-wind thermal pressure and solar-wind magnetic magnitude. No fallback, redraw or calibrated uncertainty claim. Physical rejects `--source`, `--hex`, and `--at`. Experimental noncommercial research only.
 
 ```mermaid
 ---
