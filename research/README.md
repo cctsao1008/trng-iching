@@ -60,11 +60,44 @@ Concrete example from the existing verified lunar geometry result (SHA256 `9261f
 
 **Shared runtime diagnostics:** Windows/urllib transport failures now carry a safe code (`http_error`, `request_timeout`, `connection_failed`, or `invalid_response`); HTTP status and Wood component identity are surfaced in no-hexagram outcomes when known. Wood logs per-request latency, payload size and missing session/contract details. Existing acquisition counts, source selection, no-retry/no-fallback policy, observation schedules, R-Trend and exit-status behavior remain unchanged. Static diff verified; owner Windows compile and three-method happy-path live regression PASS (2026-11-29 00:28 UTC+8, baseline ead7824). MPH five domains resolved; six HTTP requests including QRNG succeeded; TWSE 0.295479 s, TAIFEX 0.314235 s, total reported request time 6.207205 s. Wood selected values matched prior successful run. Failure classifications have not been exercised by this successful run; provider uptime is not established. Close basic runtime-diagnostics acceptance. Owner clarified that this is a personal research and casting tool, not a product. App architecture, framework selection, App development, distribution, commercial release and App-specific API refactoring are outside the current scope. Maintain the existing Python CLI, three casting methods, classical references and concise human/JSON outputs. Further changes should address concrete research or usage needs rather than speculative product requirements.
 
+## Information dynamics — exact structural baselines (2026-11-29)
+
+Current scope is personal research using the three working CLI methods. Do not recover deleted artifacts, rerun D3/D4, reopen source precision studies, or develop product interfaces. Earlier readiness statements below are historical. Issue #3 remains the source-evidence record; #4 is the symbolic-information research track. Experimental Physical v0.2 and MPH contract v0.3 are live-smoke accepted.
+
+### Four-state alphabets
+
+For fair independent bits, the three-coin line probabilities in order (6,7,8,9) are (1,3,3,1)/8. For three IID continuous levels, enumerate their six equally likely ordinal permutations under the existing R-Trend mapping: (2,1,1,2)/6. For independent symmetric nonzero increments (a distinct null model), all four states have probability 1/4. These are hypothetical analytical baselines, not empirical distributions for the actual sources. No frequency balancing or model changes.
+
+| Baseline | Line entropy (bits) | Moving-line probability |
+|---|---:|---:|
+| Fair three-coin | 1.811278 | 1/4 |
+| IID continuous levels / R-Trend | 1.918296 | 2/3 |
+| Independent symmetric nonzero increments / R-Trend | 2 | 1/2 |
+
+If lines are mutually independent under their respective nulls, joint entropy is 10.867669 bits for Quantum, 11.402757 for MPH with five IID-level R-Trend lines and one fair quantum line, and 11.509775 for six IID-level R-Trend lines. Expected moving counts are respectively 1.5, 43/12 (3.583333), and 4. These are conditional on the artificial independence assumptions; actual line dependence and time dependence are unmeasured. Alphabet capacity 12 bits is not entropy. Given all resolved deterministic source inputs, Physical has zero conditional entropy; MPH has 1.811278 bits from its independent ideal quantum top line, conditional on the five resolved inputs and a successful draw. Unconditional observed entropy can be nonzero in both.
+
+### Temporal transitions for a shared increment
+
+Let consecutive R-Trend triples be (a,b,c) and (b,c,d). The second sign of the first line is exactly the first sign of the next. For nonzero changes this allows only 8 of 16 directed line transitions (including self-transitions). Exact enumeration of all 24 ordinal permutations of four IID continuous levels gives joint transition counts:
+
+| From / To | 6 | 7 | 8 | 9 |
+|---|---:|---:|---:|---:|
+| 6 | 0 | 3 | 0 | 5 |
+| 7 | 0 | 1 | 0 | 3 |
+| 8 | 3 | 0 | 1 | 0 |
+| 9 | 5 | 0 | 3 | 0 |
+
+Divide entries by 24 for joint probabilities, or by row totals for one-step conditional probabilities. Same-code probability = 2/24 = 1/12. Conditional one-step entropy = 0.906715 bits, not a proven entropy rate or Markov model. This algebraic constraint applies only where the next actual selected triple shifts by exactly one observation and preserves both shared values. Repeated identical windows are deterministic; non-overlapping or revised windows are different cases. Current MPH domains may advance on different grids, Wood on completed market events, and Physical uses fixed half-hour block means. Do not force cross-domain synchronization. Within the applicable shared-window case, a reversal line (6 or 9) must transition to a different line. None of this establishes predictive power about external events.
+
+### Next research decision
+
+Study hexagram transition graphs by distinguishing intrinsic primary-to-relating transformations from successive casts in time. Exact analytical constraints are a useful starting point without collecting a persistent cast archive. If empirical research is later warranted, predefine the observable, window overlap, null and missingness before acquiring any data. No new live acquisition or runtime modification in this checkpoint.
+
 ## 1. Current research routing
 
 | Need | Open first | Next action / blocker |
 |---|---|---|
-| **Physical Hexagram P3 — active priority** | [Provisional six-line contract](physical_model/qualification.md#current-p3-convergence-checkpoint--2026-11-28) | Retain six natural observables, proposed phenomenological order and R-Trend; provisional 30-minute block design only. Resolve provider eligibility/rights/support and uncertainty before freeze. 0/6 qualified; live disabled. |
+| **Physical Hexagram — implemented** | [Experimental v0.2 acceptance](physical_model/qualification.md#physical-v02-live-acceptance-smoke--pass) | Basic live acceptance complete; no additional routine qualification work for personal experimental use. |
 | Planetary motion (bounded replay complete) | [planetary replay](planetary_motion/vector_replay.py), [#7239859530](https://github.com/cctsao1008/trng-iching/issues/6#issuecomment-7239859530) | Accepted owner export; slow astronomical context candidate, no short-cadence replacement. External calibration deferred until a concrete design decision. |
 | Architecture (working decision) | [Layered architecture](classical_mapping/candidate_architecture.md#working-architecture-decision--2026-11-28) | Preserve current quantum/MPH; astronomy is optional context, not another six-line method. Keep six-domain natural-observation profile offline. Reopen research only for a concrete implementation/qualification decision. |
 | Tidal gravity (parked) | [Earth orientation](tidal_gravity/earth_orientation.py), [#7239529486](https://github.com/cctsao1008/trng-iching/issues/6#issuecomment-7239529486) | Exploratory diagnostics sufficient; no further routine refinement. Independent EOP/Horizons and calibrated joint uncertainty deferred until formal candidate selection or a material discrepancy. |
