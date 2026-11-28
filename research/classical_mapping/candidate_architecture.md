@@ -40,4 +40,32 @@ Separate calendar context (UTC/local/solar terms), physical support, operator w,
 
 Bounded source review C02 selected chapters and C04 selected passages completed; full text-critical review remains open. T01,T02,T06 candidate semantics and counterexamples recorded; T03 two architectures and source screen complete at desk level, actual functional choice and planetary estimand unresolved; T04 support contract and T05 order alternatives recorded, no selection. Next independently executable work: separate B feasibility spec and synthetic circular-coordinate checks before any pinned kernel evaluation, or continue M01 external frame/ephemeris evidence without changing PH-BT. Provider QC/calibration, rights, as-of and independent validation remain blockers. PH-BT 0/6, BT-C sealed, no production change, freeze, new observation acquisition or cast. No forecast validity claimed.
 
+## Working architecture decision — 2026-11-28
+
+After the bounded planetary replay ([Issue #6 evidence](https://github.com/cctsao1008/trng-iching/issues/6#issuecomment-7239859530)), retain a layered observation-to-symbol design as the working recommendation, not a frozen physical model. Two inspected dates establish slow cadence behavior in those samples, not universal planetary constancy. No further numerical refinement is needed for this design decision.
+
+| Layer | Responsibility | Constraint |
+|---|---|---|
+| Astronomical/calendar context | Time, solar terms, lunar geometry and optional geocentric apparent planetary motion | Same declared reference instant; ephemeris-derived, not raw telescope observations. Context does not generate or modify line codes; no sixth astronomical channel required. |
+| Physical evidence | Explicit observable, unit, orientation, support, source/version, availability and QC | Distinguish measured, modeled and demonstration data. Use native meaning before symbolic labels. Unresolved input is not yin or yang. |
+| Symbolic encoder | A declared rule for each profile and explicit bottom-to-top domain order | R-Trend remains the working short-cadence trend rule for compatibility, not an empirical prediction rule. J-S and state-transition stay research alternatives with distinct meanings. |
+| Assembly and reflection | Assemble six validated codes and present received text; interpretation belongs to questioner | No automatic selection based on favorable hexagrams, no forecasts inferred from physical or random inputs. |
+
+### Existing implementation crosswalk (static inspection, not a new runtime test)
+
+Read main.py blob be9f4b859dca050f8d5c74165f2b29dff7928157, sources.py blob e36ba43925d2b95c42aacc8e209bdfd2aba210f0 and iching.py blob 7440256aaac7a1c760f66c900d4ad0cdd3bec06a. The existing MPH assembles five validated physical/demo/model trend codes plus the sixth QRNG group, then _mph_project calls _cast_context. Calendar, astronomy and ganzhi are optional reference components attached to an already assembled cast. This is the existing separation point for potential future astronomical context; do not alter the cast path merely to add context. The current astronomy projection contains Sun/Moon geometry and solar terms, not the five planets. The ephemeris remains a prerequisite for the Earth-line forcing; only post-assembly reference enrichment is non-gating.
+
+| Profile | Working disposition |
+|---|---|
+| Existing quantum | Six three-coin groups, unchanged. |
+| Existing MPH | Preserve Metal/Wood/Water/Fire/Earth/Quantum positions, current R-Trend and single post-preflight QRNG group; no silent redefinition. Current Wood is an adjusted-close financial demonstration, not validated natural Wood; Earth is modeled direct tidal forcing. Retain explicit experimental/source-policy limitations. |
+| Astronomical context | Optional reference information, not another six-line method. No sixth source or line order decision needed for this layer. |
+| Six-domain physical candidate | Separate offline experimental track; no Five Phases equivalence asserted, no QRNG substitute, no default order/cadence, live gate remains model_not_ready. Formal qualification remains 0/6. |
+
+For R-Trend with x0,x1,x2: signs of x1-x0 and x2-x1 encode primary and relating polarity respectively. Moving means opposite successive trend signs; no prediction, and no assertion that a state reference was crossed. Strictly positive affine unit conversions preserve these signs; changing observable orientation or time support can change their meaning. Keep existing unresolved behavior; zero is neither forced stationary line nor permission to reacquire entropy. Existing MPH uses exact Decimal comparison and is not thereby a calibrated uncertainty classifier. A future qualified physical profile must resolve signs relative to its justified uncertainty and time support, including actual availability (the common anchor alone does not prove all data were available at that instant). No new threshold or interval selected here.
+
+### Decision and stop criterion
+
+For the immediate project objective (reflection through a reproducible cast), preserve the working MPH and quantum profiles and treat astronomy as separate context. Do not create another live method, replace Wood with cosmic rays, or force five planets and a sixth channel into a hexagram. The current project can remain exploratory without resolving every provider/ephemeris research question. If later pursuing a *qualified natural-observation cast*, reopen only the selected source contracts, physical reference/uncertainty and explicit order; then freeze before independent evaluation. Do not unseal BT-C or weaken the gate to finish a checklist. If instead implementing optional planetary context, use the existing context boundary and verify output compatibility plus context-failure isolation once; no change in six-line assembly. This note does not authorize either implementation or release. No production code changes, new acquisition or personal cast included. 
+
 觀象，察變，求真，思己。
