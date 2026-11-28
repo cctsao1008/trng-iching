@@ -135,6 +135,39 @@ CO-OPS preliminary flags are O (outlier count), F (flat), R (rate), L (limit); v
 
 Exit: owner reviews estimands/order/R-Trend/30-min candidate and intended-use scope; obtain remaining source-specific evidence or explicitly report blocked. Freeze support/latency/uncertainty and independent acceptance protocol before opening BT-C. Stop routine desk review until a concrete unresolved source question can be answered. Formal qualification remains 0/6; no live enable, no production code changes, no raw capture, no new independent validation claimed.
 
+## P3 measurement-support closure boundary — 2026-11-28
+
+Decision: determine whether the proposed 30-minute common support can be represented by native D12 records without splitting measurements. This is a bounded specification/geometry check, not a new physical experiment.
+
+### D12 native support and phase
+
+The [CO-OPS sensor specification, updated December 2025, pp. 1–2](https://tidesandcurrents.noaa.gov/publications/CO-OPS_Measurement_Spec.pdf) distinguishes the six-minute reporting cadence from actual centered measurement support. Primary radar: 360 one-second samples over six minutes; acoustic: 181 one-second samples over about three minutes; primary dual bubbler: 36 five-second samples over three minutes. The document specifies estimated individual accuracy relative to datum of ±20 mm for these sensor classes, with outlier rejection. Prior [station evidence](https://github.com/cctsao1008/trng-iching/issues/6#issuecomment-7223004237) identified Y1 microwave and U1 tsunami sensors and temporary-station history; it does not establish the actual API channel or configuration at each epoch. No new capture or tide residual replay.
+
+Conditional geometry: ideal radar support [t-180s,t+180s) for UTC labels t divisible by 360s. At an unshifted half-hour block, only four complete native intervals lie inside; assigning all five labels leaks support across a boundary. A fixed +180s phase on the half-hour UTC grid permits five full contiguous native intervals per block (e.g. [12:03,12:33) with centers 12:06,12:12,12:18,12:24,12:30). For three-minute centered support, gaps remain regardless of phase; a full continuous coverage contract is not met by label count. Bounded synthetic enumeration of all 360 integer-second phases: radar full-cover phases={180}; acoustic full-cover phases={} under ideal 180s support. At phase 0/180 radar counts 4/5; this checks geometry only, not sensor behavior. The provider's exact discrete endpoint convention and actual support remain to be confirmed.
+
+Candidate revision for owner review: E=phi+floor((T-L-phi)/1800s)*1800s with phi fixed only after native support compatibility across all six domains is confirmed. Example phi=180s is not approved; minute-centered records may require a different phase and make exact common tiling impossible. If no common full-support phase exists, report incompatibility before freeze; explicitly choose an evidence-supported native-support statistic or change the contract with owner approval, not silent interpolation, splitting, per-source shifting or gap compression. Modeled M01 samples remain labeled point estimates, not continuous observations. The previous unshifted E formula is a draft superseded by this conditional phase-aware candidate only.
+
+If ±20 mm were a justified bound for every eligible D12 native measurement of the selected estimand, a convex block mean would retain a conservative ±20 mm error bound, and a difference would have ±40 mm by the triangle inequality; equality at 40 mm is unresolved. This is a conditional calculation, not a calibrated hard limit or production threshold. The published value is estimated accuracy, not a guarantee; support, station effects and revisions must be addressed. Do not divide by sqrt(5) absent independence and an appropriate statistical model. Prior ±20 mm stress tests remain exploratory.
+
+### Other source evidence and action boundary
+
+- D26: [Oulu terms/corrections](https://cosmicrays.oulu.fi/readme.html) specify the pressure coefficient -0.74%/mb; [station metadata](https://www.nmdb.eu/station_information/OULU_1964-04-01.html) lists a claimed barometer accuracy of 0.1 mb and nominal solar-minimum count rate 115/s. At fixed coefficient a hypothetical 0.1 mb error yields exp(0.00074)-1 ≈ 0.074% relative pressure-correction error, not total corrected-rate uncertainty. This is not a new Poisson estimate or proof of calibration at the selected epochs; reuse existing counting diagnostics. Need actual exposure, correction provenance, temporal covariance and QC.
+- D06: [USGS API](https://www.usgs.gov/tools/web-service-geomagnetism-data) supports BOU F, R0 internet variation and 1-s cadence. [USGS product overview](https://www.usgs.gov/tools/geomag-plots) distinguishes uncorrected variation from calibrated archive products. Neither establishes native F R0 measurement support or error bounds. Do not transfer adjusted/definitive specifications.
+- D02/D03: official OSPO search-indexed notices [Nov 12 MAG calibration](https://ospo.noaa.gov/data/messages/2026/11/MSG_20261112_1402.html) and [Nov 20 SOLAR-1 distribution update](https://ospo.noaa.gov/data/messages/2026/11/MSG_20261120_1334.html) indicate operational exceptions exist. Full notice retrieval failed in this review; do not infer affected exact periods, current availability or the September flag cause. Provider QC and version-specific support remain blocked.
+
+### Provider-ready minimum questions (unsent)
+
+Use one bounded request per product/team, referencing the actual candidate identity. Describe the application as a research-stage symbolic representation of physical change, not forecasting or a safety-critical service. No commercial scope or permission assumed.
+
+| Team | Questions that can close specific gates |
+|---|---|
+| NOAA CO-OPS ([Stakeholder Services](https://tidesandcurrents.noaa.gov/contact.html), Tide.Predictions@noaa.gov) | For station 9414290 preliminary MLLW six-minute API: actual primary sensor/model/location and handover history; exact support and label convention; outlier-count eligibility and sigma provenance (prior constant 62 mm); short-interval difference accuracy/calibration; preliminary release/revisions and outages. |
+| USGS Geomagnetism ([program contact](https://www.usgs.gov/programs/geomagnetism/connect)) | BOU F R0 1-s: native scalar origin and sampling/averaging support, clock convention, invalid flags/sentinels, changes of calibration and short-interval differential error, release/revision contract. |
+| Oulu / NMDB (Ilya.Usoskin@oulu.fi) | OULU original MCORR_E: exposure/raw count mapping, exact interval labels, applied pressure/efficiency corrections and QC, short-interval rate-difference uncertainty and revision/delay; permitted noncommercial app/derived-only outputs and commercial permission process if applicable. |
+| NOAA MAG / SWiPS | Reuse exact-version questions in [provider_questions.md](../solar_wind/provider_questions.md). Add availability/operational notice and native support questions; do not infer minute validity or substitute L2. |
+
+M01 needs no repeat of the completed exploratory vector diagnostics; define relevant model-difference error scope at contract review. Stop desk research on the listed provider questions unless new authoritative evidence is received. No email sent. Next: owner review of phase-aware candidate and use scope, provider answers, then freeze/evaluation only if gates pass. Formal qualification remains 0/6, P3 OPEN, BT-C sealed, P4/P5 not started. No production code changed.
+
 ## Evidence references
 
 - [Prior G1–G8 review](https://github.com/cctsao1008/trng-iching/issues/6#issuecomment-7211017000)

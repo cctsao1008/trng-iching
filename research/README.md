@@ -46,6 +46,8 @@ Concrete example from the existing verified lunar geometry result (SHA256 `9261f
 
 **P3 source/contract desk review (2026-11-28).** [Review and draft observation/uncertainty contract](physical_model/qualification.md#p3-source-eligibility-and-observation-contract-review--2026-11-28): official source-use policy evidence narrowed (especially Oulu noncommercial scope, NAIF kernel terms, USGS R0 and CO-OPS flags); difference-specific bounds and fixed UTC support proposed. Product-specific QC, support, latency, error bounds and intended-use scope remain open. #3 partial and #4 MTS pending evidence explicitly dispositioned. No requests sent, no qualification change, no BT-C access. Stop further routine desk review until a concrete evidence question can be resolved.
 
+**P3 native measurement-support check (2026-11-28).** [Phase-aware support and minimum provider questions](physical_model/qualification.md#p3-measurement-support-closure-boundary--2026-11-28): CO-OPS December 2025 sensor spec distinguishes centered radar/acoustic support; ideal radar full-cover phase is +180s, not unshifted UTC half-hour, and acoustic has gaps. Bounded synthetic geometry only; common phase, actual station channel and source-specific uncertainty remain unapproved. Provider-ready questions recorded, unsent; no routine recapture or new independent evidence.
+
 ## 1. Current research routing
 
 | Need | Open first | Next action / blocker |
