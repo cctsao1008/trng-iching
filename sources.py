@@ -71,7 +71,7 @@ def iso(t):
     return t.astimezone(timezone.utc).isoformat()
 
 
-def endpoint(source, anchor):
+def endpoint(source, anchor, *, wood_token='demo'):
     """Build the frozen source URL for the common UTC anchor."""
     if anchor.utcoffset() is None:
         raise ValueError('anchor must include timezone')
@@ -96,7 +96,7 @@ def endpoint(source, anchor):
         ))
     if source == 'wood-demo':
         return WOOD + urlencode(dict(
-            api_token='demo',
+            api_token=wood_token,
             **{
                 'from': (anchor - timedelta(days=20)).date().isoformat(),
                 'to': anchor.date().isoformat(),
@@ -105,6 +105,17 @@ def endpoint(source, anchor):
             fmt='json',
         ))
     raise ValueError('unsupported source')
+
+def _observation_record_endpoint(source, anchor, access_mode=None):
+    """Canonical evidence URL; never include a personal credential."""
+    if source == 'wood-demo':
+        if access_mode not in (None, 'demo', 'personal'):
+            raise ValueError('invalid Wood access mode')
+        return endpoint(source, anchor, wood_token='REDACTED' if access_mode == 'personal' else 'demo')
+    if access_mode is not None:
+        raise ValueError('unexpected access mode')
+    return endpoint(source, anchor)
+
 
 WINDOWS_SCRIPT = r'''
 $ErrorActionPreference = 'Stop'
@@ -247,13 +258,24 @@ def validate_payload(source, url, meta, body):
 def acquire_observation(source, *, anchor=None, fetch=None, clock=utcnow):
     """Acquire once and bind response bytes to client timing and a digest."""
     anchor=clock() if anchor is None else anchor
-    url=endpoint(source,anchor)
+    access_mode = None
+    if source == 'wood-demo':
+        token = os.environ.get('EODHD_API_TOKEN', '').strip()
+        access_mode = 'personal' if token and token != 'demo' else 'demo'
+        url = endpoint(source, anchor, wood_token=token or 'demo')
+    else:
+        url = endpoint(source, anchor)
     transport='windows_powershell_system_proxy' if sys.platform=='win32' else 'python_urllib'
     fetch=fetch or (windows_fetch if sys.platform=='win32' else urllib_fetch)
     requested=clock()
     start=time.monotonic()
     _LOG.debug("source=%s transport=%s request started", source, transport)
-    meta,body=fetch(url)  # exactly one logical invocation, no fallback
+    try:
+        meta,body=fetch(url)  # exactly one logical invocation, no fallback
+    except Exception:
+        if access_mode == 'personal':
+            raise TransportError('Wood personal API request failed') from None
+        raise
     received=clock()
     latency=time.monotonic()-start
     if requested<anchor or received<requested:
@@ -271,7 +293,7 @@ def acquire_observation(source, *, anchor=None, fetch=None, clock=utcnow):
         elapsed_seconds=round(latency,6),
         transport=transport,
         http_status=meta['status'],
-        endpoint=url,
+        endpoint=_observation_record_endpoint(source, anchor, access_mode),
         content_type=meta.get('content_type'),
         http_date=meta.get('http_date'),
         last_modified=meta.get('last_modified'),
@@ -284,6 +306,8 @@ def acquire_observation(source, *, anchor=None, fetch=None, clock=utcnow):
         ready_for_cast=False,
         qrng_requests=0,
     )
+    if access_mode is not None:
+        record['access_mode'] = access_mode
     return record,body
 
 
@@ -612,7 +636,8 @@ def from_http(domain,meta,body,anchor):
     """Bind the verified transport record to its normalized observation."""
     if epoch(meta['anchor'])!=anchor or not anchor<=epoch(meta['requested_at'])<=epoch(meta['received_at']):
         raise ValueError('transport time mismatch')
-    if meta['source']!=HTTP[domain] or meta['endpoint']!=endpoint(HTTP[domain],anchor):
+    if (meta['source'] != HTTP[domain]
+            or meta['endpoint'] != _observation_record_endpoint(HTTP[domain], anchor, meta.get('access_mode'))):
         raise ValueError('transport source mismatch')
     sha=hashlib.sha256(body).hexdigest()
     if sha!=meta['entity_sha256']:
@@ -626,7 +651,9 @@ def from_http(domain,meta,body,anchor):
     receipt=meta['received_at']
     if domain=='Wood':
         r=evaluate_wood(doc,anchor,source=SOURCE,received_at=epoch(receipt))
-        out=base(domain,anchor,'request_anchored_demo',sha,receipt)
+        access_mode = meta.get('access_mode', 'demo')
+        out=base(domain,anchor,'request_anchored_personal' if access_mode == 'personal' else 'request_anchored_demo',sha,receipt)
+        out['access_mode'] = access_mode
         out.update(
             status=r['status'],
             line=r['line'],
@@ -694,7 +721,7 @@ def _validate_observation_provenance(r, domain, anchor, completed):
                      'Earth computation provenance')
     else:
         m = r['transport']
-        _require_observation(m['source'] == HTTP[domain] and m['endpoint'] == endpoint(HTTP[domain], anchor)
+        _require_observation(m['source'] == HTTP[domain] and m['endpoint'] == _observation_record_endpoint(HTTP[domain], anchor, m.get('access_mode'))
                      and m['status'] == 'transport_shape_pass' and m['http_status'] == 200
                      and m['entity_sha256'] == r['input_sha256'], 'transport identity')
         _require_observation(isinstance(r['input_sha256'], str) and len(r['input_sha256']) == 64
