@@ -208,6 +208,38 @@ The first stages are auditable numerical operations. Interpretation is a context
 
 The completed theoretical comparisons support understanding the instrument, not ranking the three methods by divinatory truth or empirical predictive accuracy. Do not infer that more entropy is more wisdom, or that continuity implies greater authenticity. Retain all three established experimental CLI methods unchanged. The main study now returns to reading the received Zhouyi and Yi Zhuan in concrete situations rather than extending statistical studies for their own sake. No new cast, source acquisition, runtime edit, archive recovery, product roadmap or prescriptive interpretation engine is needed.
 
+## Classical reading I — Tai, Pi, Jiji and Weiji (2026-11-29)
+
+After the five-dimension synthesis, return to the received text, using the repository's [Zhouyi corpus](../data/zhouyi.json). Reopened entries 11, 12, 63 and 64 (judgment, six lines, Tuan and Xiang). The following is a contextual comparative reading, not a new casting rule or a comprehensive commentary tradition. Preserve the corpus's original character forms in quotations. No new cast or statistical experiment.
+
+### Tai 泰 and Pi 否 — connection and obstruction
+
+| Hexagram | Upper/lower trigram | Bottom-to-top binary vector | Tuan's relational image |
+|---|---|---|---|
+| 11 Tai 地天泰 | Kun / Qian | 111000 | 天地交而萬物通也，上下交而其志同也。 |
+| 12 Pi 天地否 | Qian / Kun | 000111 | 天地不交而萬物不通也，上下不交而天下无邦也。 |
+
+Both have three yin and three yang lines; both polarity complementation and reversal of six positions take one into the other. The relationship of components matters, not merely their counts. In modern systems thinking this is an analogy to interactions, communication and organization, not a claim that the received Yi formulated network science. Tai 9.3 (无平不陂，无往不復) cautions against treating favorable conditions as permanent; Pi 9.6 (傾否，先否後喜) presents the possibility of an obstruction ending. Do not infer inevitable reversal within a fixed interval or predict a real outcome from a symbolic pair. These are adjacent received King Wen hexagrams, not an actual successive-cast record.
+
+### Jiji 既濟 and Weiji 未濟 — completion and the unfinished
+
+| Hexagram | Upper/lower trigram | Bottom-to-top binary vector | Judgment excerpt |
+|---|---|---|---|
+| 63 Jiji 水火既濟 | Kan / Li | 101010 | 初吉終亂。 |
+| 64 Weiji 火水未濟 | Li / Kan | 010101 | 小狐汔濟，濡其尾，无攸利。 |
+
+Again both have three yin and three yang lines and are related by complementation and position reversal. The Tuan for Jiji says 剛柔正而位當也 and 終止則亂，其道窮也; Weiji says 雖不當位，剛柔應也. Using the conventional odd-yang/even-yin position convention, Jiji has six corresponding polarities and Weiji none, yet this does not reduce the text to a score of six versus zero. All three corresponding pairs of lines (1/4, 2/5, 3/6) have opposite polarity in both. Jiji's Great Image advises 思患而豫防之; Weiji's Great Image advises 慎辨物居方. Completion still demands care; incompletion is a situation requiring discrimination, not synonymous with failure. A systems analogy is the distinction between a currently functioning configuration and its sustainable operation under changing conditions. It is not a theorem of engineering reliability or a forecast.
+
+### Reflection through the five dimensions
+
+- Xiang: examine the received image of interaction, obstruction, crossing and completion before projecting it onto a personal problem.
+- Shu: equal yin/yang counts do not imply equal ordered states or meanings; retain the exact structure without assigning a goodness score.
+- Bian: consider changing conditions, not an assumption of permanent success or failure.
+- Shi: distinguish the present situation from readiness for action or the need to continue maintaining an achieved result.
+- Wei: inspect one's role, relationships, obligations and capacity to act; position is not sufficient by itself to determine the judgment.
+
+The four principles remain 觀象，以知萬物；察變，以明其勢；求真，以辨其理；思己，以正其行. Apply the text to a real question only with its context, actual evidence and the reader's own judgment. Do not invent a divinatory event, enforce a single interpretation, or turn the paired hexagrams into a predictive transition matrix. This chapter adds textual reflection rather than additional statistical research. The next natural reading topic is 屯/蒙 (beginnings and learning), if the owner chooses to continue. The current emblem and runtime files are unchanged.
+
 ## 1. Current research routing
 
 | Need | Open first | Next action / blocker |
