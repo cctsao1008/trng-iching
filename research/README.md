@@ -44,6 +44,8 @@ Concrete example from the existing verified lunar geometry result (SHA256 `9261f
 
 **Architecture convergence.** The [working architecture decision](classical_mapping/candidate_architecture.md#working-architecture-decision--2026-11-28) separates context, evidence, encoding and reflection. Static production-path inspection confirms an existing post-assembly reference-context boundary. Preserve existing R-Trend and line positions for MPH; Wood remains a financial demo, not a qualified natural phase. No sixth astronomical channel is needed if planetary motion is context only. No live natural-observation profile, threshold or order approved. Owner has now approved Physical Hexagram completion as the active priority. Follow the P3 convergence checkpoint; no additional routine exploratory refinement.
 
+**P3 source/contract desk review (2026-11-28).** [Review and draft observation/uncertainty contract](physical_model/qualification.md#p3-source-eligibility-and-observation-contract-review--2026-11-28): official source-use policy evidence narrowed (especially Oulu noncommercial scope, NAIF kernel terms, USGS R0 and CO-OPS flags); difference-specific bounds and fixed UTC support proposed. Product-specific QC, support, latency, error bounds and intended-use scope remain open. #3 partial and #4 MTS pending evidence explicitly dispositioned. No requests sent, no qualification change, no BT-C access. Stop further routine desk review until a concrete evidence question can be resolved.
+
 ## 1. Current research routing
 
 | Need | Open first | Next action / blocker |
