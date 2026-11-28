@@ -258,6 +258,10 @@ All five prepared inquiries were sent individually from the owner's connected ma
 
 SENT confirms submission through the mail account, not recipient delivery or provider approval. Keep private mailbox identifiers and correspondence out of Git. For each substantive response, record product/version scope, official reference, supported gate change and unresolved items; do not publish private correspondence without permission. No duplicate requests or routine re-captures while awaiting evidence. M01 numerical replay remains completed within its existing scope; remaining model/contract evidence is separate. P3 OPEN / 0 of 6 qualified / BT-C sealed / no live enable or model freeze. P4/P5 not started.
 
+## Experimental implementation scope — owner-directed convergence
+
+The owner directed proceeding with available public data without requiring provider replies or calibrated uncertainty as a prerequisite. This supersedes earlier readiness gating for experimental local research. Profile physical-rtrend-label-mean-v0.1 retains the six quantities and order, uses existing NOAA operational RTSW JSON instead of the retrospective daily L3 files, and uses three fixed UTC 30-minute native-label means with a fixed 30-minute lag before flooring. Require complete unique eligible labels and two nonzero changes per domain. No continuous-support reconstruction, calibrated difference bound, fallback or QRNG. Prior qualification remains historical; formal scientific and commercial/public redistribution approval are separate. Deleted temporary datasets need not be restored; any later reacquisition is a new snapshot. No BT-C access. Live owner smoke and regression pending.
+
 ## Evidence references
 
 - [Prior G1–G8 review](https://github.com/cctsao1008/trng-iching/issues/6#issuecomment-7211017000)
