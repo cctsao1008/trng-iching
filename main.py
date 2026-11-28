@@ -72,15 +72,16 @@ def _iso_utc(value: datetime) -> str:
 # ---------------------------------------------------------------------------
 
 def _cast_context(
-    *, sample: dict, cast: dict, cast_time: datetime | None,
+    *, sample: dict | None, cast: dict, cast_time: datetime | None,
     ephemeris_path: Path, reference_file: Path, audit: bool,
     ephemeris_session: PinnedEphemeris | None = None,
 ) -> dict:
     """One immutable cast, plus independent optional reference components."""
-    is_live = sample.get("source") in QRNG_ENDPOINTS
+    physical = sample is None
+    is_live = not physical and sample.get("source") in QRNG_ENDPOINTS
     result = {
         "schema_version": "0.3.0",
-        "mode": "live_trng_cast" if is_live else "manual_reference_cast",
+        "mode": "live_physical_cast" if physical else "live_trng_cast" if is_live else "manual_reference_cast",
         "status": "cast_only" if cast_time is None else "pending",
         "capture": {
             "cast_time_utc": _iso_utc(cast_time) if cast_time else None,
@@ -89,11 +90,12 @@ def _cast_context(
                 if cast_time else None
             ),
             "cast_time_source": (
+                "physical_request_anchor" if physical else
                 "trng_client_receive_time" if is_live else
                 "manual_reference_time" if cast_time else "not_provided"
             ),
         },
-        "randomness": sample if audit else {
+        "randomness": None if physical else sample if audit else {
             "source": sample["source"],
             "raw_hex": sample["raw_hex"],
             "request_time_utc": sample.get("request_time_utc"),
@@ -107,6 +109,8 @@ def _cast_context(
             "ganzhi": {"status": "not_requested"},
         },
     }
+    if physical:
+        result.pop("randomness")
     _LOG.debug("reference context requested=%s", cast_time is not None)
     if cast_time is None:
         return result
@@ -251,10 +255,9 @@ def _present_cast_result(result: dict, *, audit: bool) -> dict:
         "mode": result["mode"],
         "status": result["status"],
         "timestamp": result["capture"]["cast_time_utc_plus_8"],
-        "randomness": {
-            "source": result["randomness"]["source"],
-            "raw_hex": result["randomness"]["raw_hex"],
-        },
+        **({"randomness": {"source": result["randomness"]["source"],
+                           "raw_hex": result["randomness"]["raw_hex"]}}
+           if "randomness" in result else {}),
         "hexagram": {
             "lines_bottom_to_top": cast["lines_bottom_to_top"],
             "moving_lines": cast["moving_lines"],
@@ -293,7 +296,7 @@ def _present_cast_result(result: dict, *, audit: bool) -> dict:
     if audit:
         compact["audit"] = {
             "capture": result["capture"],
-            "randomness": result["randomness"],
+            **({"randomness": result["randomness"]} if "randomness" in result else {}),
             "cast": result["cast"],
             "context": result["context"],
         }
@@ -751,11 +754,76 @@ def _physical_candidate_once(observations, *, domain_order, casting_time,
 
 
 def _physical_run(args: argparse.Namespace) -> int:
-    """Fail closed until the natural observation and line contract is frozen."""
-    _LOG.debug("Physical readiness gate blocked acquisition")
-    return _emit_no_hexagram(
-        args, _no_hexagram('physical', 'error',
-                          [dict(domain=None, code='model_not_ready')]))
+    """Experimental live cast using six fixed natural sources, without QRNG."""
+    from iching import cast_from_lines
+    from sources import (PHYSICAL_ORDER, PHYSICAL_PROFILE, physical_window,
+                         observe_physical_domain, utcnow)
+    from human_view import validate_physical_record
+
+    anchor = utcnow()
+    start, end = physical_window(anchor)
+    evidence = []
+    reasons = []
+    record = cast = None
+    try:
+        _check_casting_time(anchor)
+        with PinnedEphemeris(args.ephemeris) as session:
+            for domain in PHYSICAL_ORDER:
+                try:
+                    item = observe_physical_domain(domain, start=start, end=end,
+                                                   session=session, anchor=anchor)
+                    evidence.append(item)
+                    if item['line'] is None:
+                        reasons.append(dict(domain=domain, code=item['reason']))
+                except Exception as exc:
+                    _debug_failure('physical_' + domain, exc)
+                    reasons.append(dict(domain=domain, code='acquisition_or_adapter_failed'))
+            if reasons:
+                outcome = _no_hexagram('physical', 'unresolved', reasons)
+                outcome.update(anchor_utc=_iso_utc(anchor),
+                               window_start_utc=_iso_utc(start), window_end_utc=_iso_utc(end))
+                return _emit_no_hexagram(args, outcome)
+            cast = _form_once(anchor, lambda: cast_from_lines(
+                [item['line'] for item in evidence], audit=args.audit))
+            context = _cast_context(sample=None, cast=cast, cast_time=anchor,
+                                    ephemeris_path=args.ephemeris, reference_file=args.reference,
+                                    audit=args.audit, ephemeris_session=session)
+            record = _present_cast_result(context, audit=args.audit)
+            record['physical'] = dict(
+                profile=PHYSICAL_PROFILE, experimental=True, ready_for_production=False,
+                domains_bottom_to_top=list(PHYSICAL_ORDER),
+                request_anchor_utc=_iso_utc(anchor), window_start_utc=_iso_utc(start),
+                window_end_utc=_iso_utc(end), block_seconds=1800, fixed_lag_seconds=1800,
+                time_semantics='native_label_means_not_continuous_measurement_support',
+                uncertainty_semantics='reported_value_trends_no_calibrated_error_bound',
+                domain_evidence=evidence)
+            validate_physical_record(record)
+        payload = json.dumps(record, ensure_ascii=True, indent=2, allow_nan=False) + '\n'
+        if args.json_out is not None:
+            with args.json_out.open('x', encoding='utf-8', newline='\n') as output:
+                output.write(payload)
+        if args.view == 'human':
+            human = render_human(record, classical=args.text)
+            if args.audit and args.json_out is None:
+                sys.stdout.write(payload + '\n')
+            _write_human(human)
+        else:
+            sys.stdout.write(payload)
+        return 0
+    except Exception as exc:
+        _debug_failure('physical_execution', exc)
+        if cast is not None:
+            recovery = record if record is not None else dict(
+                schema_version='physical-assembly-only-v0.1', mode='live_physical_cast',
+                status='presentation_partial', timestamp=_iso_utc(anchor), cast=cast,
+                domain_evidence=evidence)
+            sys.stdout.write(json.dumps(recovery, ensure_ascii=True, indent=2) + '\n')
+            print('ERROR: Physical cast formed; output or validation failed.', file=sys.stderr)
+            return 1
+        code = ('casting_time_already_formed' if isinstance(exc, _CastingTimeAlreadyFormed)
+                else 'execution_failed')
+        return _emit_no_hexagram(args, _no_hexagram('physical', 'error',
+                                                   [dict(domain=None, code=code)]))
 
 
 # ---------------------------------------------------------------------------
@@ -802,7 +870,7 @@ def _build_parser() -> argparse.ArgumentParser:
     )
     cast_parser.add_argument(
         "--method", choices=("quantum", "mph", "physical"), default="quantum",
-        help="Physical is registered for research; live casting is not yet enabled",
+        help="Physical is an experimental natural-observation method",
     )
     cast_parser.add_argument("--allow-private-evaluation", action="store_true",
                              help=argparse.SUPPRESS)
