@@ -512,6 +512,9 @@ def _mph_project(formed, summary, args, session):
     # Compact selected-endpoint provenance, not a source-byte replay artifact.
     keys = ('domain', 'source', 'status', 'anchor', 'endpoint_times', 'input_sha256', 'line')
     evidence = [{k: r[k] for k in keys} for r in formed['records']]
+    for e, r in zip(evidence, formed['records']):
+        if r['domain'] == 'Wood':
+            e['access_mode'] = r.get('access_mode', 'demo')
     digest = hashlib.sha256(json.dumps(evidence, sort_keys=True, separators=(',', ':'),
                                        allow_nan=False).encode()).hexdigest()
     summary['selected_evidence_sha256'] = digest
