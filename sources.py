@@ -113,7 +113,7 @@ $proxy = [System.Net.WebRequest]::GetSystemWebProxy()
 $proxy.Credentials = [System.Net.CredentialCache]::DefaultNetworkCredentials
 [System.Net.WebRequest]::DefaultWebProxy = $proxy
 try {
-    $r = Invoke-WebRequest -Uri $env:TRNG_ICHING_URL -Headers @{'Accept'='application/json'; 'User-Agent'='Mozilla/5.0'} -TimeoutSec 15 -MaximumRedirection 0 -UseBasicParsing -ErrorAction Stop
+    $r = Invoke-WebRequest -Uri $env:TRNG_ICHING_URL -Headers @{'Accept'='application/json'; 'User-Agent'='Mozilla/5.0'} -TimeoutSec ([int]$env:TRNG_ICHING_TIMEOUT) -MaximumRedirection 0 -UseBasicParsing -ErrorAction Stop
 } catch {
     $status = 0
     if ($_.Exception.Response -ne $null) {
@@ -132,17 +132,18 @@ if ($b.Length -gt ([long]$env:TRNG_ICHING_MAX_BYTES)) { throw 'Response too larg
 '''
 
 
-def windows_fetch(url, *, max_bytes=MAX_BYTES):
+def windows_fetch(url, *, max_bytes=MAX_BYTES, timeout=TIMEOUT):
     """Use the Windows system proxy; preserve response bytes and metadata."""
     env = os.environ.copy()
     env['TRNG_ICHING_URL'] = url
     env['TRNG_ICHING_MAX_BYTES'] = str(max_bytes)
+    env['TRNG_ICHING_TIMEOUT'] = str(timeout)
     try:
         r = subprocess.run(
             ['powershell.exe','-NoLogo','-NoProfile','-NonInteractive','-Command',WINDOWS_SCRIPT],
             env=env,
             capture_output=True,
-            timeout=30,
+            timeout=timeout + 15,
             check=True,
         )
     except subprocess.CalledProcessError as exc:
@@ -162,11 +163,11 @@ def windows_fetch(url, *, max_bytes=MAX_BYTES):
     return envelope,body
 
 
-def urllib_fetch(url, *, max_bytes=MAX_BYTES):
+def urllib_fetch(url, *, max_bytes=MAX_BYTES, timeout=TIMEOUT):
     """Acquire a bounded response without following redirects."""
     opener = build_opener(NoRedirect())
     req = Request(url,headers={'Accept':'application/json','User-Agent':UA,'Accept-Encoding':'identity'})
-    with opener.open(req,timeout=TIMEOUT) as r:
+    with opener.open(req,timeout=timeout) as r:
         return (
             dict(
                 status=r.status,
@@ -949,8 +950,11 @@ def acquire_physical_observation(source, *, start, end, research_acknowledged=Fa
     if not aware(requested) or end > requested:
         raise ValueError('physical interval must be completed before request')
     fetch = fetch or (windows_fetch if sys.platform == 'win32' else urllib_fetch)
-    _LOG.debug("physical source=%s research request started", source)
-    meta, body = fetch(url)
+    timeout = 60 if source == 'D06' else TIMEOUT
+    _LOG.debug("physical source=%s research request started timeout_seconds=%s", source, timeout)
+    # Preserve the existing one-argument injected fetch interface.
+    meta, body = (fetch(url, timeout=timeout) if fetch in (windows_fetch, urllib_fetch)
+                  else fetch(url))
     received = clock()
     if not aware(received) or received < requested:
         raise TransportError('physical request chronology')
