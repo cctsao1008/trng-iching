@@ -179,6 +179,35 @@ Python evaluated the closed form and independently re-enumerated the prior overl
 
 **Disposition.** Existing evidence supports studying the two physical pairs; neither provides an empirical R-Trend 4x4 contingency table from the material reopened here. No six-domain joint dataset, new measured MI, inferred coupling strength, causal relation, or Five Phases correspondence established. Reuse only aligned existing data if a concrete future empirical question warrants it; do not reconstruct deleted artifacts, start routine monitoring, optimize frequencies, change source/model, or pursue product work. The structural graph, overlap-conditioned persistence and cross-domain coupling analytical checkpoints are complete. Continue using the three verified experimental methods without modification.
 
+## Classical synthesis — Xiang, Shu, Bian, Shi and Wei (2026-11-29)
+
+**Purpose:** Return the completed mathematical/physical investigations to the classical question of how a person observes change and responds to it. The five categories (象、數、變、時、位) are our comparative framework, not a claim that the received Yi defines an exclusive five-part taxonomy. Distinguish the Zhouyi judgment and line texts from the interpretive Yi Zhuan (Xici, Tuan, Xiang, Wenyan). This is a reading of selected received passages, not a complete textual-critical study or a proof that ancient authors anticipated information theory.
+
+### Classical source crosswalk
+
+| Dimension | Received-text anchor | Modern analogy and project result | Boundary |
+|---|---|---|---|
+| Xiang 象 — representation | [Xici I, ch. 8](https://zh.wikisource.org/wiki/易傳/繫辭上): 象其物宜; [Xici II, ch. 2](https://zh.wikisource.org/w/index.php?title=易傳/繫辭下&oldid=2611136): observation of heaven, earth, self and things | Feature abstraction: R-Trend maps two signed differences to a four-state line. This retains ordinal direction while discarding magnitude, level and intervening path. Distinct input histories can have the same symbol. | Symbolic analogy is not scientific equivalence. The whole observable cannot be reconstructed from the symbol; no physical Five Phases correspondence is demonstrated. |
+| Shu 數 — numerical structure | [Xici I, ch. 10](https://zh.wikisource.org/wiki/易傳/繫辭上): 極其數，遂定天下之象 | Binary six-line alphabet 64; four-state six-line alphabet 4096; 12-bit maximum capacity; Hamming graph, theoretical distributions, entropy and total correlation characterize structure. | Capacity is not actual entropy or meaning. Traditional numerical/cosmological and divinatory interpretations are not Shannon measures; modern encoding is our construction. |
+| Bian 變 — change | [Xici I, ch. 3](https://zh.wikisource.org/wiki/易傳/繫辭上): 爻者，言乎變者也; [Xici II, ch. 7](https://zh.wikisource.org/w/index.php?title=易傳/繫辭下&oldid=2611136): 變動不居 | Primary-to-relating Hamming distance equals moving-line count. The R-Trend temporal bridge is exact only for identical overlapping values shifted by one step. Information persistence and coupling show that symbols are neither necessarily independent nor uniformly distributed. | Classical change includes transformation and adaptation in human affairs. The mathematical bridge is retrospective encoding, not a universal rule of divination or a forecast. A moving line is a reversal of sampled increments, not proof that a state threshold was crossed. |
+| Shi 時 — time and timeliness | [Gen, Tuan](https://zh.wikisource.org/wiki/周易/艮): 時止則止，時行則行 | Quantum uses the sample reception time; MPH uses a common request anchor with native endpoint schedules; Physical uses a fixed lagged half-hour-bin window. Identical time labels alone do not establish identical data; different domains have different update rates. | Classical timeliness includes suitability of action to circumstances, not merely clock timestamps. Calendar context and astronomical information do not dictate a quantitative casting interval or predict a fortunate event. |
+| Wei 位 — position and relation | [Xici II, ch. 8](https://zh.wikisource.org/w/index.php?title=易傳/繫辭下&oldid=2611136): 二與四同功而異位，其善不同; [Qian](https://zh.wikisource.org/w/index.php?title=周易/乾&oldid=2404991): first and upper yang line judgments differ | An ordered six-component state, not an unordered bag. Permuting unequal line codes changes the primary and/or relating pair even if marginal entropy or moving count is unchanged. Physical and MPH have distinct explicitly fixed orders. | The classical position includes stages, appropriateness, and relationships (such as centrality and correspondence in traditional commentary), not only an array index. The modern domain-to-position assignments are experimental design choices, not prescribed by the Zhouyi. |
+
+The Qian example makes the distinction concrete: all six primary polarities are yang, but the first, fifth and upper line texts describe different situations. Binary value alone does not decide meaning, auspiciousness or action. Classical line names using nine/six must not be confused with the runtime four-state codes assigning six/nine to moving lines and seven/eight to nonmoving lines.
+
+### Synthesis: observation, symbol, interpretation and action
+
+Observation -> declared representation -> ordered changing symbol -> classical text and actual circumstances -> human reflection and choice.
+
+The first stages are auditable numerical operations. Interpretation is a contextual and philosophical act, and the person's judgment is not supplied by a probability distribution. The ancient texts include divinatory aspirations (for example Xici II, ch. 9, concerning knowledge of what is to come); our personal research scope neither denies that historical intent nor claims to have scientifically established it. A true random source is not evidence of a hidden channel carrying future events or the questioner's intention.
+
+- **觀象 (observe patterns):** maintain the distinction between observation, model, entropy source and symbolic representation.
+- **察變 (discern change):** distinguish internal primary/relating transformation, actual temporal evolution and contextual interpretation.
+- **求真 (seek truth):** preserve source meaning and uncertainty, accept repeated or unresolved outcomes, and do not select favorable symbols or force a scientific equivalence.
+- **思己 (reflect within):** let the text raise questions about circumstances, timing, role, responsibility and available action; the reader retains interpretation and decision-making.
+
+The completed theoretical comparisons support understanding the instrument, not ranking the three methods by divinatory truth or empirical predictive accuracy. Do not infer that more entropy is more wisdom, or that continuity implies greater authenticity. Retain all three established experimental CLI methods unchanged. The main study now returns to reading the received Zhouyi and Yi Zhuan in concrete situations rather than extending statistical studies for their own sake. No new cast, source acquisition, runtime edit, archive recovery, product roadmap or prescriptive interpretation engine is needed.
+
 ## 1. Current research routing
 
 | Need | Open first | Next action / blocker |
