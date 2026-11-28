@@ -242,6 +242,8 @@ The four principles remain 觀象，以知萬物；察變，以明其勢；求�
 
 ## Historical astronomy and omen studies — owner-selected Tian Guan Shu priority (2026-11-29)
 
+Active reading and research log: [Issue #7](https://github.com/cctsao1008/trng-iching/issues/7). TC-01B textual reading: [four palaces, mansions and terrestrial divisions](https://github.com/cctsao1008/trng-iching/issues/7#issuecomment-7243443543). Subsequent primary-text notes are recorded in that issue.
+
 The owner prioritizes Sima Qian's Shiji, chapter 27, Tian Guan Shu (史記・天官書) over Yisi Zhan as the primary reference for historical observation and metaphysical research. Supersede the proposed routine paired-hexagram philosophical reading sequence as the active direction. Start with the source text, not new casting rules.
 
 - Owner-provided preferred reading text: [Chinese Text Project — Shiji, Tian Guan Shu](https://ctext.org/shiji/tian-guan-shu/zh). Direct retrieval returned HTTP 403; this edition has not yet been inspected or collated. Use the accessible Wikisource edition as a separately identified auxiliary text.
