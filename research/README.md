@@ -54,6 +54,8 @@ Concrete example from the existing verified lunar geometry result (SHA256 `9261f
 
 **P3 provider outreach (2026-11-28).** [Five inquiries SENT; response pending](physical_model/qualification.md#p3-provider-outreach-sent--2026-11-28). Initial independent noncommercial research scope adopted; derived-only public use still subject to terms. Prior UNSENT entries are historical. No provider approval, qualification change, BT-C access or production change; wait for substantive evidence rather than repeat research.
 
+**Owner-directed experimental implementation.** The previous wait-for-provider prerequisite no longer applies to experimental local casting. Existing public sources, native-label means and R-Trend are used; no new precision study or archival reconstruction. Formal scientific qualification and commercial/public redistribution approval remain separate. See the main README; live owner smoke pending.
+
 ## 1. Current research routing
 
 | Need | Open first | Next action / blocker |
