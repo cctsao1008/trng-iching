@@ -266,7 +266,7 @@ The owner directed proceeding with available public data without requiring provi
 
 ### Physical v0.2 live acceptance smoke — PASS
 
-Owner Windows live run, 2026-11-28 15:49:08 UTC (23:49:08 UTC+8), code baseline c21e9aa. Fixed label window [13:30, 15:00) UTC. D12 15/15, M01 15/15, D06 90/90, D26-NEST 90/90, D02 90/90, D03 90/90; all candidate_resolved (375 total labels). INTERMAGNET returned 1440 rows and selected all 90 required eligible BOUF labels. Six-line assembly, reference context, record validation, Human View and local classical text completed. This demonstrates experimental P4 end-to-end functionality on the observed window, not general availability or scientific predictive validity. P5 three-method regression pending; no additional precision study or provider-response prerequisite. No raw observation archive or individual cast record saved by this documentation update.
+Owner Windows live run, 2026-11-28 15:49:08 UTC (23:49:08 UTC+8), code baseline c21e9aa. Fixed label window [13:30, 15:00) UTC. D12 15/15, M01 15/15, D06 90/90, D26-NEST 90/90, D02 90/90, D03 90/90; all candidate_resolved (390 total labels). INTERMAGNET returned 1440 rows and selected all 90 required eligible BOUF labels. Six-line assembly, reference context, record validation, Human View and local classical text completed. This demonstrates experimental P4 end-to-end functionality on the observed window, not general availability or scientific predictive validity. P5 three-method regression pending; no additional precision study or provider-response prerequisite. No raw observation archive or individual cast record saved by this documentation update.
 
 ## Evidence references
 
