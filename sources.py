@@ -113,7 +113,11 @@ $proxy = [System.Net.WebRequest]::GetSystemWebProxy()
 $proxy.Credentials = [System.Net.CredentialCache]::DefaultNetworkCredentials
 [System.Net.WebRequest]::DefaultWebProxy = $proxy
 try {
-    $r = Invoke-WebRequest -Uri $env:TRNG_ICHING_URL -Headers @{'Accept'='application/json'; 'User-Agent'='Mozilla/5.0'} -TimeoutSec ([int]$env:TRNG_ICHING_TIMEOUT) -MaximumRedirection 0 -UseBasicParsing -ErrorAction Stop
+    $argsMap = @{}
+    if ($env:TRNG_ICHING_FORM) {
+        $argsMap = @{Method='Post'; Body=$env:TRNG_ICHING_FORM; ContentType='application/x-www-form-urlencoded'}
+    }
+    $r = Invoke-WebRequest @argsMap -Uri $env:TRNG_ICHING_URL -Headers @{'Accept'='application/json, text/csv, */*'; 'User-Agent'='Mozilla/5.0'} -TimeoutSec ([int]$env:TRNG_ICHING_TIMEOUT) -MaximumRedirection 0 -UseBasicParsing -ErrorAction Stop
 } catch {
     $status = 0
     if ($_.Exception.Response -ne $null) {
@@ -132,12 +136,13 @@ if ($b.Length -gt ([long]$env:TRNG_ICHING_MAX_BYTES)) { throw 'Response too larg
 '''
 
 
-def windows_fetch(url, *, max_bytes=MAX_BYTES, timeout=TIMEOUT):
+def windows_fetch(url, *, max_bytes=MAX_BYTES, timeout=TIMEOUT, form=None):
     """Use the Windows system proxy; preserve response bytes and metadata."""
     env = os.environ.copy()
     env['TRNG_ICHING_URL'] = url
     env['TRNG_ICHING_MAX_BYTES'] = str(max_bytes)
     env['TRNG_ICHING_TIMEOUT'] = str(timeout)
+    env['TRNG_ICHING_FORM'] = urlencode(form) if form is not None else ''
     try:
         r = subprocess.run(
             ['powershell.exe','-NoLogo','-NoProfile','-NonInteractive','-Command',WINDOWS_SCRIPT],
@@ -163,10 +168,11 @@ def windows_fetch(url, *, max_bytes=MAX_BYTES, timeout=TIMEOUT):
     return envelope,body
 
 
-def urllib_fetch(url, *, max_bytes=MAX_BYTES, timeout=TIMEOUT):
+def urllib_fetch(url, *, max_bytes=MAX_BYTES, timeout=TIMEOUT, form=None):
     """Acquire a bounded response without following redirects."""
     opener = build_opener(NoRedirect())
-    req = Request(url,headers={'Accept':'application/json','User-Agent':UA,'Accept-Encoding':'identity'})
+    req = Request(url, data=urlencode(form).encode('ascii') if form is not None else None,
+                  headers={'Accept':'application/json, text/csv, */*','User-Agent':UA,'Accept-Encoding':'identity'})
     with opener.open(req,timeout=timeout) as r:
         return (
             dict(
@@ -425,16 +431,185 @@ def epoch(x):
 # Frozen observation profiles and deterministic endpoint normalization
 # ---------------------------------------------------------------------------
 
-VERSION = 'mph-data-contract-candidate-v0.2'
+VERSION = 'mph-data-contract-candidate-v0.3'
 
 KERNEL = 'c1c7feeab882263fc493a9d5a5b2ddd71b54826cdf65d8d17a76126b260a49f2'
+
+
+WOOD_COMPOSITE_SOURCE = 'TWSE:MFI94U+TAIFEX:TX'
+WOOD_COMPOSITE_PROFILE = 'mph-wood-twse-taifex-v0.2'
+TWSE_INDEX = 'https://www.twse.com.tw/indicesReport/MFI94U?'
+TAIFEX_TX = 'https://www.taifex.com.tw/cht/3/futDataDown'
+
+
+def wood_schedule(anchor):
+    """Select the three scheduled completed cash/night observations before reading prices."""
+    import exchange_calendars as xc
+
+    tz = ZoneInfo('Asia/Taipei')
+    local = anchor.astimezone(tz).date()
+    cal = xc.get_calendar('XTAI', start=str(local-timedelta(days=60)),
+                          end=str(local+timedelta(days=40)))
+    sessions = [x.date() for x in cal.sessions]
+    schedule = []
+    for d, next_day in zip(sessions, sessions[1:]):
+        close = cal.session_close(d.isoformat()).to_pydatetime()
+        night = datetime.combine(d+timedelta(days=1), datetime.min.time(), tzinfo=tz)
+        night = (night+timedelta(hours=5)).astimezone(timezone.utc)
+        if close <= anchor:
+            schedule.append(dict(kind='cash', day=d.isoformat(), time=iso(close)))
+        if night <= anchor:
+            # Select the nearest monthly contract that has not expired at cash close.
+            month = d.replace(day=1)
+            third_wed = month+timedelta(days=(2-month.weekday()) % 7+14)
+            expiry = next(x for x in sessions if x >= third_wed)
+            if d >= expiry:
+                month = (month+timedelta(days=32)).replace(day=1)
+            schedule.append(dict(kind='night', day=d.isoformat(), time=iso(night),
+                                 trade_date=next_day.isoformat(), contract=month.strftime('%Y%m')))
+    if len(schedule) < 3:
+        raise ValueError('insufficient XTAI calendar history')
+    return schedule[-3:]
+
+
+def wood_requests(anchor):
+    schedule = wood_schedule(anchor)
+    months = sorted({x['day'][:7].replace('-', '')+'01' for x in schedule})
+    specs = [dict(source='TWSE', url=TWSE_INDEX+urlencode(dict(response='json', date=m)),
+                  form=None) for m in months]
+    nights = [x for x in schedule if x['kind'] == 'night']
+    if nights:
+        start = min(x['day'] for x in nights).replace('-', '/')
+        end = max(x['trade_date'] for x in nights).replace('-', '/')
+        specs.append(dict(source='TAIFEX', url=TAIFEX_TX,
+                          form=dict(down_type='1', commodity_id='TX', commodity_id2='',
+                                    queryStartDate=start, queryEndDate=end)))
+    return schedule, specs
+
+
+def parse_twse_index(doc):
+    if (doc.get('stat') != 'OK' or doc.get('fields') != ['日　期', '發行量加權股價報酬指數']
+            or not isinstance(doc.get('data'), list)):
+        raise ValueError('unexpected TWSE index response')
+    rows = {}
+    for label, raw in doc['data']:
+        y, m, d = map(int, label.split('/'))
+        day = date(y+1911, m, d).isoformat()
+        val = number(raw.replace(',', ''))
+        if day in rows or val is None or val <= 0:
+            raise ValueError('invalid TWSE index row')
+        rows[day] = val
+    return rows
+
+
+def parse_taifex_tx(body):
+    import csv
+    import io
+
+    try:
+        text = body.decode('utf-8-sig')
+    except UnicodeDecodeError:
+        text = body.decode('cp950')
+    reader = csv.reader(io.StringIO(text))
+    header = [x.strip() for x in next(reader)]
+    if (len(header) < 18 or header[1] != '契約' or header[17] != '交易時段'
+            or header[6] not in ('收盤價', '最後成交價')):
+        raise ValueError('unexpected TAIFEX CSV header')
+    rows = {}
+    for raw in reader:
+        if not raw or not any(x.strip() for x in raw):
+            continue
+        if len(raw) < 18:
+            raise ValueError('invalid TAIFEX row')
+        d, product, contract = (x.strip() for x in raw[:3])
+        if product != 'TX' or not re.fullmatch(r'[0-9]{6}', contract):
+            continue
+        day = date.fromisoformat(d.replace('/', '-')).isoformat()
+        session = raw[17].strip()
+        if session not in ('一般', '盤後'):
+            raise ValueError('unexpected TAIFEX session')
+        key = (day, contract, session)
+        if key in rows:
+            raise ValueError('duplicate TAIFEX contract/session')
+        price, volume = number(raw[6].strip()), number(raw[9].strip())
+        rows[key] = price if price is not None and price > 0 and volume is not None and volume > 0 else None
+    return rows
+
+
+def replay_wood_composite(endpoints, anchor):
+    schedule = wood_schedule(anchor)
+    if len(endpoints) != 3:
+        raise ValueError('Wood endpoint count')
+    values = []
+    for spec, e in zip(schedule, endpoints):
+        if any(e.get(k) != v for k, v in spec.items()):
+            raise ValueError('Wood schedule mismatch')
+        cash = number(e['cash'])
+        if cash is None or cash <= 0:
+            raise ValueError('invalid cash index')
+        value = cash
+        if spec['kind'] == 'night':
+            regular, night = number(e['regular']), number(e['night'])
+            if regular is None or night is None or min(regular, night) <= 0:
+                raise ValueError('invalid futures prices')
+            value = cash*night/regular
+        values.append(value)
+    return line_from_trend(values)
+
+
+def observe_wood_composite(anchor):
+    schedule, specs = wood_requests(anchor)
+    fetch = windows_fetch if sys.platform == 'win32' else urllib_fetch
+    cash, futures, evidence = {}, {}, []
+    for spec in specs:
+        requested = utcnow()
+        _LOG.debug('Wood source=%s request started', spec['source'])
+        meta, body = fetch(spec['url'], timeout=30, form=spec['form'])
+        received = utcnow()
+        if (meta.get('status') != 200 or meta.get('url') != spec['url']
+                or not isinstance(body, bytes) or not 0 < len(body) <= MAX_BYTES):
+            raise TransportError('invalid Wood response')
+        if spec['source'] == 'TWSE':
+            rows = parse_twse_index(_decode_response(spec['url'], meta, body, parse_float=Decimal))
+            if set(cash) & set(rows):
+                raise ValueError('duplicate TWSE date')
+            cash.update(rows)
+        else:
+            rows = parse_taifex_tx(body)
+            futures.update(rows)
+        evidence.append(dict(**spec, requested_at=iso(requested), received_at=iso(received),
+                             sha256=hashlib.sha256(body).hexdigest(), rows=len(rows)))
+        _LOG.debug('Wood source=%s rows=%s', spec['source'], len(rows))
+    digest = hashlib.sha256(json.dumps(evidence, sort_keys=True, separators=(',', ':')).encode()).hexdigest()
+    out = base('Wood', anchor, 'request_anchored_composite', digest, evidence[-1]['received_at'])
+    out.update(profile=WOOD_COMPOSITE_PROFILE, horizon={'kind':'completed_cash_or_night','count':1},
+               component_requests=evidence, endpoint_times=[x['time'] for x in schedule])
+    out['age_seconds'] = (anchor-epoch(schedule[-1]['time'])).total_seconds()
+    endpoints = []
+    for spec in schedule:
+        value = cash.get(spec['day'])
+        if value is None:
+            return out | dict(reason='missing_expected_session')
+        e = dict(**spec, cash=str(value))
+        if spec['kind'] == 'night':
+            regular = futures.get((spec['day'], spec['contract'], '一般'))
+            night = futures.get((spec['trade_date'], spec['contract'], '盤後'))
+            if regular is None or night is None:
+                return out | dict(reason='missing_expected_session')
+            e.update(regular=str(regular), night=str(night))
+        endpoints.append(e)
+    trend = replay_wood_composite(endpoints, anchor)
+    _LOG.debug('Wood composite endpoints=%s values=%s', schedule, trend['values'])
+    return out | trend | dict(endpoints=endpoints,
+                              status='candidate_resolved' if trend['line'] is not None else 'incomplete')
+
 
 PROFILES = {
  'Metal': ('D03:SOLAR1','nT',60,900,'active SOLAR1; numeric Bt>0; zero overall/max flags candidate'),
  'Fire': ('D02:SOLAR1','nPa',60,900,'active SOLAR1; density and temperature positive; zero overall/max flags candidate'),
  'Water': ('9414290:MLLW','mm',360,900,'preliminary p; F/R/L zero; O retained; exact mm'),
  'Earth': ('M01:SF:DE440s','microGal',360,360,'pinned kernel/site/model; exact six-minute grid'),
- 'Wood': (SOURCE,'USD',None,None,'P1B adjusted close; three expected completed sessions; finality unverified')}
+ 'Wood': (WOOD_COMPOSITE_SOURCE,'index points',None,None,'TWSE cash and completed TX night; same contract; finality unverified')}
 
 
 def aware(t):
@@ -650,6 +825,8 @@ def from_http(domain,meta,body,anchor):
 
 def observe_domain(domain, anchor):
     """Fetch and normalize one external domain; orchestration belongs in main."""
+    if domain == 'Wood':
+        return observe_wood_composite(anchor)
     meta, body = acquire_observation(HTTP[domain], anchor=anchor)
     return from_http(domain, meta, body, anchor)
 
@@ -692,6 +869,19 @@ def _validate_observation_provenance(r, domain, anchor, completed):
     if domain == 'Earth':
         _require_observation(r['input_sha256'] == KERNEL and anchor <= _observation_utc(r['computed_at']) <= completed,
                      'Earth computation provenance')
+    elif domain == 'Wood':
+        _, specs = wood_requests(anchor)
+        records = r['component_requests']
+        _require_observation(len(records) == len(specs), 'Wood component count')
+        for spec, item in zip(specs, records):
+            _require_observation(all(item.get(k) == v for k, v in spec.items())
+                                 and anchor <= _observation_utc(item['requested_at'])
+                                 <= _observation_utc(item['received_at']) <= completed
+                                 and re.fullmatch(r'[0-9a-f]{64}', item['sha256']) is not None,
+                                 'Wood component provenance')
+        digest = hashlib.sha256(json.dumps(records, sort_keys=True, separators=(',', ':')).encode()).hexdigest()
+        _require_observation(digest == r['input_sha256']
+                             and records[-1]['received_at'] == r['received_at'], 'Wood digest or receipt')
     else:
         m = r['transport']
         _require_observation(m['source'] == HTTP[domain] and m['endpoint'] == endpoint(HTTP[domain], anchor)
@@ -711,13 +901,10 @@ def _replay_selected_observation(r, domain, anchor, times):
     from astronomy import validate_earth_endpoint
 
     if domain == 'Wood':
-        n = r['native_adapter']
-        _require_observation(r['profile'] == PROFILE and n['profile'] == PROFILE
-                     and n['source'] == SOURCE and n['endpoints'] == r['endpoints']
-                     and n['line'] == r['line'], 'Wood profile')
-        replay = evaluate_wood(r['endpoints'], anchor, source=SOURCE,
-                                 received_at=_observation_utc(r['received_at']))
-        _require_observation(replay['endpoint_close_utc'] == r['endpoint_times'], 'Wood session replay')
+        _require_observation(r['profile'] == WOOD_COMPOSITE_PROFILE
+                             and [e['time'] for e in r['endpoints']] == r['endpoint_times'], 'Wood profile')
+        trend = replay_wood_composite(r['endpoints'], anchor)
+        replay = trend | dict(status='candidate_resolved' if trend['line'] is not None else 'incomplete')
     else:
         if domain in ('Metal', 'Fire'):
             diag = r['duplicate_diagnostics']
